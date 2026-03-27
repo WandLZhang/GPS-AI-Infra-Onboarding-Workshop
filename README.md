@@ -13,7 +13,7 @@ Each section maps to a key phase of the onboarding journey:
 | # | Phase | Description |
 |---|-------|-------------|
 | 1 | [Foundational Tools & Access](./01-foundational-tools/) | Agentic Coders, Quota Requests, Reservations |
-| 2 | [Core Infrastructure Setup](./02-core-infrastructure/) | Networking (IAP, no-public-IP), Disk Images (Packer), Storage (GCSFuse, Anywhere Cache) |
+| 2 | [Core Infrastructure Setup](./02-core-infrastructure/) | Networking (IAP, no-public-IP), Disk Images (Packer), Storage (GCSFuse, Rapid Cache, Rapid Bucket, GDrive Sync) |
 | 3 | [Deploying Workloads & Scheduling](./03-deploying-workloads/) | DWS, Vertex AI, GKE AI Hypercompute, Cluster Director, XPK |
 | 4 | [Monitoring & Observability](./04-monitoring-observability/) | AI workload monitoring, TPU Observability, dashboards |
 
@@ -63,14 +63,14 @@ ai-infra-onboarding/
 ├── .gitignore
 │
 ├── 01-foundational-tools/             
-│   ├── 01a-agentic-coder-setup/       # Cline, Claude Code, Gemini CLI setup
+│   ├── agentic-coder-setup/           # Cline, Claude Code, Gemini CLI setup
 │   ├── quota-management/              # Quota request & check scripts
 │   └── reservations/                  # On-demand, future, auto-reserve scripts
 │
 ├── 02-core-infrastructure/            # VMs, Networking, Storage
 │   ├── networking/                    # IAP setup, no-public-IP configs
 │   ├── disk-images/                   # Packer templates & Cloud Build
-│   └── storage/                       # GCSFuse, Anywhere Cache, GDrive sync
+│   └── storage/                       # GCSFuse, Rapid Cache, Rapid Bucket, GDrive sync
 │
 ├── 03-deploying-workloads/            # Workload scheduling & platforms
 │   ├── dws/                           # Dynamic Workload Scheduling
