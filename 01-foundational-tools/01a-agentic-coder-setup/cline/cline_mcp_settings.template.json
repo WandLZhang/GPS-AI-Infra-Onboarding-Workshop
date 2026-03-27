@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "github.com/cline/cline-community": {
+      "autoApprove": ["preview_cline_issue"],
+      "disabled": false,
+      "timeout": 10,
+      "type": "stdio",
+      "command": "node",
+      "args": ["<MCP_DIR>/cline-community/build/index.js"],
+      "env": {
+        "GH_TOKEN": "<GH_TOKEN>"
+      },
+      "_install": "git clone https://github.com/cline/cline-community.git <MCP_DIR>/cline-community && cd <MCP_DIR>/cline-community && npm install && npm run build"
+    },
+    "google-dev-knowledge": {
+      "autoApprove": ["get_document", "batch_get_documents"],
+      "disabled": false,
+      "timeout": 30,
+      "type": "stdio",
+      "command": "node",
+      "args": ["<MCP_DIR>/google-dev-knowledge/proxy.mjs"],
+      "env": {
+        "GOOGLE_DEV_KNOWLEDGE_API_KEY": "<GOOGLE_DEV_KNOWLEDGE_API_KEY>"
+      },
+      "_install": "Copy mcp-servers/google-dev-knowledge/proxy.mjs to <MCP_DIR>/google-dev-knowledge/proxy.mjs"
+    },
+    "google-cloud-logging": {
+      "autoApprove": ["list_log_entries"],
+      "disabled": false,
+      "timeout": 30,
+      "command": "node",
+      "args": ["<MCP_DIR>/google-cloud-logging/proxy.mjs"],
+      "transportType": "stdio",
+      "_install": "Copy mcp-servers/google-cloud-logging/proxy.mjs to <MCP_DIR>/google-cloud-logging/proxy.mjs. No API key needed — uses gcloud auth."
+    },
+    "github.com/github/github-mcp-server": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 30,
+      "type": "stdio",
+      "command": "<MCP_DIR>/github-mcp-server/github-mcp-server",
+      "args": ["stdio"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<GH_TOKEN>"
+      },
+      "_install": "Download latest from https://github.com/github/github-mcp-server/releases (github-mcp-server_Linux_x86_64.tar.gz), extract to <MCP_DIR>/github-mcp-server/, chmod +x"
+    },
+    "huggingface": {
+      "autoApprove": [],
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://huggingface.co/mcp", "--header", "Authorization:Bearer <HF_TOKEN>"],
+      "_install": "No install needed — uses npx mcp-remote at runtime"
+    }
+  }
+}
