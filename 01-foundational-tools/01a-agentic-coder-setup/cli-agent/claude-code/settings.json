@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "mcp__github-mcp__get_*",
+      "mcp__github-mcp__list_*",
+      "mcp__github-mcp__search_*",
+      "mcp__github-mcp__pull_request_read",
+      "mcp__github-mcp__issue_read",
+      "mcp__github-mcp__get_me",
+      "mcp__google-dev-knowledge__search_documents",
+      "mcp__google-dev-knowledge__get_document",
+      "mcp__google-dev-knowledge__batch_get_documents",
+      "mcp__google-cloud-logging__list_*",
+      "mcp__google-cloud-logging__get_*"
+    ]
+  }
+}

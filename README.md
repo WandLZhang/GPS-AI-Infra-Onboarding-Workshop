@@ -1,6 +1,6 @@
 # AI Infrastructure Onboarding — Google Public Sector
 
-> A comprehensive, hands-on guide and artifact repository for Sales Engineers to demonstrate Google Cloud AI infrastructure capabilities to Public Sector customers.
+> A comprehensive, hands-on guide and artifact repository to demonstrate Google Cloud AI infrastructure capabilities to Public Sector customers.
 
 ---
 
@@ -12,7 +12,7 @@ Each section maps to a key phase of the onboarding journey:
 
 | # | Phase | Description |
 |---|-------|-------------|
-| 1 | [Foundational Tools & Access](./01-foundational-tools/) | Cloud Assist, Gemini CLI, Quota Requests, Reservations |
+| 1 | [Foundational Tools & Access](./01-foundational-tools/) | Agentic Coders, Quota Requests, Reservations |
 | 2 | [Core Infrastructure Setup](./02-core-infrastructure/) | Networking (IAP, no-public-IP), Disk Images (Packer), Storage (GCSFuse, Anywhere Cache) |
 | 3 | [Deploying Workloads & Scheduling](./03-deploying-workloads/) | DWS, Vertex AI, GKE AI Hypercompute, Cluster Director, XPK |
 | 4 | [Monitoring & Observability](./04-monitoring-observability/) | AI workload monitoring, TPU Observability, dashboards |
@@ -25,13 +25,13 @@ Additionally, a [Terraform module](./terraform/) is provided to bootstrap founda
 
 ### Prerequisites
 
-| Tool | Minimum Version | Install |
-|------|----------------|---------|
-| `gcloud` CLI | 490.0+ | [Install](https://cloud.google.com/sdk/docs/install) |
-| `terraform` | 1.5+ | [Install](https://developer.hashicorp.com/terraform/install) |
-| `kubectl` | 1.28+ | `gcloud components install kubectl` |
-| `packer` | 1.10+ | [Install](https://developer.hashicorp.com/packer/install) |
-| `jq` | 1.6+ | `apt-get install jq` |
+| Tool | Install |
+|------|---------|
+| `gcloud` CLI | [Install](https://cloud.google.com/sdk/docs/install) |
+| `terraform` | [Install](https://developer.hashicorp.com/terraform/install) |
+| `kubectl` | `gcloud components install kubectl` |
+| `packer` | [Install](https://developer.hashicorp.com/packer/install) |
+| `jq` | `apt-get install jq` |
 
 ### 1. Clone this repository
 
@@ -62,8 +62,8 @@ ai-infra-onboarding/
 ├── LICENSE
 ├── .gitignore
 │
-├── 01-foundational-tools/             # Quota, Reservations, Gemini CLI
-│   ├── cloud-assist-gemini-cli/       # Cloud Assist & Gemini CLI setup
+├── 01-foundational-tools/             
+│   ├── 01a-agentic-coder-setup/       # Cline, Claude Code, Gemini CLI setup
 │   ├── quota-management/              # Quota request & check scripts
 │   └── reservations/                  # On-demand, future, auto-reserve scripts
 │
