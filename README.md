@@ -13,8 +13,8 @@ Each section maps to a key phase of the onboarding journey:
 | # | Phase | Description |
 |---|-------|-------------|
 | 1 | [Foundational Tools & Access](./01-foundational-tools/) | Agentic Coders, Quota Requests, Reservations |
-| 2 | [Core Infrastructure Setup](./02-core-infrastructure/) | Networking (IAP, no-public-IP), Disk Images (Packer), Storage (GCSFuse, Rapid Cache, Rapid Bucket, GDrive Sync) |
-| 3 | [Deploying Workloads & Scheduling](./03-deploying-workloads/) | DWS, Vertex AI, GKE AI Hypercompute, Cluster Director, XPK |
+| 2 | [Core Infrastructure Setup](./02-core-infrastructure/) | Networking (IAP, no-public-IP), Disk Images (Packer), Storage (GCSFuse, Rapid Cache, Rapid Bucket, GDrive Sync), Data Pipeline (BigQuery, Dataflow, BigQuery DataFrames) |
+| 3 | [Deploying Workloads & Scheduling](./03-deploying-workloads/) | DWS, GKE (Autopilot & Standard), Vertex AI, Colab Enterprise, GKE AI Hypercompute, Cluster Director, XPK |
 | 4 | [Monitoring & Observability](./04-monitoring-observability/) | AI workload monitoring, TPU Observability, dashboards |
 
 Additionally, a [Terraform module](./terraform/) is provided to bootstrap foundational infrastructure (VPC, IAP, firewall rules, service accounts).
@@ -67,14 +67,17 @@ ai-infra-onboarding/
 │   ├── quota-management/              # Quota request & check scripts
 │   └── reservations/                  # On-demand, future, auto-reserve scripts
 │
-├── 02-core-infrastructure/            # VMs, Networking, Storage
+├── 02-core-infrastructure/            # VMs, Networking, Storage, Data Pipeline
 │   ├── networking/                    # IAP setup, no-public-IP configs
 │   ├── disk-images/                   # Packer templates & Cloud Build
-│   └── storage/                       # GCSFuse, Rapid Cache, Rapid Bucket, GDrive sync
+│   ├── storage/                       # GCSFuse, Rapid Cache, Rapid Bucket, GDrive sync
+│   └── data-pipeline/                 # BigQuery, Dataflow, BigQuery DataFrames for AI/ML
 │
 ├── 03-deploying-workloads/            # Workload scheduling & platforms
 │   ├── dws/                           # Dynamic Workload Scheduling
-│   ├── vertex-ai/                     # Vertex AI & Colab
+│   ├── gke/                           # GKE Autopilot & Standard (GPU deployment, DWS)
+│   ├── vertex-ai/                     # Vertex AI serverless training (FLEX_START)
+│   ├── colab-enterprise/              # GPU-accelerated notebooks, reservations, DWS patterns
 │   ├── gke-ai-hypercompute/           # GKE, Cluster Toolkit, MIGs, DWS Flex
 │   └── xpk/                           # Accelerated Processing Kit
 │

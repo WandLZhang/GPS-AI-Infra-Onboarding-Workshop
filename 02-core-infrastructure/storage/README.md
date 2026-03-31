@@ -85,4 +85,8 @@ There is **no native direct sync** between Google Drive and Cloud Storage. For r
 
 ---
 
+> **Looking for BigQuery?** BigQuery is a data preparation and analytics service that operates *upstream* of the storage I/O layer covered here. For BigQuery ML, BigQuery DataFrames, export-to-GCS patterns, and Dataflow ETL pipelines, see the [Data Pipeline & Preparation guide](../data-pipeline/).
+
+---
+
 > **Disclaimer:** This document is intended for demonstration and enablement purposes. Always follow your organization's security policies and review configurations before deploying in production environments.
