@@ -20,42 +20,60 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 
 ## Claude Code
 
-### Install
+**Defaults provisioned by this setup:**
+- Model: `claude-opus-4-7[1m]` (Claude Opus 4.7 with 1M context window)
+- Effort: `max`
+- Backend: Vertex AI, region `global` (Anthropic Claude global endpoint)
+- Subagent + small-fast model: also `claude-opus-4-7[1m]`
+- VS Code Claude Code extension: same model/effort/env defaults
+
+### Quick install (one-shot)
+
+```bash
+cd 01-foundational-tools/agentic-coder-setup/cli-agent/claude-code
+GOOGLE_DEV_KNOWLEDGE_API_KEY=AIza... \
+  GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx \
+  ./setup.sh <YOUR_GCP_PROJECT_ID>
+```
+
+The script installs Node 20 + Claude Code CLI, writes the Vertex env vars to `~/.bashrc`, drops the `claude-start` launcher into `~/bin`, copies CLI rules + permissions to `~/.claude/`, writes the VS Code extension defaults (Code OSS Machine settings + workspace `<root>/.vscode/settings.json`), installs the Cloud Logging proxy + GitHub MCP binary, and registers all three MCP servers.
+
+### Manual install (step-by-step)
 
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
-
-### Configure Vertex AI Backend
 
 Add to your `~/.bashrc`:
 
 ```bash
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="<YOUR_PROJECT_ID>"
-export CLOUD_ML_REGION="<YOUR_REGION>"   # e.g. us-east5
+export CLOUD_ML_REGION="global"   # use a regional value (e.g. us-east5) only if your project lacks global Anthropic access
+export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-4-7[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-4-7[1m]"
 export PATH="$HOME/bin:$PATH"
 ```
 
 Then `source ~/.bashrc`.
 
-### Install Config Files
+#### Install config files
 
 ```bash
 # System prompt
 mkdir -p ~/.claude
 cp claude-code/CLAUDE.md ~/.claude/CLAUDE.md
 
-# Permissions
+# Permissions + model + effort defaults
 cp claude-code/settings.json ~/.claude/settings.json
 
-# Launcher script
+# Launcher script (Opus 4.7, max effort)
 mkdir -p ~/bin
 cp claude-code/bin/claude-start ~/bin/claude-start
 chmod +x ~/bin/claude-start
 ```
 
-### Register MCP Servers
+#### Register MCP servers
 
 ```bash
 # Google Cloud Logging (uses gcloud auth, no API key needed)
@@ -63,7 +81,7 @@ mkdir -p ~/mcp/google-cloud-logging
 cp shared/google-cloud-logging/proxy.mjs ~/mcp/google-cloud-logging/proxy.mjs
 claude mcp add -s user google-cloud-logging -- node ~/mcp/google-cloud-logging/proxy.mjs
 
-# Google Dev Knowledge (HTTP, needs API key)
+# Google Dev Knowledge (HTTP, needs API key from console.cloud.google.com/apis/credentials)
 claude mcp add -s user --transport http \
     google-dev-knowledge \
     "https://developerknowledge.googleapis.com/mcp" \
@@ -83,6 +101,31 @@ claude mcp add -s user -e "GITHUB_PERSONAL_ACCESS_TOKEN=<YOUR_GITHUB_PAT>" \
 ```bash
 claude-start
 ```
+
+---
+
+## VS Code Claude Code extension defaults
+
+The extension reads three keys from VS Code settings:
+
+| Key | Value |
+|---|---|
+| `claudeCode.selectedModel` | `claude-opus-4-7[1m]` |
+| `claudeCode.effortLevel` | `max` |
+| `claudeCode.environmentVariables` | `["CLOUD_ML_REGION=global", "ANTHROPIC_SMALL_FAST_MODEL=claude-opus-4-7[1m]", "CLAUDE_CODE_SUBAGENT_MODEL=claude-opus-4-7[1m]"]` |
+
+Two template files are provided:
+
+- **`claude-code/vscode/machine-settings.json`** — Machine-scope (applies IDE-wide). Install at:
+  - Cloud Workstation (Code OSS): `~/.codeoss-cloudworkstations/data/Machine/settings.json`
+  - Desktop VS Code Linux: `~/.config/Code/User/settings.json`
+  - Desktop VS Code macOS: `~/Library/Application Support/Code/User/settings.json`
+  - Desktop VS Code Windows: `%APPDATA%\Code\User\settings.json`
+- **`claude-code/vscode/workspace-settings.json`** — Workspace-scope (applies when that folder is open). Install at: `<your-workspace>/.vscode/settings.json`
+
+Workspace overrides Machine, so you can pin a project to a different model/effort. `./setup.sh` writes both: Machine to the Cloud Workstation Code OSS path, and workspace to `~/Projects/.vscode/settings.json` (if `~/Projects` exists).
+
+The `CLAUDE_CODE_USE_VERTEX=1` and `ANTHROPIC_VERTEX_PROJECT_ID=<...>` env vars come from your `~/.bashrc` and are inherited by the `claude` process the extension spawns — they don't need to be in `claudeCode.environmentVariables`.
 
 ---
 
