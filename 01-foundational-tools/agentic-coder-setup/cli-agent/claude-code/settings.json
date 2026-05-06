@@ -19,5 +19,13 @@
       "mcp__google-cloud-logging__list_*",
       "mcp__google-cloud-logging__get_*"
     ]
+  },
+  "model": "claude-opus-4-7[1m]",
+  "effortLevel": "max",
+  "env": {
+    "CLAUDE_CODE_USE_VERTEX": "1",
+    "CLOUD_ML_REGION": "global",
+    "ANTHROPIC_SMALL_FAST_MODEL": "claude-opus-4-7[1m]",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-7[1m]"
   }
 }
