@@ -70,28 +70,32 @@ The HuggingFace MCP gives your AI assistant access to models, datasets, papers, 
 
 Have this repo open in your IDE. Start a new task in Cline and paste:
 
-> Set up MCP servers using the template in `01-foundational-tools/01a-agentic-coder-setup/cline/cline_mcp_settings.template.json`. Install each server per its `_install` instructions, copy the proxy scripts from `mcp-servers/`, and generate the final `cline_mcp_settings.json`. My HuggingFace token is `<HF_TOKEN>`.
+> Set up MCP servers using the template in `01-foundational-tools/agentic-coder-setup/cline/cline_mcp_settings.template.json`. Install each server per its `_install` instructions, copy the proxy scripts from `mcp-servers/`, and generate the final `cline_mcp_settings.json`. My HuggingFace token is `<HF_TOKEN>`.
 
 Cline will read the config files in [`cline/`](./cline/) and wire everything up.
+
+> **Mac / Apple Silicon note:** the `github-mcp-server` binary is published as **Linux x86_64-only**. On Mac (Intel or Apple Silicon) that MCP install will fail. Either skip github-mcp on Mac, or run the workshop from a Cloud Workstation.
 
 ### 7. Ask Cline to install Claude Code or Gemini CLI
 
 Open a new Cline task and paste:
 
-> Install Claude Code CLI and set it up using the config in `01-foundational-tools/01a-agentic-coder-setup/cli-agent/`. Set up the Vertex AI backend, MCP servers, system prompt, and launcher script.
+> Install Claude Code CLI and set it up using the config in `01-foundational-tools/agentic-coder-setup/cli-agent/`. Set up the Vertex AI backend, MCP servers, system prompt, and launcher script.
 
 Or for Gemini CLI:
 
-> Install Gemini CLI and set it up using the config in `01-foundational-tools/01a-agentic-coder-setup/cli-agent/`. Configure the MCP servers and system instructions.
+> Install Gemini CLI and set it up using the config in `01-foundational-tools/agentic-coder-setup/cli-agent/`. Configure the MCP servers and system instructions.
 
 Cline will read the config files in [`cli-agent/`](./cli-agent/) and handle the installation.
+
+> **Model versions:** Cline-on-Vertex (step 3) uses **Claude Opus 4.6** — the latest available in Vertex Model Garden. The Claude Code CLI installed here uses **Claude Opus 4.7** via the same Vertex backend (the CLI accepts newer model IDs that Cline doesn't yet). Different surfaces, different model IDs — expected.
 
 ---
 
 ## What's in this folder
 
 ```
-01a-agentic-coder-setup/
+agentic-coder-setup/
 ├── README.md                              # This file
 ├── cline/                                 # Cline (IDE) config
 │   ├── cline_mcp_settings.template.json   # MCP settings template (all 5 servers)

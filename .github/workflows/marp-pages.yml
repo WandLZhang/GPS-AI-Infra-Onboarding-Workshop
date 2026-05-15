@@ -1,0 +1,85 @@
+# Copyright 2026 Google LLC
+# Licensed under the Apache License, Version 2.0
+#
+# Builds the agentic-coder-setup Marp deck and publishes the resulting
+# static HTML to the gh-pages branch — viewable at
+#   https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/
+#
+# Triggered on push to main when the slide source or this workflow change,
+# plus manually via the Actions tab.
+
+name: Build & deploy Marp slides
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "01-foundational-tools/agentic-coder-setup/slides/**"
+      - "visuals/**"
+      - ".github/workflows/marp-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build slides with Marp
+        uses: docker://marpteam/marp-cli:latest
+        with:
+          args: >-
+            -I 01-foundational-tools/agentic-coder-setup/slides/
+            -o build/
+            --html
+            --theme-set 01-foundational-tools/agentic-coder-setup/slides/theme.css
+        env:
+          MARP_USER: root:root
+
+      - name: Copy slide visuals into build
+        run: |
+          sudo mkdir -p build/visuals
+          sudo cp -L visuals/* build/visuals/ 2>/dev/null || true
+          sudo chown -R $(id -u):$(id -g) build
+
+      - name: Generate index page
+        run: |
+          cat > build/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <title>GPS AI Infra Onboarding Workshop — Slides</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 720px; margin: 4rem auto; padding: 0 1.5rem; color: #222; }
+              h1 { font-size: 1.5rem; }
+              ul { list-style: none; padding: 0; }
+              li { margin: 0.75rem 0; }
+              a { color: #1a73e8; text-decoration: none; font-size: 1.1rem; }
+              a:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>GPS AI Infra Onboarding Workshop — Slides</h1>
+            <ul>
+          EOF
+          for f in build/*.html; do
+            name=$(basename "$f" .html)
+            [ "$name" = "index" ] && continue
+            echo "      <li><a href=\"${name}.html\">${name}</a></li>" >> build/index.html
+          done
+          cat >> build/index.html <<'EOF'
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          publish_branch: gh-pages

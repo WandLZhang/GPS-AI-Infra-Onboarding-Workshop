@@ -1,0 +1,263 @@
+/* @theme gps-onboarding
+ *
+ * Marp theme for the GPS AI Infra Onboarding Workshop — agentic-coder-setup deck.
+ * Forked from sbu-healthcare-ai-datathon/slides/theme.css. Same color tokens,
+ * same Material palette, same Google Sans typography — drop-in compatible
+ * with `<!-- _class: title|section|section yellow|section green|section blue|compact -->`.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&display=swap');
+@import 'default';
+
+:root {
+  --gps-blue: #1A73E8;
+  --gps-blue-dark: #1967D2;
+  --gps-blue-deep: #185ABC;
+  --gps-yellow: #F9AB00;
+  --gps-green: #1E8E3E;
+  --gps-red: #D93025;
+  --gps-ink: #202124;
+  --gps-ink-soft: #3C4043;
+  --gps-grey: #5F6368;
+  --gps-grey-soft: #80868B;
+  --gps-line: #E8EAED;
+  --gps-surface: #F8F9FA;
+}
+
+/* ---------- Base slide ---------- */
+section {
+  font-family: 'Google Sans', 'Product Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 28px;
+  line-height: 1.55;
+  color: var(--gps-ink-soft);
+  background: #ffffff;
+  padding: 96px 120px;
+  justify-content: flex-start;
+  letter-spacing: -0.005em;
+}
+
+section h1, section h2, section h3, section h4 {
+  font-family: 'Google Sans', sans-serif;
+  font-weight: 500;
+  color: var(--gps-ink);
+  letter-spacing: -0.015em;
+}
+
+section h1 { font-size: 56px; margin: 0 0 56px 0; }
+section h2 { font-size: 44px; color: var(--gps-blue); margin: 0 0 48px 0; }
+section h3 { font-size: 32px; color: var(--gps-grey); margin: 0 0 24px 0; }
+
+section p {
+  margin: 0 0 28px 0;
+}
+
+section strong {
+  color: var(--gps-blue);
+  font-weight: 500;
+}
+
+section em {
+  color: var(--gps-grey);
+  font-style: normal;
+}
+
+section a {
+  color: var(--gps-blue);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(26, 115, 232, 0.4);
+}
+
+/* ---------- Strip bullet noise ---------- */
+section ul, section ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+section ul li, section ol li {
+  margin: 0 0 28px 0;
+  padding: 0;
+}
+
+/* ---------- Tables ---------- */
+section table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 26px;
+  margin: 0 0 32px 0;
+}
+
+section th {
+  font-weight: 500;
+  color: var(--gps-grey);
+  text-align: left;
+  padding: 14px 24px 14px 0;
+  border-bottom: 2px solid var(--gps-blue);
+}
+
+section td {
+  padding: 18px 24px 18px 0;
+  border-bottom: 1px solid var(--gps-line);
+  color: var(--gps-ink-soft);
+}
+
+section tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- Code ---------- */
+section code {
+  font-family: 'Google Sans Mono', 'JetBrains Mono', Menlo, monospace;
+  background: var(--gps-surface);
+  color: var(--gps-blue-deep);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+section pre {
+  background: var(--gps-surface);
+  padding: 24px 28px;
+  border-radius: 8px;
+  border-left: 4px solid var(--gps-blue);
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+section pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--gps-ink-soft);
+}
+
+/* ---------- Blockquote (used for the Cline copy-paste prompt) ---------- */
+section blockquote {
+  background: var(--gps-surface);
+  border-left: 4px solid var(--gps-yellow);
+  padding: 20px 28px;
+  margin: 0 0 28px 0;
+  color: var(--gps-ink-soft);
+  font-size: 22px;
+  line-height: 1.55;
+}
+
+section blockquote p {
+  margin: 0 0 14px 0;
+}
+
+section blockquote p:last-child {
+  margin: 0;
+}
+
+/* ---------- Pagination ---------- */
+section::after {
+  font-family: 'Google Sans', sans-serif;
+  font-weight: 400;
+  color: var(--gps-grey-soft);
+  font-size: 16px;
+  bottom: 36px;
+  right: 48px;
+}
+
+/* ---------- Title-page variant: <!-- _class: title --> ---------- */
+section.title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 96px 120px;
+}
+
+section.title h1 {
+  font-size: 76px;
+  font-weight: 500;
+  margin: 0 0 24px 0;
+  line-height: 1.1;
+}
+
+section.title h2 {
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--gps-grey);
+  margin: 0 0 56px 0;
+}
+
+section.title p {
+  color: var(--gps-grey);
+  font-size: 24px;
+}
+
+/* ---------- Section-divider variant: <!-- _class: section --> ---------- */
+section.section {
+  background: var(--gps-blue);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+section.section h1 {
+  color: #ffffff;
+  font-size: 84px;
+  font-weight: 500;
+  margin: 0 0 16px 0;
+}
+
+section.section h2 {
+  color: rgba(255,255,255,0.85);
+  font-size: 32px;
+  font-weight: 400;
+  margin: 0;
+}
+
+section.section p {
+  color: rgba(255,255,255,0.85);
+  font-size: 26px;
+}
+
+section.section::after {
+  color: rgba(255,255,255,0.5);
+}
+
+/* ---------- Accent variants per section divider ---------- */
+section.section.yellow { background: var(--gps-yellow); }
+section.section.green  { background: var(--gps-green); }
+section.section.deep   { background: var(--gps-blue-deep); }
+
+/* ---------- Compact variant for dense tables / Mermaid slides ---------- */
+section.compact {
+  padding: 64px 88px;
+}
+section.compact h2 {
+  font-size: 36px;
+  margin: 0 0 28px 0;
+}
+section.compact p {
+  font-size: 22px;
+  margin: 0 0 18px 0;
+}
+section.compact table {
+  font-size: 18px;
+}
+section.compact th {
+  padding: 10px 16px 10px 0;
+}
+section.compact td {
+  padding: 12px 16px 12px 0;
+  line-height: 1.4;
+}
+section.compact blockquote {
+  font-size: 18px;
+  padding: 16px 22px;
+}
+
+/* ---------- Mermaid sizing: keep diagrams centered and bounded ---------- */
+section .mermaid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+section .mermaid svg {
+  max-width: 100%;
+  max-height: 540px;
+  height: auto;
+}
