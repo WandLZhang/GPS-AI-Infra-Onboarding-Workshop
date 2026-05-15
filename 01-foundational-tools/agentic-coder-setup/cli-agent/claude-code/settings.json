@@ -1,12 +1,28 @@
 {
   "permissions": {
     "allow": [
-      "Bash(*)",
       "Read",
       "Glob",
       "Grep",
-      "WebFetch",
-      "WebSearch",
+
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(tree *)",
+      "Bash(file *)",
+      "Bash(diff *)",
+      "Bash(stat *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Bash(echo *)",
+      "Bash(env)",
+      "Bash(date)",
+      "Bash(whoami)",
+
       "mcp__github-mcp__get_*",
       "mcp__github-mcp__list_*",
       "mcp__github-mcp__search_*",
@@ -18,7 +34,8 @@
       "mcp__google-dev-knowledge__batch_get_documents",
       "mcp__google-cloud-logging__list_*",
       "mcp__google-cloud-logging__get_*"
-    ]
+    ],
+    "deny": []
   },
   "model": "claude-opus-4-7[1m]",
   "effortLevel": "max",
