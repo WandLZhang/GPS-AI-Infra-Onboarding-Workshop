@@ -16,11 +16,7 @@ limitations under the License.
 
 # Agentic Coders Setup
 
-## ▶ Live slides
-
-**[wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/slides.html](https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/slides.html)** — present from any browser. Arrow keys / spacebar to advance, `f` for fullscreen.
-
-Source: [`slides/slides.md`](./slides/slides.md). Pushes to `main` rebuild and redeploy via [`.github/workflows/marp-pages.yml`](../../.github/workflows/marp-pages.yml).
+## ▶ [Slides](https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/slides.html)
 
 ---
 
