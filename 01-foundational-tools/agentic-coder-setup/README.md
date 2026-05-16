@@ -16,6 +16,14 @@ limitations under the License.
 
 # Agentic Coders Setup
 
+## ▶ Live slides
+
+**[wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/slides.html](https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/slides.html)** — present from any browser. Arrow keys / spacebar to advance, `f` for fullscreen.
+
+Source: [`slides/slides.md`](./slides/slides.md). Pushes to `main` rebuild and redeploy via [`.github/workflows/marp-pages.yml`](../../.github/workflows/marp-pages.yml).
+
+---
+
 By the end of this guide, you will have agentic coding assistance who have ready access to Google Cloud documentation via [Developer API MCP](https://developers.google.com/knowledge/mcp), [Google Cloud Logging MCP](https://docs.cloud.google.com/logging/docs/reference/v2_mcp/mcp), Github MCP, and HuggingFace MCP.
 
 ### 1. Choose IDE

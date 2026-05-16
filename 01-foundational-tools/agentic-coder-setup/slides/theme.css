@@ -161,10 +161,24 @@ section::after {
 
 /* ---------- Title-page variant: <!-- _class: title --> ---------- */
 section.title {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 96px 120px;
+  justify-content: flex-start;
+  background-image: url('visuals/Gemini_Generated_Image_l8z8lzl8z8lzl8z8.png');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  padding: 120px 50% 80px 120px;
+}
+
+section.title h1,
+section.title h2,
+section.title p,
+section.title div {
+  position: relative;
+  z-index: 2;
 }
 
 section.title h1 {
@@ -185,6 +199,9 @@ section.title p {
   color: var(--gps-grey);
   font-size: 24px;
 }
+
+section.title p:last-of-type { margin-top: auto; margin-bottom: 0; }
+section.title::after { color: transparent; }
 
 /* ---------- Section-divider variant: <!-- _class: section --> ---------- */
 section.section {
