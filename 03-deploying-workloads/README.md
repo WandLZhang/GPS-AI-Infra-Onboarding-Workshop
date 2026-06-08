@@ -18,7 +18,7 @@
 
 Deploying GPU/TPU workloads on Google Cloud involves two independent decisions:
 
-1. **How do you acquire capacity?** — This is the domain of [Dynamic Workload Scheduler (DWS)](dws/), reservations, on-demand, and Spot. DWS is a scheduling service that queues your request and provisions resources when available, at up to 53% discount.
+1. **How do you acquire capacity?** — This is the domain of [Dynamic Workload Scheduler (DWS)](dws/), reservations, on-demand, and [Spot](spot-capacity-advisor/). DWS is a scheduling service that queues your request and provisions resources when available, at up to 53% discount.
 
 2. **Where do you deploy?** — This is the deployment method — the platform and tooling you use to run your workload. Each method integrates with DWS and other capacity models differently.
 
@@ -57,6 +57,8 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+> **Picking the best Spot zone / region / machine?** See [spot-capacity-advisor/](spot-capacity-advisor/) — use the Capacity Advisor for Spot API to place Spot workloads on live obtainability instead of guesswork.
 
 ---
 
