@@ -67,6 +67,7 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 | Method | Platform | Best For | DWS Support | Guide |
 |---|---|---|---|---|
 | **[DWS Concepts](dws/)** | — | Understanding capacity acquisition models, pricing, compliance | — | [→ dws/](dws/) |
+| **[Spot Capacity Advisor](spot-capacity-advisor/)** | Compute Engine API (beta) | Picking the best zone/region/machine for Spot via live obtainability + estimated uptime | — (Spot) | [→ spot-capacity-advisor/](spot-capacity-advisor/) |
 | **[GKE (Autopilot & Standard)](gke/)** | GKE (gcloud / Terraform) | Understanding GKE modes, direct GPU deployment, DWS flex-start | Flex-start, Queued Provisioning | [→ gke/](gke/) |
 | **[Compute Engine](compute-engine-Managed%20Instance%20Groups/)** | Compute Engine (MIGs) | Raw VM control, no K8s overhead, batch training | Flex-start | [→ compute-engine/](compute-engine-Managed%20Instance%20Groups/) |
 | **[Calendar Mode](compute-engine-future-reservations/)** | Compute Engine (Future Reservations) | Planned training with hard deadlines, guaranteed start | Calendar Mode | [→ compute-engine-future-reservations/](compute-engine-future-reservations/) |
