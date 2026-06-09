@@ -21,10 +21,10 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 ## Claude Code
 
 **Defaults provisioned by this setup:**
-- Model: `claude-opus-4-7[1m]` (Claude Opus 4.7 with 1M context window)
+- Model: `claude-opus-4-8[1m]` (Claude Opus 4.8 with 1M context window)
 - Effort: `max`
 - Backend: Vertex AI, region `global` (Anthropic Claude global endpoint)
-- Subagent + small-fast model: also `claude-opus-4-7[1m]`
+- Subagent + small-fast model: also `claude-opus-4-8[1m]`
 - VS Code Claude Code extension: same model/effort/env defaults
 
 ### Quick install (one-shot)
@@ -50,8 +50,8 @@ Add to your `~/.bashrc`:
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="<YOUR_PROJECT_ID>"
 export CLOUD_ML_REGION="global"   # use a regional value (e.g. us-east5) only if your project lacks global Anthropic access
-export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-4-7[1m]"
-export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-4-7[1m]"
+export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-4-8[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-4-8[1m]"
 export PATH="$HOME/bin:$PATH"
 ```
 
@@ -67,7 +67,7 @@ cp claude-code/CLAUDE.md ~/.claude/CLAUDE.md
 # Permissions + model + effort defaults
 cp claude-code/settings.json ~/.claude/settings.json
 
-# Launcher script (Opus 4.7, max effort)
+# Launcher script (Opus 4.8, max effort)
 mkdir -p ~/bin
 cp claude-code/bin/claude-start ~/bin/claude-start
 chmod +x ~/bin/claude-start
@@ -110,9 +110,9 @@ The extension reads three keys from VS Code settings:
 
 | Key | Value |
 |---|---|
-| `claudeCode.selectedModel` | `claude-opus-4-7[1m]` |
+| `claudeCode.selectedModel` | `claude-opus-4-8[1m]` |
 | `claudeCode.effortLevel` | `max` |
-| `claudeCode.environmentVariables` | `["CLOUD_ML_REGION=global", "ANTHROPIC_SMALL_FAST_MODEL=claude-opus-4-7[1m]", "CLAUDE_CODE_SUBAGENT_MODEL=claude-opus-4-7[1m]"]` |
+| `claudeCode.environmentVariables` | `["CLOUD_ML_REGION=global", "ANTHROPIC_SMALL_FAST_MODEL=claude-opus-4-8[1m]", "CLAUDE_CODE_SUBAGENT_MODEL=claude-opus-4-8[1m]"]` |
 
 Two template files are provided:
 

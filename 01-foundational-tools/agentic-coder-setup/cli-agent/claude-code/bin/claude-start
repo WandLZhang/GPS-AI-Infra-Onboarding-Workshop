@@ -17,4 +17,4 @@
 # Requires: CLAUDE_CODE_USE_VERTEX=1, ANTHROPIC_VERTEX_PROJECT_ID, CLOUD_ML_REGION
 # Usage: claude-start [additional claude args]
 
-exec claude --model "claude-opus-4-7[1m]" --effort max "$@"
+exec claude --model "claude-opus-4-8[1m]" --effort max "$@"
