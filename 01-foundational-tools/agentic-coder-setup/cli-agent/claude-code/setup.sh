@@ -24,7 +24,7 @@
 #
 # Defaults:
 #   REGION = "global"  (Vertex AI Anthropic Claude global endpoint)
-#   Model  = "claude-opus-4-8[1m]" via Vertex
+#   Model  = "fable" -> claude-fable-5[1m] (Fable 5, 1M context) via Vertex
 #   Effort = "max"
 
 set -e
@@ -46,7 +46,7 @@ echo "============================================"
 echo "  Claude Code Setup - Vertex AI + MCPs"
 echo "  Project: $PROJECT_ID"
 echo "  Region:  $REGION"
-echo "  Model:   claude-opus-4-8[1m] (effort: max)"
+echo "  Model:   Fable 5 (claude-fable-5[1m], effort: max)"
 echo "============================================"
 echo ""
 
@@ -94,8 +94,11 @@ else
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="$PROJECT_ID"
 export CLOUD_ML_REGION="$REGION"
-export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-4-8[1m]"
-export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-4-8[1m]"
+# 1M on Vertex: the [1m] suffix must live on these alias-backing vars
+# (the /model picker strips it from the model field, dropping you back to 200K)
+export ANTHROPIC_DEFAULT_FABLE_MODEL="claude-fable-5[1m]"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-8[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="claude-fable-5[1m]"
 export PATH="\$HOME/bin:\$PATH"
 EOF
     echo "  ✓ Vertex AI env vars appended to .bashrc"
@@ -103,6 +106,8 @@ fi
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="$PROJECT_ID"
 export CLOUD_ML_REGION="$REGION"
+export ANTHROPIC_DEFAULT_FABLE_MODEL="claude-fable-5[1m]"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-8[1m]"
 export PATH="$HOME_DIR/bin:$PATH"
 
 # ------------------------------------------------------------------

@@ -1,9 +1,10 @@
 {
-    "claudeCode.selectedModel": "claude-opus-4-8[1m]",
+    "claudeCode.selectedModel": "fable",
     "claudeCode.effortLevel": "max",
     "claudeCode.environmentVariables": [
         "CLOUD_ML_REGION=global",
-        "ANTHROPIC_SMALL_FAST_MODEL=claude-opus-4-8[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL=claude-opus-4-8[1m]"
+        "ANTHROPIC_DEFAULT_FABLE_MODEL=claude-fable-5[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-4-8[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL=claude-fable-5[1m]"
     ]
 }

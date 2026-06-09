@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Claude Code Launcher — Vertex AI backend, max context window
+# Claude Code Launcher — Fable 5 (1M context) via Vertex AI, max effort
 # Requires: CLAUDE_CODE_USE_VERTEX=1, ANTHROPIC_VERTEX_PROJECT_ID, CLOUD_ML_REGION
+# 1M on Vertex comes from ANTHROPIC_DEFAULT_FABLE_MODEL='claude-fable-5[1m]' (settings.json env);
+# the [1m] suffix must live on that env var, not the model field (the /model picker strips it).
 # Usage: claude-start [additional claude args]
 
-exec claude --model "claude-opus-4-8[1m]" --effort max "$@"
+exec claude --model fable --effort max "$@"
