@@ -82,10 +82,12 @@
       ],
       "disabled": false,
       "timeout": 60,
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://huggingface.co/mcp", "--header", "Authorization:Bearer <HF_TOKEN>"],
-      "_install": "No install needed — uses npx mcp-remote at runtime"
+      "type": "streamableHttp",
+      "url": "https://huggingface.co/mcp",
+      "headers": {
+        "Authorization": "Bearer <HF_TOKEN>"
+      },
+      "_install": "No install needed — native streamable HTTP transport (no npx mcp-remote subprocess bridge to leak/orphan)"
     },
     "google-cloud-storage": {
       "autoApprove": [
