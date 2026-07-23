@@ -218,6 +218,15 @@ else
     echo "    Re-run with: GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx ./setup.sh $PROJECT_ID"
 fi
 
+# ------------------------------------------------------------------
+# gcp-pricing CLI (raw GCP pricing scraper)
+# ------------------------------------------------------------------
+echo ""
+echo "[+] Installing gcp-pricing CLI (raw GCP pricing scraper)..."
+curl -fsSL https://raw.githubusercontent.com/WandLZhang/gcp-pricing-scraper/main/install.sh | bash \
+    && echo "  ✓ gcp-pricing installed (try: gcp-pricing tpu --filter Trillium)" \
+    || echo "  ⚠ gcp-pricing install failed (non-fatal)"
+
 echo ""
 echo "============================================"
 echo "  Setup Complete!"
