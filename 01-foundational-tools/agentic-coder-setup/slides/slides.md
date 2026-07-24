@@ -78,7 +78,7 @@ Licensed under the Apache License, Version 2.0
   </div>
   <div style="text-align:center;font-size:24px;color:#80868b;margin:12px 0;">↓</div>
   <div style="display:flex;justify-content:center;margin:0;">
-    <div style="background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:20px 40px;text-align:center;font-size:20px;font-weight:500;color:#202124;">Enable <a href="https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-4-8" style="color:#1a73e8;">Opus 4.8</a><br/><span style="font-size:14px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
+    <div style="background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:20px 40px;text-align:center;font-size:20px;font-weight:500;color:#202124;">Enable <a href="https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5" style="color:#1a73e8;">Opus 5</a><br/><span style="font-size:14px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
   </div>
 </div>
 
@@ -93,7 +93,7 @@ Licensed under the Apache License, Version 2.0
   </div>
   <div style="text-align:center;font-size:24px;color:#80868b;margin:12px 0;">↓</div>
   <div style="display:flex;gap:12px;margin:0;">
-    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:20px 16px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:20px;font-weight:500;color:#202124;">Enable Opus 4.8<br/><span style="font-size:14px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
+    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:20px 16px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:20px;font-weight:500;color:#202124;">Enable Opus 5<br/><span style="font-size:14px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:20px 16px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:20px;font-weight:500;color:#202124;"><code style="font-size:13px;white-space:nowrap;">gcloud auth login</code><br/><code style="font-size:13px;white-space:nowrap;">gcloud auth application-default login</code></div>
   </div>
 </div>
@@ -109,7 +109,7 @@ Licensed under the Apache License, Version 2.0
   </div>
   <div style="text-align:center;font-size:20px;color:#80868b;margin:8px 0;">↓</div>
   <div style="display:flex;gap:12px;margin:0;">
-    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Enable Opus 4.8<br/><span style="font-size:13px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
+    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Enable Opus 5<br/><span style="font-size:13px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;"><code style="font-size:12px;white-space:nowrap;">gcloud auth login</code><br/><code style="font-size:12px;white-space:nowrap;">gcloud auth application-default login</code></div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Cline settings</div>
   </div>
@@ -129,7 +129,7 @@ Licensed under the Apache License, Version 2.0
   </div>
   <div style="text-align:center;font-size:20px;color:#80868b;margin:8px 0;">↓</div>
   <div style="display:flex;gap:12px;margin:0;">
-    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Enable Opus 4.8</div>
+    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Enable Opus 5</div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;"><code style="font-size:12px;white-space:nowrap;">gcloud auth login</code><br/><code style="font-size:12px;white-space:nowrap;">gcloud auth application-default login</code></div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Cline settings</div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Sign up for <a href="https://github.com/signup" style="color:#1a73e8;">GitHub</a></div>

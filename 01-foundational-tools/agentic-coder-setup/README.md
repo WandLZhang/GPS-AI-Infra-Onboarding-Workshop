@@ -43,7 +43,7 @@ gcloud auth application-default login
 
 <img src="../../visuals/project-id.png" width="300" style="border: 1px solid #ccc; border-radius: 4px;" />
 
-3. To use Claude APIs, navigate to [Model Garden](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-4-8) (and enable Vertex AI APIs if it pops up). Look to Anthropic to choose a model like Opus 4.8, and fill out a nominal form to turn on the API. 
+3. To use Claude APIs, navigate to [Model Garden](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5) (and enable Vertex AI APIs if it pops up). Look to Anthropic to choose a model like Opus 5, and fill out a nominal form to turn on the API. 
 
 ### 4. Install Cline
 
@@ -92,7 +92,7 @@ Or for Gemini CLI:
 
 Cline will read the config files in [`cli-agent/`](./cli-agent/) and handle the installation.
 
-> **Model versions:** Both Cline-on-Vertex (step 3) and the Claude Code CLI installed here use **Claude Opus 4.8** via the Vertex AI backend.
+> **Model versions:** Both Cline-on-Vertex (step 3) and the Claude Code CLI installed here use **Claude Opus 5** via the Vertex AI backend.
 
 ---
 

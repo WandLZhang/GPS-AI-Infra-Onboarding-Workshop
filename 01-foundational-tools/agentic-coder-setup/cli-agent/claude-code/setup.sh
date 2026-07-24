@@ -24,7 +24,7 @@
 #
 # Defaults:
 #   REGION = "global"  (Vertex AI Anthropic Claude global endpoint)
-#   Model  = "claude-opus-4-8[1m]" via Vertex
+#   Model  = "claude-opus-5[1m]" via Vertex
 #   Effort = "max"
 
 set -e
@@ -46,7 +46,7 @@ echo "============================================"
 echo "  Claude Code Setup - Vertex AI + MCPs"
 echo "  Project: $PROJECT_ID"
 echo "  Region:  $REGION"
-echo "  Model:   claude-opus-4-8[1m] (effort: max)"
+echo "  Model:   claude-opus-5[1m] (effort: max)"
 echo "============================================"
 echo ""
 
@@ -94,8 +94,8 @@ else
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="$PROJECT_ID"
 export CLOUD_ML_REGION="$REGION"
-export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-4-8[1m]"
-export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-4-8[1m]"
+export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-5[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-5[1m]"
 export PATH="\$HOME/bin:\$PATH"
 EOF
     echo "  ✓ Vertex AI env vars appended to .bashrc"
