@@ -65,6 +65,8 @@ mkdir -p ~/.claude
 cp claude-code/CLAUDE.md ~/.claude/CLAUDE.md
 
 # Permissions + model + effort defaults
+# (grants /tmp as an additional directory so `gcp-pricing` captures can be
+#  written and grepped without a prompt on every run)
 cp claude-code/settings.json ~/.claude/settings.json
 
 # Launcher script (Opus 5, max effort)

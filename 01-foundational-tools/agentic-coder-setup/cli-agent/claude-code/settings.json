@@ -22,6 +22,10 @@
       "Bash(env)",
       "Bash(date)",
       "Bash(whoami)",
+      "Bash(gcp-pricing *)",
+
+      "Read(//tmp/**)",
+      "Edit(//tmp/**)",
 
       "mcp__github-mcp__get_*",
       "mcp__github-mcp__list_*",
@@ -35,7 +39,8 @@
       "mcp__google-cloud-logging__list_*",
       "mcp__google-cloud-logging__get_*"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": ["/tmp"]
   },
   "model": "claude-opus-5[1m]",
   "effortLevel": "max",
