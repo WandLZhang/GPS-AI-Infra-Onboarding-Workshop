@@ -74,7 +74,7 @@ The HuggingFace MCP gives your AI assistant access to models, datasets, papers, 
 
 Have this repo open in your IDE. Start a new task in Cline and paste:
 
-> Set up MCP servers using the template in `01-foundational-tools/agentic-coder-setup/cline/cline_mcp_settings.template.json`. Install each server per its `_install` instructions, copy the proxy scripts from `mcp-servers/`, and generate the final `cline_mcp_settings.json`. My HuggingFace token is `<HF_TOKEN>`.
+> Set up MCP servers using the template in `01-foundational-tools/agentic-coder-setup/cline/cline_mcp_settings.template.json`. Install each server per its `_install` instructions, copy the proxy scripts from `mcp-servers/`, and generate the final `cline_mcp_settings.json`. Also copy every file in `cline/rules/` into my Cline Rules folder (`~/Documents/Cline/Rules` on Linux/Mac). My HuggingFace token is `<HF_TOKEN>`.
 
 Cline will read the config files in [`cline/`](./cline/) and wire everything up.
 
@@ -93,6 +93,30 @@ Or for Gemini CLI:
 Cline will read the config files in [`cli-agent/`](./cli-agent/) and handle the installation.
 
 > **Model versions:** Both Cline-on-Vertex (step 3) and the Claude Code CLI installed here use **Claude Opus 5** via the Vertex AI backend.
+
+### 8. Install the gcp-pricing CLI
+
+Google Cloud's pricing pages are JavaScript-rendered, so an agent that fetches the URL gets an
+empty shell. This CLI captures the whole page — every table and every region — to a file the
+agent can grep.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/WandLZhang/gcp-pricing-scraper/main/install.sh | bash
+```
+
+Run it **after** step 7, once your coders exist. It detects what is installed and wires each
+one from a single upstream source: the Claude Code skill, the Cline rule
+(`~/Documents/Cline/Rules/gcp-pricing.md`), and a marked section in `~/.gemini/GEMINI.md`.
+It is idempotent — re-run it any time to upgrade. Check with `gcp-pricing --version`.
+
+The Claude Code setup in step 7 already runs this for you; run it yourself if you use Cline
+or Gemini CLI.
+
+Try it:
+
+```bash
+gcp-pricing tpu --filter Trillium
+```
 
 ---
 
