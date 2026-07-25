@@ -24,3 +24,5 @@ Customize these to match your team's style. Cline will follow them across all ta
 4. NEVER use mock or fake data — test against real systems
 5. When code sends payloads between functions, ALWAYS include log statements capturing the full payload for troubleshooting
 6. NEVER truncate output or limit reading — always capture and display full command output
+7. NEVER add AI attribution to anything you write. No "Co-Authored-By: Cline", no "Generated with" line, no 🤖 — not in commit messages, not in PR bodies, not in issue comments, release notes, or changelogs
+8. Never run `git config user.name` or `git config user.email` — the machine's existing identity is correct

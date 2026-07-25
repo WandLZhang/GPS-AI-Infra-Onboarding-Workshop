@@ -30,6 +30,11 @@ limitations under the License.
 ## Output
 - NEVER truncate output or limit reading. Always capture and display full command output.
 
+## Git
+- NEVER add AI attribution to anything you write. No `Co-Authored-By:` trailer naming an agent, no "Generated with" line, no 🤖 — not in commit messages, not in PR/MR bodies, not in issue comments, release notes, or changelogs. Write the message or body and stop.
+- Never run `git config user.name` or `git config user.email` — the machine's existing identity is correct.
+- Never commit secrets (AIza*, gho_*/ghp_*, hf_*, sk-*, AKIA*). Reference environment variables instead.
+
 <!-- BEGIN gcp-pricing (generated) -->
 # gcp-pricing
 
