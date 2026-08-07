@@ -227,6 +227,21 @@ curl -fsSL https://raw.githubusercontent.com/WandLZhang/gcp-pricing-scraper/main
     && echo "  ✓ gcp-pricing installed (try: gcp-pricing tpu --filter Trillium)" \
     || echo "  ⚠ gcp-pricing install failed (non-fatal)"
 
+# ------------------------------------------------------------------
+# no-ai-slop skill (global)
+# ------------------------------------------------------------------
+# Lands in ~/.agents/skills/ (the universal location, so Cline, Gemini CLI and
+# Antigravity pick it up too) and symlinks into ~/.claude/skills/.
+#
+# The skill is invocation-triggered -- it gives you /no-ai-slop for editing a
+# draft. It does NOT govern ordinary prose on its own; the Writing Style block
+# in CLAUDE.md is what does that. Install both or neither.
+echo ""
+echo "[+] Installing no-ai-slop skill..."
+npx --yes skills add petergyang/no-ai-slop --skill no-ai-slop --global --yes >/dev/null 2>&1 \
+    && echo "  ✓ no-ai-slop installed (try: /no-ai-slop <draft>)" \
+    || echo "  ⚠ no-ai-slop install failed (non-fatal)"
+
 echo ""
 echo "============================================"
 echo "  Setup Complete!"
