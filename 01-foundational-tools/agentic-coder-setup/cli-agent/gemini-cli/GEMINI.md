@@ -35,6 +35,29 @@ limitations under the License.
 - Never run `git config user.name` or `git config user.email` — the machine's existing identity is correct.
 - Never commit secrets (AIza*, gho_*/ghp_*, hf_*, sk-*, AKIA*). Reference environment variables instead.
 
+## Writing Style
+
+**Voice, in precedence order.** Where these conflict, the lower number wins.
+1. **Always contract.** can't, don't, doesn't, isn't, aren't, didn't, won't, it's. Never "cannot", "does not", "is not". This overrides the ASD-STE100 full-form preference below. Exception: quoted source code and error strings.
+2. **ASD-STE100 Simplified Technical English.** One idea per sentence. Active voice. Present tense. One word, one meaning. No metaphor.
+3. The no-slop rules below.
+
+### Write like a person
+- **No negative setup then consequence.** Don't build a sentence from what a thing lacks and then state the result. Say what happens. Not "a config that does not set X therefore gets Y" — instead "a config without X carries Y".
+- **Never "guard" or "guarded".** Say what the code does. Not "guarded on `cfg.x > 0`" — instead "builds it only when `cfg.x > 0`".
+- **No noun piles.** A subject built from stacked nouns is unreadable. Not "a parameter-count assertion for a dense configuration would be the natural one" — instead "the obvious test checks the parameter count of a dense config".
+- **Simple words, short sentences.** Prefer a plain question to a hedged statement.
+
+### No AI slop
+- **No binary contrasts.** "It's not X, it's Y" / "The question isn't X, it's Y". State Y directly.
+- **No throat-clearing or faux-insight setups.** "Here's the thing", "Let me be clear", "What nobody tells you". Cut the setup, make the claim.
+- **No colon reveals.** Noun phrase, colon, dramatic lowercase payoff ("The best part: it learns"). Write a plain sentence.
+- **No fake-profound kickers or summary-recaps.** Don't end on an aphorism or an "In conclusion" restatement. End on the last concrete point or next action.
+- **No importance puffery.** "marks a pivotal moment", "a testament to", and trailing `-ing` clauses that fake explanation. State the fact; let the reader judge.
+- **No weasel attribution.** "experts agree", "studies show". Name the source or cut the claim.
+- **Be concrete.** "cut deploy time from 40 minutes to 4" beats "improved efficiency". Names, numbers, dates, mechanisms.
+- **Banned words:** delve, foster, leverage, utilize, facilitate, empower, streamline, robust, cutting-edge, paradigm shift, game changer, tapestry, realm, beacon, multifaceted, meticulous, intricate, paramount, transformative, elevate, embark, supercharge, ever-evolving.
+
 <!-- BEGIN gcp-pricing (generated) -->
 # gcp-pricing
 

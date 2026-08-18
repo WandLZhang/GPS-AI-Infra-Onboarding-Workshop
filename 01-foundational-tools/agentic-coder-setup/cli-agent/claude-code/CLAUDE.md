@@ -35,7 +35,20 @@ limitations under the License.
 - Never run `git config user.name` or `git config user.email` — the machine's existing identity is correct.
 - Never commit secrets (AIza*, gho_*/ghp_*, hf_*, sk-*, AKIA*). Reference environment variables instead.
 
-## Writing Style — no AI slop
+## Writing Style
+
+**Voice, in precedence order.** Where these conflict, the lower number wins.
+1. **Always contract.** can't, don't, doesn't, isn't, aren't, didn't, won't, it's. Never "cannot", "does not", "is not". This overrides the ASD-STE100 full-form preference below. Exception: quoted source code and error strings.
+2. **ASD-STE100 Simplified Technical English.** One idea per sentence. Active voice. Present tense. One word, one meaning. No metaphor.
+3. The no-slop rules below.
+
+### Write like a person
+- **No negative setup then consequence.** Don't build a sentence from what a thing lacks and then state the result. Say what happens. Not "a config that does not set X therefore gets Y" — instead "a config without X carries Y".
+- **Never "guard" or "guarded".** Say what the code does. Not "guarded on `cfg.x > 0`" — instead "builds it only when `cfg.x > 0`".
+- **No noun piles.** A subject built from stacked nouns is unreadable. Not "a parameter-count assertion for a dense configuration would be the natural one" — instead "the obvious test checks the parameter count of a dense config".
+- **Simple words, short sentences.** Prefer a plain question to a hedged statement.
+
+### No AI slop
 Condensed from the `no-ai-slop` skill (https://github.com/petergyang/no-ai-slop), installed globally by setup.sh. Run `/no-ai-slop` for a full editing pass on a draft; these apply to everything you write.
 - **No binary contrasts.** "It's not X, it's Y" / "The question isn't X, it's Y" / "not just X but Y". State Y directly.
 - **No throat-clearing or faux-insight setups.** "Here's the thing", "Let me be clear", "What nobody tells you", "The part everyone misses". Cut the setup, make the claim.
