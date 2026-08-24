@@ -1,9 +1,3 @@
 {
-    "claudeCode.selectedModel": "claude-opus-5[1m]",
-    "claudeCode.effortLevel": "max",
-    "claudeCode.environmentVariables": [
-        "CLOUD_ML_REGION=global",
-        "ANTHROPIC_SMALL_FAST_MODEL=claude-opus-5[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL=claude-opus-5[1m]"
-    ]
+    "claudeCode.claudeProcessWrapper": "__HOME__/bin/claude-vscode-wrapper"
 }

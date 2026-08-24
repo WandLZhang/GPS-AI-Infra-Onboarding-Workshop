@@ -25,7 +25,8 @@
 # Defaults:
 #   REGION = "global"  (Vertex AI Anthropic Claude global endpoint)
 #   Model  = "claude-opus-5[1m]" via Vertex
-#   Effort = "max"
+#   Effort = "max", via the --effort flag on both launchers. settings.json holds
+#            "xhigh" because its effortLevel key rejects "max" (see cli-agent/README.md).
 
 set -e
 
@@ -106,20 +107,23 @@ export CLOUD_ML_REGION="$REGION"
 export PATH="$HOME_DIR/bin:$PATH"
 
 # ------------------------------------------------------------------
-# 4. claude-start launcher
+# 4. claude-start launcher + VS Code effort wrapper
 # ------------------------------------------------------------------
 echo ""
-echo "[4/9] Installing claude-start launcher..."
+echo "[4/8] Installing launchers..."
 mkdir -p "$HOME_DIR/bin"
 cp "$SCRIPT_DIR/bin/claude-start" "$HOME_DIR/bin/claude-start"
 chmod +x "$HOME_DIR/bin/claude-start"
 echo "  ✓ claude-start installed to ~/bin/claude-start"
+cp "$SCRIPT_DIR/bin/claude-vscode-wrapper" "$HOME_DIR/bin/claude-vscode-wrapper"
+chmod +x "$HOME_DIR/bin/claude-vscode-wrapper"
+echo "  ✓ claude-vscode-wrapper installed to ~/bin/claude-vscode-wrapper"
 
 # ------------------------------------------------------------------
 # 5. CLI global rules + settings
 # ------------------------------------------------------------------
 echo ""
-echo "[5/9] Installing Claude Code CLI settings..."
+echo "[5/8] Installing Claude Code CLI settings..."
 mkdir -p "$HOME_DIR/.claude"
 cp "$SCRIPT_DIR/CLAUDE.md" "$HOME_DIR/.claude/CLAUDE.md"
 cp "$SCRIPT_DIR/settings.json" "$HOME_DIR/.claude/settings.json"
@@ -129,40 +133,33 @@ echo "  ✓ ~/.claude/settings.json installed"
 # ------------------------------------------------------------------
 # 6. VS Code Machine settings (Code OSS / Cloud Workstation)
 # ------------------------------------------------------------------
+# Every claudeCode.* key the extension reads is machine-scoped, so this is the
+# only VS Code file that reaches the extension - a workspace .vscode/settings.json
+# is ignored for them. __HOME__ is substituted here because claudeProcessWrapper
+# has to be an absolute path.
 echo ""
-echo "[6/9] Installing VS Code Machine settings..."
+echo "[6/8] Installing VS Code Machine settings..."
 VSCODE_MACHINE_DIR="$HOME_DIR/.codeoss-cloudworkstations/data/Machine"
+MACHINE_JSON="$(cat "$SCRIPT_DIR/vscode/machine-settings.json")"
+MACHINE_JSON="${MACHINE_JSON//__HOME__/$HOME_DIR}"
 if [ -d "$HOME_DIR/.codeoss-cloudworkstations" ]; then
     mkdir -p "$VSCODE_MACHINE_DIR"
-    cp "$SCRIPT_DIR/vscode/machine-settings.json" "$VSCODE_MACHINE_DIR/settings.json"
+    printf '%s\n' "$MACHINE_JSON" > "$VSCODE_MACHINE_DIR/settings.json"
     echo "  ✓ Machine settings -> $VSCODE_MACHINE_DIR/settings.json"
 else
     echo "  ⚠ Cloud Workstation Code OSS dir not found; skipping Machine settings"
-    echo "    Desktop VS Code paths:"
-    echo "      Linux:   ~/.config/Code/User/settings.json"
-    echo "      macOS:   ~/Library/Application Support/Code/User/settings.json"
-    echo "      Windows: %APPDATA%\\Code\\User\\settings.json"
-fi
-
-# ------------------------------------------------------------------
-# 7. VS Code Workspace settings (~/Projects/.vscode/settings.json)
-# ------------------------------------------------------------------
-echo ""
-echo "[7/9] Installing VS Code Workspace settings..."
-PROJECTS_DIR="$HOME_DIR/Projects"
-if [ -d "$PROJECTS_DIR" ]; then
-    mkdir -p "$PROJECTS_DIR/.vscode"
-    cp "$SCRIPT_DIR/vscode/workspace-settings.json" "$PROJECTS_DIR/.vscode/settings.json"
-    echo "  ✓ Workspace settings -> $PROJECTS_DIR/.vscode/settings.json"
-else
-    echo "  ⚠ ~/Projects not found; skipping workspace settings"
+    echo "    Merge these keys into your desktop VS Code user settings instead:"
+    while IFS= read -r line; do echo "      $line"; done <<< "$MACHINE_JSON"
+    echo "    Linux:   ~/.config/Code/User/settings.json"
+    echo "    macOS:   ~/Library/Application Support/Code/User/settings.json"
+    echo "    Windows: %APPDATA%\\Code\\User\\settings.json"
 fi
 
 # ------------------------------------------------------------------
 # 8. MCP proxy scripts
 # ------------------------------------------------------------------
 echo ""
-echo "[8/9] Installing MCP proxy scripts..."
+echo "[7/8] Installing MCP proxy scripts..."
 mkdir -p "$HOME_DIR/mcp/google-cloud-logging"
 cp "$SHARED_DIR/google-cloud-logging/proxy.mjs" "$HOME_DIR/mcp/google-cloud-logging/proxy.mjs"
 echo "  ✓ Cloud Logging proxy installed"
@@ -183,7 +180,7 @@ fi
 # 9. Register MCP servers with Claude Code
 # ------------------------------------------------------------------
 echo ""
-echo "[9/9] Registering MCP servers..."
+echo "[8/8] Registering MCP servers..."
 
 GOOGLE_DEV_KEY="${GOOGLE_DEV_KNOWLEDGE_API_KEY:-}"
 if [ -n "$GOOGLE_DEV_KEY" ]; then

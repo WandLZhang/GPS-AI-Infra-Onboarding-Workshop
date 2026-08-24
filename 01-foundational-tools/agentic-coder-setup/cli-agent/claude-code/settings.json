@@ -49,7 +49,7 @@
   },
   "includeCoAuthoredBy": false,
   "model": "claude-opus-5[1m]",
-  "effortLevel": "max",
+  "effortLevel": "xhigh",
   "env": {
     "CLAUDE_CODE_USE_VERTEX": "1",
     "CLOUD_ML_REGION": "global",

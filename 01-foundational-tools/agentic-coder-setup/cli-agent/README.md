@@ -22,10 +22,10 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 
 **Defaults provisioned by this setup:**
 - Model: `claude-opus-5[1m]` (Claude Opus 5 with 1M context window)
-- Effort: `max`
+- Effort: `max`, passed as `--effort max` by both launchers (see [Effort](#effort-why-max-needs-a-wrapper))
 - Backend: Vertex AI, region `global` (Anthropic Claude global endpoint)
 - Subagent + small-fast model: also `claude-opus-5[1m]`
-- VS Code Claude Code extension: same model/effort/env defaults
+- VS Code Claude Code extension: same model, same effort, via the launch wrapper
 
 ### Quick install (one-shot)
 
@@ -36,7 +36,7 @@ GOOGLE_DEV_KNOWLEDGE_API_KEY=AIza... \
   ./setup.sh <YOUR_GCP_PROJECT_ID>
 ```
 
-The script installs Node 20 + Claude Code CLI, writes the Vertex env vars to `~/.bashrc`, drops the `claude-start` launcher into `~/bin`, copies CLI rules + permissions to `~/.claude/`, writes the VS Code extension defaults (Code OSS Machine settings + workspace `<root>/.vscode/settings.json`), installs the Cloud Logging proxy + GitHub MCP binary, and registers all three MCP servers.
+The script installs Node 20 + Claude Code CLI, writes the Vertex env vars to `~/.bashrc`, drops the `claude-start` launcher and the `claude-vscode-wrapper` into `~/bin`, copies CLI rules + permissions to `~/.claude/`, writes the VS Code extension defaults (Code OSS Machine settings), installs the Cloud Logging proxy + GitHub MCP binary, and registers all three MCP servers.
 
 ### Manual install (step-by-step)
 
@@ -69,10 +69,11 @@ cp claude-code/CLAUDE.md ~/.claude/CLAUDE.md
 #  written and grepped without a prompt on every run)
 cp claude-code/settings.json ~/.claude/settings.json
 
-# Launcher script (Opus 5, max effort)
+# Launcher scripts (Opus 5, max effort)
 mkdir -p ~/bin
 cp claude-code/bin/claude-start ~/bin/claude-start
-chmod +x ~/bin/claude-start
+cp claude-code/bin/claude-vscode-wrapper ~/bin/claude-vscode-wrapper
+chmod +x ~/bin/claude-start ~/bin/claude-vscode-wrapper
 ```
 
 #### Register MCP servers
@@ -106,28 +107,37 @@ claude-start
 
 ---
 
+## Effort: why `max` needs a wrapper
+
+`effortLevel` in `settings.json` accepts `low`, `medium`, `high` and `xhigh` only. `max` fails that enum, the loader drops it, and the session falls back to the model default of `high` — silently, with no warning. Verify it on any box: with `"effortLevel": "max"` in `~/.claude/settings.json`, `claude -p 'run: echo $CLAUDE_EFFORT'` prints `high`.
+
+So `claude-code/settings.json` pins `xhigh`, the highest value that key can hold, and both launchers pass `--effort max` on the command line, which does accept it:
+
+- terminal — `claude-start` runs `claude --effort max`
+- VS Code — `claudeCode.claudeProcessWrapper` points at `~/bin/claude-vscode-wrapper`, which strips any `--effort` the extension passes and appends `--effort max`
+
+The extension invokes the wrapper as `claude-vscode-wrapper <claude-binary> <args...>` — it puts the real binary in `executableArgs`, ahead of everything else.
+
 ## VS Code Claude Code extension defaults
 
-The extension reads three keys from VS Code settings:
+Every `claudeCode.*` key the extension reads is **machine-scoped**, so a workspace `.vscode/settings.json` cannot set any of them. `claude-code/vscode/machine-settings.json` is the only template, and it carries one key:
 
 | Key | Value |
 |---|---|
-| `claudeCode.selectedModel` | `claude-opus-5[1m]` |
-| `claudeCode.effortLevel` | `max` |
-| `claudeCode.environmentVariables` | `["CLOUD_ML_REGION=global", "ANTHROPIC_SMALL_FAST_MODEL=claude-opus-5[1m]", "CLAUDE_CODE_SUBAGENT_MODEL=claude-opus-5[1m]"]` |
+| `claudeCode.claudeProcessWrapper` | `__HOME__/bin/claude-vscode-wrapper` |
 
-Two template files are provided:
+Install it at:
 
-- **`claude-code/vscode/machine-settings.json`** — Machine-scope (applies IDE-wide). Install at:
-  - Cloud Workstation (Code OSS): `~/.codeoss-cloudworkstations/data/Machine/settings.json`
-  - Desktop VS Code Linux: `~/.config/Code/User/settings.json`
-  - Desktop VS Code macOS: `~/Library/Application Support/Code/User/settings.json`
-  - Desktop VS Code Windows: `%APPDATA%\Code\User\settings.json`
-- **`claude-code/vscode/workspace-settings.json`** — Workspace-scope (applies when that folder is open). Install at: `<your-workspace>/.vscode/settings.json`
+- Cloud Workstation (Code OSS): `~/.codeoss-cloudworkstations/data/Machine/settings.json`
+- Desktop VS Code Linux: `~/.config/Code/User/settings.json`
+- Desktop VS Code macOS: `~/Library/Application Support/Code/User/settings.json`
+- Desktop VS Code Windows: `%APPDATA%\Code\User\settings.json`
 
-Workspace overrides Machine, so you can pin a project to a different model/effort. `./setup.sh` writes both: Machine to the Cloud Workstation Code OSS path, and workspace to `~/Projects/.vscode/settings.json` (if `~/Projects` exists).
+`./setup.sh` writes the Code OSS path and substitutes `__HOME__`. Installing by hand means replacing `__HOME__` with your home directory yourself — the wrapper path has to be absolute, and a wrong one stops the extension from launching Claude at all.
 
-The `CLAUDE_CODE_USE_VERTEX=1` and `ANTHROPIC_VERTEX_PROJECT_ID=<...>` env vars come from your `~/.bashrc` and are inherited by the `claude` process the extension spawns — they don't need to be in `claudeCode.environmentVariables`.
+Model and env vars are not set here. Both come from `~/.claude/settings.json` (`model` and `env`), which the extension reads through the CLI. `claudeCode.selectedModel` and `claudeCode.effortLevel` no longer exist — the extension dropped them — and `claudeCode.environmentVariables` now takes `{name, value}` objects rather than `"KEY=value"` strings.
+
+The `CLAUDE_CODE_USE_VERTEX=1` and `ANTHROPIC_VERTEX_PROJECT_ID=<...>` env vars come from your `~/.bashrc` and are inherited by the `claude` process the extension spawns.
 
 ---
 
