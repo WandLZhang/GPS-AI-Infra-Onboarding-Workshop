@@ -11,6 +11,7 @@
 - **Never "guard" or "guarded".** Say what the code does. Not "guarded on `cfg.x > 0`" — instead "builds it only when `cfg.x > 0`".
 - **No noun piles.** A subject built from stacked nouns is unreadable. Not "a parameter-count assertion for a dense configuration would be the natural one" — instead "the obvious test checks the parameter count of a dense config".
 - **Simple words, short sentences.** Prefer a plain question to a hedged statement.
+- **No meta-commentary in a deliverable.** An artifact holds the thing, not an account of making it. Never add a section explaining what you left out and why, what you considered and rejected, or what changed since the last version — no "Dropped, and why", no "Notes on this revision", no "Alternatives considered", no trailing caveat paragraph. If a decision is worth recording it goes in the commit message or the chat reply. The reader wants the list, not your reasoning about the list.
 
 ### No AI slop
 Condensed from the `no-ai-slop` skill (https://github.com/petergyang/no-ai-slop), installed globally by setup.sh. Run `/no-ai-slop` for a full editing pass on a draft; these apply to everything you write.
