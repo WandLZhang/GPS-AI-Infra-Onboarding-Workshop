@@ -124,11 +124,24 @@ echo "  ✓ claude-vscode-wrapper installed to ~/bin/claude-vscode-wrapper"
 # ------------------------------------------------------------------
 echo ""
 echo "[5/8] Installing Claude Code CLI settings..."
-mkdir -p "$HOME_DIR/.claude"
+mkdir -p "$HOME_DIR/.claude/hooks"
 cp "$SCRIPT_DIR/CLAUDE.md" "$HOME_DIR/.claude/CLAUDE.md"
-cp "$SCRIPT_DIR/settings.json" "$HOME_DIR/.claude/settings.json"
+
+# settings.json carries __HOME__ because a hook command has to be an absolute
+# path, the same reason vscode/machine-settings.json does.
+SETTINGS_JSON="$(cat "$SCRIPT_DIR/settings.json")"
+printf '%s\n' "${SETTINGS_JSON//__HOME__/$HOME_DIR}" > "$HOME_DIR/.claude/settings.json"
+
+# md_write_guard denies any Bash command that overwrites a .md file which
+# already exists. Shell redirects and inline python rewrites skip the staleness
+# check Edit/Write use, so they destroy hand edits made in the editor without
+# ever warning. Creating a new .md still works.
+cp "$SCRIPT_DIR/hooks/md_write_guard.py" "$HOME_DIR/.claude/hooks/md_write_guard.py"
+chmod +x "$HOME_DIR/.claude/hooks/md_write_guard.py"
+
 echo "  ✓ ~/.claude/CLAUDE.md installed"
 echo "  ✓ ~/.claude/settings.json installed"
+echo "  ✓ ~/.claude/hooks/md_write_guard.py installed (PreToolUse on Bash)"
 
 # ------------------------------------------------------------------
 # 6. VS Code Machine settings (Code OSS / Cloud Workstation)

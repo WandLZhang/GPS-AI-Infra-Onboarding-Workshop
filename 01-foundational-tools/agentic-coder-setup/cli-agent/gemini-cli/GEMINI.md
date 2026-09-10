@@ -22,6 +22,7 @@ limitations under the License.
 ## File Management
 - NEVER create markdown or text files telling me what to do — just walk through and run the deployments
 - NEVER create new scripts when you can replace/update the old script that is not working. No "enhanced_" or "v2_" files
+- NEVER overwrite an existing `.md` file with a shell command. No `>` redirect, no `sed -i`, no inline python that opens it for writing. A shell write skips the staleness check, so it destroys hand edits made in the editor and nobody finds out. Use the edit tool, which fails loudly when the file moved under you. Creating a NEW `.md` that way is fine, and /tmp is always fine.
 
 ## Data Integrity
 - NEVER use mock or fake data. Test real systems. Do not simulate responses — solve the real problem and if you cannot, say so.
