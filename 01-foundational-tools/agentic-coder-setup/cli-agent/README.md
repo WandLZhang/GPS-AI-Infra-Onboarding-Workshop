@@ -21,10 +21,10 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 ## Claude Code
 
 **Defaults provisioned by this setup:**
-- Model: `claude-opus-5[1m]` (Claude Opus 5 with 1M context window)
+- Model: `claude-opus-5-5[1m]` (Claude Opus 5.5 with 1M context window)
 - Effort: `max`, passed as `--effort max` by both launchers (see [Effort](#effort-why-max-needs-a-wrapper))
 - Backend: Vertex AI, region `global` (Anthropic Claude global endpoint)
-- Subagent + small-fast model: also `claude-opus-5[1m]`
+- Subagent + small-fast model: also `claude-opus-5-5[1m]`
 - VS Code Claude Code extension: same model, same effort, via the launch wrapper
 
 ### Quick install (one-shot)
@@ -50,8 +50,8 @@ Add to your `~/.bashrc`:
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="<YOUR_PROJECT_ID>"
 export CLOUD_ML_REGION="global"   # use a regional value (e.g. us-east5) only if your project lacks global Anthropic access
-export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-5[1m]"
-export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-5[1m]"
+export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-5-5[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-5-5[1m]"
 export PATH="$HOME/bin:$PATH"
 ```
 
@@ -69,7 +69,7 @@ cp claude-code/CLAUDE.md ~/.claude/CLAUDE.md
 #  written and grepped without a prompt on every run)
 cp claude-code/settings.json ~/.claude/settings.json
 
-# Launcher scripts (Opus 5, max effort)
+# Launcher scripts (Opus 5.5, max effort)
 mkdir -p ~/bin
 cp claude-code/bin/claude-start ~/bin/claude-start
 cp claude-code/bin/claude-vscode-wrapper ~/bin/claude-vscode-wrapper
