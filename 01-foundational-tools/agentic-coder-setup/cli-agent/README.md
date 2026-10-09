@@ -25,6 +25,7 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 - Effort: `max`, passed as `--effort max` by both launchers (see [Effort](#effort-why-max-needs-a-wrapper))
 - Backend: Vertex AI, region `global` (Anthropic Claude global endpoint)
 - Subagent + small-fast model: also `claude-opus-5-5[1m]`
+- Prompt cache: 1 hour for the main conversation, 5 minutes for subagents (see [Prompt cache TTL](#prompt-cache-ttl))
 - VS Code Claude Code extension: same model, same effort, via the launch wrapper
 
 ### Quick install (one-shot)
@@ -117,6 +118,10 @@ So `claude-code/settings.json` pins `xhigh`, the highest value that key can hold
 - VS Code — `claudeCode.claudeProcessWrapper` points at `~/bin/claude-vscode-wrapper`, which strips any `--effort` the extension passes and appends `--effort max`
 
 The extension invokes the wrapper as `claude-vscode-wrapper <claude-binary> <args...>` — it puts the real binary in `executableArgs`, ahead of everything else.
+
+## Prompt cache TTL
+
+Claude Code caches the conversation, so each request reads most of its context from the cache at a small fraction of the input price. On Vertex AI the cache lasts 5 minutes by default. After a longer pause, the next request writes the whole context to the cache again. `"promptCacheTtl": "1h"` in `claude-code/settings.json` makes the main conversation's cache last an hour. A 1-hour cache write costs 1.6x a 5-minute write. A return within the hour then reads the context from the cache instead of writing all of it again. Subagents rarely pause, so they keep the 5-minute default. To change either one for a single shell, set `CLAUDE_CODE_PROMPT_CACHE_TTL` or `CLAUDE_CODE_SUBAGENT_PROMPT_CACHE_TTL` to `5m` or `1h`.
 
 ## VS Code Claude Code extension defaults
 

@@ -63,12 +63,14 @@
     "sessionUrl": false
   },
   "includeCoAuthoredBy": false,
+  "promptCacheTtl": "1h",
   "model": "claude-opus-5-5[1m]",
   "effortLevel": "xhigh",
   "env": {
     "CLAUDE_CODE_USE_VERTEX": "1",
     "CLOUD_ML_REGION": "global",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-opus-5-5[1m]",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5-5[1m]"
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5-5[1m]",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5[1m]"
   }
 }
