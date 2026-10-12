@@ -45,6 +45,7 @@
     "CLOUD_ML_REGION": "global",
     "ANTHROPIC_DEFAULT_FABLE_MODEL": "claude-fable-5[1m]",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8[1m]",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-fable-5[1m]"
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-fable-5[1m]",
+    "CLAUDE_STREAM_IDLE_TIMEOUT_MS": "1800000"
   }
 }
