@@ -146,10 +146,15 @@ echo "  ✓ ~/.claude/hooks/md_write_guard.py installed (PreToolUse on Bash)"
 # ------------------------------------------------------------------
 # 6. VS Code Machine settings (Code OSS / Cloud Workstation)
 # ------------------------------------------------------------------
-# Every claudeCode.* key the extension reads is machine-scoped, so this is the
-# only VS Code file that reaches the extension - a workspace .vscode/settings.json
-# is ignored for them. __HOME__ is substituted here because claudeProcessWrapper
+# The claudeCode.* keys in this file are machine-scoped, so this is the only
+# workstation file that reaches them - a workspace .vscode/settings.json is
+# ignored for them. __HOME__ is substituted here because claudeProcessWrapper
 # has to be an absolute path.
+#
+# Application-scoped keys don't work here; VS Code ignores them in Machine
+# settings. claudeCode.archiveInactiveSessions is one: it moves sessions idle
+# for 14 days into the Archived list. Code OSS keeps User settings in the
+# browser, so set it to Never in User settings in each browser profile.
 echo ""
 echo "[6/8] Installing VS Code Machine settings..."
 VSCODE_MACHINE_DIR="$HOME_DIR/.codeoss-cloudworkstations/data/Machine"

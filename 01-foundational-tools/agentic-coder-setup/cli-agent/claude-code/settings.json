@@ -63,6 +63,7 @@
     "sessionUrl": false
   },
   "includeCoAuthoredBy": false,
+  "cleanupPeriodDays": 3650,
   "promptCacheTtl": "1h",
   "model": "claude-opus-5-5[1m]",
   "effortLevel": "xhigh",
