@@ -75,10 +75,15 @@ export NVM_DIR="$HOME_DIR/.nvm"
 # ------------------------------------------------------------------
 echo ""
 echo "[2/9] Installing Claude Code CLI..."
-if command -v claude &>/dev/null; then
-    echo "  ✓ Claude Code already installed: $(claude --version 2>/dev/null)"
+# Anthropic's native build installs under ~/.local, so it survives the restarts
+# that wipe everything outside $HOME on Cloud Workstations and Cloud Shell. It
+# doesn't depend on Node either. Current npm releases need Node 22, so on Node
+# 20 npm falls back to a release too old to run Opus 5.5.
+if curl -fsSL https://claude.ai/install.sh | bash -s stable >/dev/null; then
+    export PATH="$HOME_DIR/.local/bin:$PATH"
+    echo "  ✓ Claude Code installed: $(claude --version 2>/dev/null)"
 else
-    npm install -g @anthropic-ai/claude-code
+    echo "  ⚠ Claude Code install failed. See https://code.claude.com/docs"
 fi
 
 # ------------------------------------------------------------------
@@ -101,6 +106,8 @@ export PATH="\$HOME/bin:\$PATH"
 EOF
     echo "  ✓ Vertex AI env vars appended to .bashrc"
 fi
+grep -q '.local/bin' "$HOME_DIR/.bashrc" 2>/dev/null \
+    || echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME_DIR/.bashrc"
 export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="$PROJECT_ID"
 export CLOUD_ML_REGION="$REGION"
@@ -139,9 +146,43 @@ printf '%s\n' "${SETTINGS_JSON//__HOME__/$HOME_DIR}" > "$HOME_DIR/.claude/settin
 cp "$SCRIPT_DIR/hooks/md_write_guard.py" "$HOME_DIR/.claude/hooks/md_write_guard.py"
 chmod +x "$HOME_DIR/.claude/hooks/md_write_guard.py"
 
+# accelerator_guard runs when Claude is about to end a turn. It lists the GPUs
+# and TPUs still running in your project and sends the list back to Claude once,
+# so Claude tells you before it hands the turn back. It never deletes anything.
+cp "$SCRIPT_DIR/hooks/accelerator_guard.py" "$HOME_DIR/.claude/hooks/accelerator_guard.py"
+chmod +x "$HOME_DIR/.claude/hooks/accelerator_guard.py"
+
 echo "  ✓ ~/.claude/CLAUDE.md installed"
 echo "  ✓ ~/.claude/settings.json installed"
 echo "  ✓ ~/.claude/hooks/md_write_guard.py installed (PreToolUse on Bash)"
+echo "  ✓ ~/.claude/hooks/accelerator_guard.py installed (Stop)"
+
+# ------------------------------------------------------------------
+# Boot hook + claude-backup
+# ------------------------------------------------------------------
+# The boot hook reinstalls gh and tmux after each restart, and runs your
+# scripts in ~/.workstation/startup.d. claude-backup copies conversations and
+# memory to a bucket you own (see cli-agent/README.md).
+echo ""
+echo "[+] Installing the boot hook and claude-backup..."
+cp "$SCRIPT_DIR/bin/claude-backup" "$HOME_DIR/bin/claude-backup"
+chmod +x "$HOME_DIR/bin/claude-backup"
+echo "  ✓ claude-backup installed to ~/bin/claude-backup"
+if [ "${CLOUD_SHELL:-}" = "true" ]; then
+    BOOT_HOOK="$HOME_DIR/.customize_environment"
+elif [ -d /etc/workstation-startup.d ]; then
+    BOOT_HOOK="$HOME_DIR/.workstation/customize_environment"
+else
+    BOOT_HOOK=""
+fi
+if [ -n "$BOOT_HOOK" ]; then
+    mkdir -p "$(dirname "$BOOT_HOOK")" "$HOME_DIR/.workstation/startup.d"
+    cp "$SCRIPT_DIR/workstation/customize_environment" "$BOOT_HOOK"
+    chmod +x "$BOOT_HOOK"
+    echo "  ✓ boot hook installed to $BOOT_HOOK"
+else
+    echo "  - this isn't Cloud Shell or Cloud Workstations, so no boot hook"
+fi
 
 # ------------------------------------------------------------------
 # 6. VS Code Machine settings (Code OSS / Cloud Workstation)
@@ -257,6 +298,48 @@ npx --yes skills add petergyang/no-ai-slop --skill no-ai-slop --global --yes >/d
     && echo "  ✓ no-ai-slop installed (try: /no-ai-slop <draft>)" \
     || echo "  ⚠ no-ai-slop install failed (non-fatal)"
 
+# ------------------------------------------------------------------
+# Check that Claude answers through Vertex AI
+# ------------------------------------------------------------------
+# One short request, about $0.06. When it fails, this prints the usual cause
+# for that error code, so a room full of setups doesn't need one-on-one help.
+# disableAllHooks keeps the Stop hook from adding a second, paid reply here.
+echo ""
+echo "[+] Checking that Claude answers through Vertex AI..."
+if command -v claude &>/dev/null; then
+    CHECK_JSON="$(timeout 180 claude -p --no-session-persistence --strict-mcp-config --tools "" \
+        --settings '{"disableAllHooks":true}' --effort low --output-format json \
+        "Reply with the single word ok." 2>/dev/null < /dev/null)" || true
+    python3 - "$CHECK_JSON" "$PROJECT_ID" <<'PY'
+import json
+import sys
+
+raw, project = sys.argv[1], sys.argv[2]
+try:
+    r = json.loads(raw)
+except ValueError:
+    print("  ⚠ Claude didn't answer. Run this to see the error:")
+    print('    claude -p "Reply with the single word ok."')
+    sys.exit(0)
+if not r.get("is_error"):
+    print(f"  ✓ Claude answered through Vertex AI (${r.get('total_cost_usd', 0):.2f})")
+    sys.exit(0)
+status = r.get("api_error_status")
+hints = {
+    404: "Turn on Claude Opus 5.5 for this project in Model Garden: "
+         "https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5",
+    403: f"Your account needs the Vertex AI User role (roles/aiplatform.user) on {project}, "
+         "and the project needs the Vertex AI API: gcloud services enable aiplatform.googleapis.com",
+    401: "Log in again: gcloud auth application-default login",
+    429: "The project is out of Claude quota for now. Wait a minute, then run setup.sh again.",
+}
+print(f"  ⚠ Claude returned an error{f' ({status})' if status else ''}: {r.get('result', '')}")
+print("    Next step: " + hints.get(status, "check the project ID, then run: gcloud auth application-default login"))
+PY
+else
+    echo "  ⚠ claude isn't on PATH, so the check didn't run. Open a new terminal and run setup.sh again."
+fi
+
 echo ""
 echo "============================================"
 echo "  Setup Complete!"
@@ -266,3 +349,4 @@ echo "Next steps:"
 echo "  1. source ~/.bashrc   (or open a new terminal)"
 echo "  2. gcloud auth login  (if not already)"
 echo "  3. claude-start"
+echo "  4. Before you delete this machine: claude-backup gs://YOUR_BUCKET"

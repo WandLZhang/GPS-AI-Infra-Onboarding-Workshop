@@ -36,6 +36,28 @@ limitations under the License.
 - Never run `git config user.name` or `git config user.email` — the machine's existing identity is correct.
 - Never commit secrets (AIza*, gho_*/ghp_*, hf_*, sk-*, AKIA*). Reference environment variables instead.
 
+## Cloud Spend
+- A Cloud Billing budget sends alerts. It doesn't stop spending, so check what's running yourself.
+- Before you create a GPU, a TPU or anything else billed by the hour, say what it costs per hour and per day.
+- Delete what you created as soon as the step that needed it is done. Don't save cleanup for the end.
+- A Spot or DWS Flex-Start request for several nodes can grant all of them at once. Watch the request, and delete the nodes you don't need.
+- Use the smallest machine or slice that answers the question.
+- Never delete something you didn't create. List it and ask.
+
+## Units
+- Spell bit and byte units correctly. Case and the "i" carry meaning, so never normalize them. Capital `B` is a byte and lowercase `b` is a bit. Gbps and Gb/s are gigabits per second; GBps and GB/s are gigabytes per second.
+- `TB` and `GB` are decimal (10^12 and 10^9 bytes). `TiB` and `GiB` are binary (2^40 and 2^30 bytes).
+- Copy the unit spelling from the source and don't convert. Google Cloud docs use Gbps for network bandwidth, GBps and TBps for throughput, GiB and TiB for disk, Filestore and Lustre capacity, and GB for machine memory.
+- When a figure has no unit, such as "50TB" in a note, keep it as written and ask. Don't pick TB or TiB.
+
+## Check Your Work
+- Before you say a task is done, check the result: run the test, load the page, or read back what you deployed.
+- Before a long or costly run, run one item first and check its output.
+- Run anything that takes more than a few minutes inside `tmux`, so a dropped connection doesn't kill it.
+- When a library or tool behaves in a way you don't expect, read its source on GitHub before you guess.
+- Look up a term before you explain it. Never invent a reason, a number or a source.
+- Test the user's premise against the evidence. If the evidence disagrees, say so.
+
 ## Writing Style
 
 **Voice, in precedence order.** Where these conflict, the lower number wins.

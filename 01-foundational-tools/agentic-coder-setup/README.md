@@ -44,6 +44,7 @@ gcloud auth application-default login
 <img src="../../visuals/project-id.png" width="300" style="border: 1px solid #ccc; border-radius: 4px;" />
 
 3. To use Claude APIs, navigate to [Model Garden](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5) (and enable Vertex AI APIs if it pops up). Look to Anthropic to choose a model like Opus 5.5, and fill out a nominal form to turn on the API. 
+4. Claude bills per token, and a budget alert doesn't stop spending. [Cost](./cli-agent/README.md#cost) lists the prices and the habits that keep the bill down.
 
 ### 4. Install Cline
 
@@ -132,13 +133,21 @@ agentic-coder-setup/
 │   │   └── google-dev-knowledge/proxy.mjs # stdio proxy for Google Dev docs
 │   └── rules/
 │       ├── development.md                 # SDLC & quality standards
-│       └── coding_preferences.md          # Example coding preferences
+│       ├── coding_preferences.md          # Example coding preferences
+│       ├── gcp-pricing.md                 # How to price with gcp-pricing
+│       └── no_ai_slop.md                  # Writing rules
 └── cli-agent/                             # Claude Code & Gemini CLI config
     ├── README.md                          # Detailed setup for both CLIs
     ├── claude-code/
+    │   ├── setup.sh                       # One-shot install, ends with a check
     │   ├── bin/claude-start               # Launcher (Vertex AI, max context)
+    │   ├── bin/claude-vscode-wrapper      # VS Code launch wrapper (max effort)
+    │   ├── bin/claude-backup              # Copies conversations and memory to your bucket
+    │   ├── hooks/md_write_guard.py        # Denies shell writes over existing .md files
+    │   ├── hooks/accelerator_guard.py     # Lists running GPUs and TPUs before a turn ends
+    │   ├── workstation/customize_environment  # Boot hook for Cloud Workstations and Cloud Shell
     │   ├── CLAUDE.md                      # Global system prompt
-    │   └── settings.json                  # Permissions config
+    │   └── settings.json                  # Permissions, model and hooks
     ├── gemini-cli/
     │   └── GEMINI.md                      # System instructions
     └── shared/

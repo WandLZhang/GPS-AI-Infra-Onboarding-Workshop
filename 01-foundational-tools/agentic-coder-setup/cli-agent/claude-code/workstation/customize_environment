@@ -1,0 +1,102 @@
+#!/bin/bash
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Boot hook: runs once each time the machine starts, before you open a shell.
+#
+#   Cloud Workstations runs ~/.workstation/customize_environment as `user`.
+#   Cloud Shell runs ~/.customize_environment as root.
+#
+# Both rebuild everything outside $HOME at each start, so a tool installed with
+# apt is gone after a restart. When gh goes missing that way, every git push
+# fails with what looks like an auth error, because gh is git's credential
+# helper. This hook installs the missing packages again, then runs each
+# executable script in ~/.workstation/startup.d as you.
+#
+# setup.sh copies this file to the right path for the machine it runs on. Keep
+# it idempotent and non-fatal: a failure here must never stop the machine from
+# coming up.
+
+# The platform pipes this script's output through xargs, which quits on the
+# first unmatched quote (an apostrophe in apt output is enough), and the next
+# write then kills the script with SIGPIPE. So all output goes to a log file.
+HOME_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ "$(basename "$HOME_DIR")" = ".workstation" ] && HOME_DIR="$(dirname "$HOME_DIR")"
+LOG="$HOME_DIR/.customize_environment.log"
+exec >>"$LOG" 2>&1
+echo "=== $(date -Is) customize_environment ==="
+
+SUDO=""
+[ "$(id -u)" -ne 0 ] && SUDO=sudo
+OWNER="$(stat -c %U "$HOME_DIR")"
+
+# Built-in Code OSS extensions to pull out of a Cloud Workstations image. Empty by
+# default. On a box short of memory, add googlecloudtools.cloudcode and
+# googlecloudtools.datacloud: Cloud Code runs a language server of about 530 MB
+# per IDE window and depends on Data Cloud, which loads Jupyter at every start.
+# To get one back for the current boot:
+#   sudo mv /opt/code-oss/extensions-disabled/<id> /opt/code-oss/extensions/
+DISABLED_BUILTIN_EXTENSIONS=()
+for ext in "${DISABLED_BUILTIN_EXTENSIONS[@]}"; do
+    [ -d "/opt/code-oss/extensions/$ext" ] || continue
+    $SUDO mkdir -p /opt/code-oss/extensions-disabled
+    $SUDO rm -rf "/opt/code-oss/extensions-disabled/$ext"
+    $SUDO mv "/opt/code-oss/extensions/$ext" /opt/code-oss/extensions-disabled/ \
+        && echo "builtin extension disabled: $ext"
+done
+
+# The network isn't always up the instant this runs.
+for i in 1 2 3 4 5; do
+    curl -fsS --max-time 5 https://cli.github.com >/dev/null 2>&1 && break
+    echo "waiting for network ($i/5)"; sleep 5
+done
+
+# gh comes from GitHub's apt repo; the rest come from the OS. Each package's
+# command must have the package's name.
+PACKAGES=(gh tmux)
+missing=()
+for p in "${PACKAGES[@]}"; do
+    command -v "$p" >/dev/null 2>&1 && echo "$p present" || missing+=("$p")
+done
+if [ ${#missing[@]} -gt 0 ]; then
+    echo "missing: ${missing[*]}"
+    if [[ " ${missing[*]} " == *" gh "* ]] && [ ! -f /etc/apt/sources.list.d/github-cli.list ]; then
+        $SUDO mkdir -p -m 755 /etc/apt/keyrings
+        $SUDO curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+            -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+            && $SUDO chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+                | $SUDO tee /etc/apt/sources.list.d/github-cli.list >/dev/null \
+            || echo "WARN: gh apt repo setup failed"
+    fi
+    $SUDO apt-get update -qq || echo "WARN: apt-get update failed"
+    # One package per call, so the others still install when one repo is down.
+    for p in "${missing[@]}"; do
+        $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$p" \
+            && echo "$p installed" || echo "WARN: $p install failed"
+    done
+fi
+
+# Your own startup scripts. Each must background anything long-running itself.
+for f in "$HOME_DIR"/.workstation/startup.d/*; do
+    [ -x "$f" ] || continue
+    echo "startup.d: $f"
+    if [ "$(id -u)" -eq 0 ] && [ "$OWNER" != root ]; then
+        sudo -u "$OWNER" -H "$f" || echo "WARN: $f exited $?"
+    else
+        "$f" || echo "WARN: $f exited $?"
+    fi
+done
+
+echo "=== done ==="

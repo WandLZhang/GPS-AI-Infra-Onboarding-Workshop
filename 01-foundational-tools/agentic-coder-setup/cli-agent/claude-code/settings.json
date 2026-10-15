@@ -55,6 +55,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 __HOME__/.claude/hooks/accelerator_guard.py",
+            "timeout": 30,
+            "statusMessage": "Checking for GPUs and TPUs still running..."
+          }
+        ]
+      }
     ]
   },
   "attribution": {
