@@ -26,7 +26,7 @@ Choosing the right accelerator is the **single most impactful decision** you mak
 - **Availability** — newer/larger accelerators are harder to obtain; your consumption model (reservation, DWS, Spot) depends on the machine type
 - **Time-to-result** — an undersized cluster doubles your wall-clock time; an oversized cluster wastes budget
 
-This guide helps you make that decision systematically. Use it **before** requesting quota, making reservations, or deploying workloads via [Cluster Toolkit](../../03-deploying-workloads/gke-ai-hypercompute/cluster-toolkit/README.md) or [DWS](../../03-deploying-workloads/dws/README.md).
+This guide helps you make that decision systematically. Use it **before** requesting quota, making reservations, or deploying workloads via [Cluster Toolkit](../../03-deploying-workloads/cluster-toolkit/README.md) or [DWS](../../03-deploying-workloads/dws/README.md).
 
 ### Where This Guide Fits
 
@@ -39,8 +39,8 @@ This guide helps you make that decision systematically. Use it **before** reques
 │  │    ├── Pick accelerator type    ◄── This guide, Sections 2–3  │  │
 │  │    ├── Size memory & shape      ◄── This guide, Section 4     │  │
 │  │    ├── Plan checkpointing       ◄── This guide, Section 6     │  │
-│  │    ├── Request quota            ◄── quota-management/         │  │
-│  │    └── Make reservations        ◄── reservations/             │  │
+│  │    ├── Request quota            ◄── DWS: Quota & Pricing      │  │
+│  │    └── Make reservations        ◄── Future reservations       │  │
 │  ├───────────────────────────────────────────────────────────────┤  │
 │  │ 2. BUILD                                                      │  │
 │  │    ├── Set up networking, storage, disk images                │  │
@@ -603,7 +603,7 @@ Your choice of accelerator constrains which consumption models are available:
 ### Related Sections in This Repository
 
 - [DWS Guide](../../03-deploying-workloads/dws/README.md) — Dynamic Workload Scheduler comprehensive guide
-- [Cluster Toolkit](../../03-deploying-workloads/gke-ai-hypercompute/cluster-toolkit/README.md) — Deploy AI-optimized GKE clusters
+- [Cluster Toolkit](../../03-deploying-workloads/cluster-toolkit/README.md) — Deploy AI-optimized GKE clusters
 - [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
 - [XPK](../../03-deploying-workloads/xpk/README.md) — Accelerated Processing Kit for quick PoCs
 

@@ -12,12 +12,11 @@ Each section maps to a key phase of the onboarding journey:
 
 | # | Phase | Description |
 |---|-------|-------------|
-| 1 | [Foundational Tools & Access](./01-foundational-tools/) | Agentic Coders, Quota Requests, Reservations |
+| 1 | [Foundational Tools & Access](./01-foundational-tools/) | Agentic Coders, Accelerator Guide |
 | 2 | [Core Infrastructure Setup](./02-core-infrastructure/) | Networking (IAP, no-public-IP), Disk Images (Packer), Storage (GCSFuse, Rapid Cache, Rapid Bucket, GDrive Sync), Data Pipeline (BigQuery, Dataflow, BigQuery DataFrames) |
 | 3 | [Deploying Workloads & Scheduling](./03-deploying-workloads/) | DWS, GKE (Autopilot & Standard), Vertex AI, Colab Enterprise, GKE AI Hypercompute, Cluster Director, XPK |
 | 4 | [Monitoring & Observability](./04-monitoring-observability/) | AI workload monitoring, TPU Observability, dashboards |
-
-Additionally, a [Terraform module](./terraform/) is provided to bootstrap foundational infrastructure (VPC, IAP, firewall rules, service accounts).
+| 5 | [Billing & Usage](./05-billing-usage/) | Cost monitoring and limits for AI workloads |
 
 ---
 
@@ -60,35 +59,32 @@ Start with [01-foundational-tools/](./01-foundational-tools/) and work through e
 ai-infra-onboarding/
 ├── README.md                          # This file
 ├── LICENSE
-├── .gitignore
+├── CONTRIBUTING.md
 │
-├── 01-foundational-tools/             
-│   ├── agentic-coder-setup/           # Cline, Claude Code, Gemini CLI setup
-│   ├── quota-management/              # Quota request & check scripts
-│   └── reservations/                  # On-demand, future, auto-reserve scripts
+├── 01-foundational-tools/
+│   ├── accelerator-guide/             # Pick, size and checkpoint GPUs and TPUs
+│   └── agentic-coder-setup/           # Cline, Claude Code, Gemini CLI setup
 │
 ├── 02-core-infrastructure/            # VMs, Networking, Storage, Data Pipeline
-│   ├── networking/                    # IAP setup, no-public-IP configs
+│   ├── zero-trust-iap-access/         # IAP setup, no-public-IP configs
 │   ├── disk-images/                   # Packer templates & Cloud Build
 │   ├── storage/                       # GCSFuse, Rapid Cache, Rapid Bucket, GDrive sync
 │   └── data-pipeline/                 # BigQuery, Dataflow, BigQuery DataFrames for AI/ML
 │
 ├── 03-deploying-workloads/            # Workload scheduling & platforms
-│   ├── dws/                           # Dynamic Workload Scheduling
+│   ├── dws/                           # Dynamic Workload Scheduling, quota & pricing
 │   ├── gke/                           # GKE Autopilot & Standard (GPU deployment, DWS)
+│   ├── cluster-toolkit/               # AI-optimized GKE clusters with DWS
+│   ├── cluster-director/              # Managed Slurm clusters
+│   ├── compute-engine-Managed Instance Groups/   # Flex-start VMs via MIG resize requests
+│   ├── compute-engine-future-reservations/       # Calendar-mode future reservations
+│   ├── spot-capacity-advisor/         # Best zone, region and machine for Spot
 │   ├── vertex-ai/                     # Vertex AI serverless training (FLEX_START)
 │   ├── colab-enterprise/              # GPU-accelerated notebooks, reservations, DWS patterns
-│   ├── gke-ai-hypercompute/           # GKE, Cluster Toolkit, MIGs, DWS Flex
 │   └── xpk/                           # Accelerated Processing Kit
 │
-├── 04-monitoring-observability/       # Monitoring & dashboards
-│   ├── tpu-observability/             # TPU health, JobSet monitoring
-│   └── dashboards/                    # Cloud Monitoring dashboard JSON
-│
-└── terraform/                         # Base infrastructure Terraform module
-    ├── main.tf
-    ├── variables.tf
-    └── outputs.tf
+├── 04-monitoring-observability/       # GKE dashboards, TPU metrics, alerts, XProf
+└── 05-billing-usage/                  # Cost monitoring and limits for AI workloads
 ```
 
 ---
@@ -96,13 +92,13 @@ ai-infra-onboarding/
 ## 🔑 Key Concepts
 
 ### Quota & Reservations
-Before deploying any GPU/TPU workloads, you must have sufficient **resource-level quotas** (vCPUs, GPUs, machine types) AND a separate **reservation count quota**. See the [Quota Management](./01-foundational-tools/quota-management/) section for scripts that automate checking and requesting quota increases.
+Before deploying any GPU/TPU workloads, you must have sufficient **resource-level quotas** (vCPUs, GPUs, machine types) AND a separate **reservation count quota**. [DWS: Quota & Pricing](./03-deploying-workloads/dws/README.md#7-quota--pricing) shows how to check quota and which quota each deployment method uses.
 
 ### Dynamic Workload Scheduling (DWS)
 DWS enables Google Cloud to schedule workloads when capacity becomes available. This is crucial for high-demand accelerators like A3/H100. See [DWS](./03-deploying-workloads/dws/) for console and CLI guides.
 
 ### GKE AI Hypercompute
-The recommended platform for large-scale AI training and inference. This repo includes artifacts for Cluster Toolkit, MIG + DWS Resize, and Flex Start training. See [GKE AI Hypercompute](./03-deploying-workloads/gke-ai-hypercompute/).
+The recommended platform for large-scale AI training and inference. See [GKE](./03-deploying-workloads/gke/) for flex-start training, [Cluster Toolkit](./03-deploying-workloads/cluster-toolkit/) for AI-optimized clusters, and [Compute Engine MIGs](./03-deploying-workloads/compute-engine-Managed%20Instance%20Groups/) for DWS resize requests.
 
 ---
 

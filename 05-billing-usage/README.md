@@ -865,7 +865,7 @@ gcloud compute project-info describe --project=$PROJECT_ID \
 
 - [Accelerator Guide](../01-foundational-tools/accelerator-guide/README.md) — GPU selection and sizing (impacts cost)
 - [DWS Guide](../03-deploying-workloads/dws/README.md) — DWS Flex-Start for up to 53% discount
-- [Cluster Toolkit](../03-deploying-workloads/gke-ai-hypercompute/cluster-toolkit/README.md) — Reservation-bound and Spot GKE clusters
+- [Cluster Toolkit](../03-deploying-workloads/cluster-toolkit/README.md) — Reservation-bound and Spot GKE clusters
 - [Storage Guide](../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, storage tiering
 - [Monitoring & Observability](../04-monitoring-observability/README.md) — Monitoring cost optimization strategies
 

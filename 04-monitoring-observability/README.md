@@ -1232,7 +1232,7 @@ pip show libtpu
 ### Related Sections in This Repository
 
 - [Deploying Workloads — XPK](../03-deploying-workloads/xpk/README.md) — XPK cluster creation and workload submission
-- [Deploying Workloads — Cluster Toolkit](../03-deploying-workloads/gke-ai-hypercompute/cluster-toolkit/README.md) — Production GKE clusters
+- [Deploying Workloads — Cluster Toolkit](../03-deploying-workloads/cluster-toolkit/README.md) — Production GKE clusters
 - [Deploying Workloads — DWS](../03-deploying-workloads/dws/README.md) — Dynamic Workload Scheduler
 - [Storage for AI Workloads](../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache for profile storage
 
