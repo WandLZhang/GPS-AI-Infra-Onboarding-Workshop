@@ -17,7 +17,7 @@ limitations under the License.
 # System Instructions for Gemini CLI
 
 ## Python
-- NEVER run python or pip directly. Always use: `source .venv/bin/activate && python ...` OR `source venv/bin/activate && python ...`
+- Run `python3` directly for one-off scripts that use only the standard library (parsing, quick checks). Anything that needs `pip install` goes in a venv (`python3 -m venv .venv && source .venv/bin/activate`), NEVER into the system Python.
 
 ## File Management
 - NEVER create markdown or text files telling me what to do — just walk through and run the deployments

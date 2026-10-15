@@ -18,7 +18,7 @@ limitations under the License.
 
 Customize these to match your team's style. Cline will follow them across all tasks.
 
-1. NEVER run python or pip directly. Always use: `source .venv/bin/activate && python ...`
+1. Run `python3` directly for one-off scripts that use only the standard library (parsing, quick checks). Anything that needs `pip install` goes in a venv (`python3 -m venv .venv && source .venv/bin/activate`), NEVER into the system Python.
 2. NEVER create markdown files telling you what to do — just execute the steps directly
 3. NEVER create new scripts when you can update the existing one. No "enhanced_" or "v2_" files
 4. NEVER use mock or fake data — test against real systems
