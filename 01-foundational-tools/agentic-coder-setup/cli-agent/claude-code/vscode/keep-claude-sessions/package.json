@@ -1,0 +1,24 @@
+{
+  "name": "keep-claude-sessions",
+  "displayName": "Keep Claude sessions",
+  "description": "Sets claudeCode.archiveInactiveSessions to Never in the User settings of each browser that opens this workstation.",
+  "publisher": "local",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  }
+}

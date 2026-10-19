@@ -194,8 +194,8 @@ fi
 #
 # Application-scoped keys don't work here; VS Code ignores them in Machine
 # settings. claudeCode.archiveInactiveSessions is one: it moves sessions idle
-# for 14 days into the Archived list. Code OSS keeps User settings in the
-# browser, so set it to Never in User settings in each browser profile.
+# for 14 days into the Archived list. The keep-claude-sessions step below
+# sets it to Never in each browser instead.
 echo ""
 echo "[6/8] Installing VS Code Machine settings..."
 VSCODE_MACHINE_DIR="$HOME_DIR/.codeoss-cloudworkstations/data/Machine"
@@ -212,6 +212,36 @@ else
     echo "    Linux:   ~/.config/Code/User/settings.json"
     echo "    macOS:   ~/Library/Application Support/Code/User/settings.json"
     echo "    Windows: %APPDATA%\\Code\\User\\settings.json"
+fi
+
+# ------------------------------------------------------------------
+# keep-claude-sessions VS Code extension
+# ------------------------------------------------------------------
+# The Claude Code panel archives a conversation after 14 idle days unless
+# claudeCode.archiveInactiveSessions is Never. Step 6's Machine settings can't
+# set that key, and Code OSS keeps User settings in each browser. This
+# extension runs on the workstation and sets the key to Never in the User
+# settings of every browser that opens it, logging to
+# ~/.cache/keep-claude-sessions.log. From a VS Code terminal the install goes
+# through the running server and takes effect at once. Over SSH it takes
+# effect the next time a browser opens the workstation.
+echo ""
+echo "[+] Installing the keep-claude-sessions VS Code extension..."
+if [ -n "${VSCODE_IPC_HOOK_CLI:-}" ] && [ -x /opt/code-oss/bin/remote-cli/code-oss-cloud-workstations ]; then
+    CODE_CLI=/opt/code-oss/bin/remote-cli/code-oss-cloud-workstations
+else
+    CODE_CLI=/opt/code-oss/bin/codeoss-cloudworkstations
+fi
+if [ -x "$CODE_CLI" ]; then
+    KCS_DIR="$(mktemp -d)"
+    cp -r "$SCRIPT_DIR/vscode/keep-claude-sessions" "$KCS_DIR/extension"
+    (cd "$KCS_DIR" && python3 -m zipfile -c keep-claude-sessions.vsix extension) \
+        && "$CODE_CLI" --install-extension "$KCS_DIR/keep-claude-sessions.vsix" --force >/dev/null 2>&1 \
+        && echo "  ✓ keep-claude-sessions installed (Claude conversations stay out of the Archived list)" \
+        || echo "  ⚠ keep-claude-sessions install failed (non-fatal)"
+    rm -rf "$KCS_DIR"
+else
+    echo "  - no Code OSS CLI here, so no extension. Set claudeCode.archiveInactiveSessions to 0 in your VS Code user settings."
 fi
 
 # ------------------------------------------------------------------
