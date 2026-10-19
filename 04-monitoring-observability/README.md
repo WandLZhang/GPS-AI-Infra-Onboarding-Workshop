@@ -363,6 +363,25 @@ sum(
 
 > This counts 60-second memory samples as a proxy for uptime in minutes, then divides by total interruptions.
 
+### 3.6 TPU hardware health (Cloud Monitoring, Beta)
+
+TPU VMs also report hardware health to Cloud Monitoring. Use these metrics to tell a hardware fault from a bug in your code. They're listed on [Monitor TPU VMs](https://docs.cloud.google.com/tpu/docs/monitor-tpu#beta) (read 2026-10-15), all in Beta:
+
+| What it catches | Metric |
+|---|---|
+| Throttling | `instance/tpu/accelerator/core_throttling_indicator` |
+| Temperature | `instance/tpu/accelerator/core_temperature`, `mxu_temperature`, `hbm_temperature`, `tray_temperature` |
+| Power | `instance/tpu/accelerator/power_draw`, `hbm_power_draw`, `tray_power` |
+| ICI link health | `instance/tpu/accelerator/network/ici_link_health`, 0 to 10: 1 to 5 is brief flapping, 6 to 9 degraded, and 10 a fatal link failure that evicts running workloads |
+| ICI link flaps | `instance/tpu/accelerator/network/ici_link_flaps` |
+| HBM errors | `instance/tpu/accelerator/hbm_uncorrectable_count`, fatal |
+| PCIe errors | `instance/tpu/accelerator/pcie_fatal_error_count`, `pcie_nonfatal_error_count` |
+| Host network drops | `tpu/network/nic_packets_dropped_count_rx`, `nic_packets_dropped_count_tx` |
+| Predicted failure | `instance/tpu/failure_prediction_status`: chance the machine degrades in the next 5 hours (`NO_DEGRADATION_PREDICTED`, `POSSIBLE_DEGRADATION_PREDICTED` or `DEGRADATION_PREDICTED`). Data can lag up to 540 seconds |
+| Overall instance health | `instance/tpu/infra_health` |
+
+When a job dies, check `ici_link_health`, `hbm_uncorrectable_count` and the PCIe counters for that window before you debug your code.
+
 ---
 
 ## 4. Recommended Proactive Alerts

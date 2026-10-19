@@ -119,6 +119,19 @@ Try it:
 gcp-pricing tpu --filter Trillium
 ```
 
+### 9. Try the docs MCP
+
+Once the Developer Knowledge MCP is set up, ask your agent questions like these. Your agent answers each one from the current official docs:
+
+- "Which GPU and TPU machine types support Dynamic Workload Scheduler flex-start and calendar mode?"
+- "How do I request a calendar mode future reservation for GPUs, and what does reservation-bound provisioning mean?"
+- "Which GPU types does Vertex AI custom training support, and which ones does Colab Enterprise offer?"
+- "How do I create a G4 VM with a fractional vGPU?"
+- "How do I speed up GKE node startup for accelerator workloads with secondary boot disks?"
+- "How does dynamic resource allocation (DRA) work for GPUs and TPUs on GKE?"
+- "How do I serve an LLM with vLLM on TPUs in GKE?"
+- "What tensor dimensions and batch sizes does the Cloud TPU performance guide recommend?"
+
 ---
 
 ## What's in this folder

@@ -104,10 +104,12 @@ Flex-start is DWS's queued provisioning model. Your request persists until capac
 |---|---|
 | **Start time** | When capacity becomes available (not guaranteed) |
 | **Max duration** | 7 days |
-| **Pricing** | Up to 53% discount vs. on-demand |
+| **Pricing** | Discounted vs. on-demand: about 50% to 57% off on the GPU and TPU types in [Prices by machine type](#prices-by-machine-type) |
 | **Allocation** | Dense (VMs placed close together) |
 | **All-at-once** | Yes — all VMs created simultaneously |
 | **Preemptible?** | No — once provisioned, VMs run until duration expires or you delete them |
+
+To catch Flex-start capacity sooner, [`flex-spray.sh`](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/flex-spray.sh) queues one Flex-start VM for each zone and machine type on its list. When one is granted, it deletes the rest before they're granted too. [`flex-poll.sh`](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/flex-poll.sh) lists the zone and machine-type pairs that have no request pending. It submits requests only if you set `FLEX_SUBMIT=1`.
 
 ### Calendar Mode (Guaranteed Start)
 
@@ -117,10 +119,16 @@ Calendar mode uses future reservations to guarantee capacity at a specific start
 |---|---|
 | **Start time** | Guaranteed at your requested time |
 | **Min lead time** | 87 hours (GPUs), 6 hours (TPUs) |
-| **Pricing** | DWS pricing (up to 53% discount) |
+| **Pricing** | Discounted vs. on-demand: about 30% to 53% off, depending on the machine type ([Prices by machine type](#prices-by-machine-type)) |
 | **Cost commitment** | Cannot cancel after submission — you pay from start time regardless |
 | **Allocation** | Dense (GPUs), Flexible (TPUs) |
 | **Share type** | Single-project or shared (up to 100 projects) |
+| **Request size** | GPUs: 1 to 80 VMs. H4D: 1 to 256 VMs. TPUs: 1, 4, 8, 16, 32, 64, 128, 256, 512 or 1,024 chips |
+| **How far ahead** | Availability shows up to 60 days ahead for GPUs and H4D, 120 days for TPUs |
+| **Duration** | 1 to 90 days |
+| **Machine types** | GPU and H4D: A4, A3 Ultra, A3 Mega, A3 High with 8 GPUs, A3 Edge and H4D. TPU: TPU7x, v6e and v5p |
+
+> Source: [Future reservation requests in calendar mode](https://docs.cloud.google.com/compute/docs/instances/future-reservations-calendar-mode-overview) (last updated 2026-10-13). A2, G2 and G4 aren't on the list, and the advice API rejects them with "This machine family is not supported in Calendar Mode." On 2026-10-15 the API also rejected TPU7x, which is on the list, and returned zones for v5e, which isn't.
 
 ### Choosing Between Flex-start and Calendar Mode
 
@@ -133,10 +141,27 @@ Calendar mode uses future reservations to guarantee capacity at a specific start
                     │                      │
               Calendar Mode           Flex-start
               • Guaranteed start      • Runs when available
-              • Committed cost        • Up to 53% discount
+              • Committed cost        • About 50% to 57% off
               • 87h lead time (GPU)   • Up to 7-day duration
               • Cannot cancel         • Cancel anytime
 ```
+
+### Check Calendar availability before you book
+
+The advice API tells you when and where you could book, and creates nothing:
+
+```bash
+gcloud compute advice calendar-mode \
+  --machine-type=a3-megagpu-8g --vm-count=1 --region=us-central1 \
+  --duration-range=min=7d,max=7d \
+  --start-time-range=from=<YYYY-MM-DD>,to=<YYYY-MM-DD>
+```
+
+- It needs the `compute.advice.calendarMode` permission on the project you run it from.
+- The API returns the longest block up to your `max` duration, even when a shorter block starts sooner. On 2026-10-15, a 7-day request for `a3-megagpu-8g` in us-central1 came back for Nov 9 to Nov 16, and a 1-to-30-day range came back for Dec 9 to Jan 8. Set `max` to the length you need.
+- `NO_CAPACITY` means the zone takes Calendar requests for that machine type but has nothing free in your window. `NOT_SUPPORTED` means the zone doesn't take Calendar requests for that machine type, even if it carries the machine type. Retrying won't change it.
+- [`discover-calendar-zones.py`](./discover-calendar-zones.py) runs the check for the A3, A4, H4D and TPU v5e, v5p and v6e machine types in every region that has them, and writes each zone's status to a CSV.
+- [`calendar-poll.sh`](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/calendar-poll.sh) checks H100, H200 and B200 across US regions and prints each bookable window. Schedule it daily with cron. It books only if you set `CALENDAR_AUTOBOOK=1`.
 
 ---
 
@@ -207,7 +232,7 @@ Job submitted → Kueue tries Reservation flavor (Priority 1)
 
 ### GPU Machine Types Available with DWS
 
-For GPUs, **future reservations in calendar mode and Flex-start VMs are available in all zones where the GPU machine types are available**.
+For GPUs, **Flex-start VMs are available in all zones where the GPU machine types are available**. Calendar mode takes fewer machine types and fewer zones. See [Calendar Mode](#calendar-mode-guaranteed-start) for the types and [Check Calendar availability](#check-calendar-availability-before-you-book) for the zones.
 
 | Machine Type | GPU | GPUs per VM | Key US Zones | Notes |
 |---|---|---|---|---|
@@ -380,9 +405,23 @@ For FedRAMP High, DoD IL4/IL5 workloads that require US-only data residency:
 | **[Cluster Toolkit](../cluster-toolkit/) / [XPK](../xpk/)** | `ACTIVE_RESIZE_REQUESTS` (default: 100/project) + GPU quota | GKE uses Compute Engine quota under the hood |
 | **[Vertex AI](../vertex-ai/)** | Preemptible Vertex AI quota (e.g., `custom_model_training_preemptible_nvidia_h100_gpus`) | Despite name, resources are NOT preemptible |
 
-### DWS Pricing
+### Prices by machine type
 
-DWS offers **up to 53% discount** compared to on-demand pricing for vCPUs, memory, GPUs, and TPUs.
+DWS prices are well below on-demand, but the discount depends on the machine type. Public prices on 2026-10-15, USD per hour:
+
+| Machine type (us-central1) | On-demand | Flex-start | Calendar | Spot |
+|---|---|---|---|---|
+| `a3-highgpu-8g` (8x H100) | $88.49 | $38.32 | $41.60 | $52.79 |
+| `a3-megagpu-8g` (8x H100) | $93.40 | $40.32 | $44.00 | $50.44 |
+| `a3-ultragpu-8g` (8x H200) | $84.81 | $42.40 | $59.36 | $50.80 |
+| `a4-highgpu-8g` (8x B200) | none | $64.44 | $90.22 | $39.63 |
+| TPU Trillium (v6e), per chip, us-east1 | $2.70 | $1.35 | $1.89 | not on the TPU pricing page |
+
+- On H100 and H200, Flex-start costs less per hour than Spot, and Flex-start VMs aren't preempted during their run of up to 7 days.
+- On B200, Spot is the cheapest option, and there's no on-demand price.
+- Spot prices change. Re-pull any row before you quote it: `gcp-pricing accelerator --filter a3-megagpu-8g` or `gcp-pricing tpu --filter Trillium` ([install gcp-pricing](../../01-foundational-tools/agentic-coder-setup/README.md#8-install-the-gcp-pricing-cli)).
+
+### DWS Pricing
 
 | Component | Pricing Model |
 |---|---|

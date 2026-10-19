@@ -1854,6 +1854,33 @@ This guide shows you how to create GKE clusters and deploy GPU workloads **direc
 
 > For detailed data residency and compliance guidance, see the [DWS Guide — Data Residency & Compliance](../dws/#5-data-residency--compliance-considerations).
 
+### Spot VMs for AI jobs
+
+From the [GKE Spot VMs page](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/spot-vms) (read 2026-10-15):
+
+- After the preemption notice, Pods get 30 seconds: 15 for your Pods, then 15 for critical system Pods. You can extend the total to 120 seconds on Standard node pools (control plane 1.35.0-gke.1171000 or later) or through custom ComputeClasses (control plane 1.36.0-gke.3204000 or later).
+- Preemption isn't covered by PodDisruptionBudgets, so expect more disruption than your PDB allows.
+- Local SSD data is deleted on preemption, so the replacement node has to stage it again.
+- A Spot GPU node pool needs an existing non-GPU node pool with standard VMs. Without one, GKE doesn't add the `nvidia.com/gpu=present:NoSchedule` taint, and system Pods can land on the GPU nodes.
+- Stateful workloads should finish shutting down within 25 seconds to avoid persistent-volume corruption.
+- Spot VMs don't expire after 24 hours, unlike the older preemptible VMs.
+
+For training, either finish a checkpoint inside that window or checkpoint on a timer and accept losing the steps since the last one. A synchronous job also waits until every lost node comes back. Elastic or independent jobs suit Spot better than tightly gang-scheduled ones. More in [Keep a training job alive on Spot](../spot-capacity-advisor/README.md#keep-a-training-job-alive-on-spot).
+
+### Fall back across capacity types with custom ComputeClasses
+
+A custom [ComputeClass](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes) lists node configurations in priority order. When the first isn't available, GKE moves to the next one, for example a reservation, then Spot, then on-demand. ComputeClasses work on Autopilot and on Standard from GKE 1.30.3-gke.1451000.
+
+### Scale idle inference to zero
+
+An `autoscaling/v2` HPA with `minReplicas: 0` and an external or object metric, such as a Pub/Sub backlog, scales a Deployment to zero when it's idle and back up when work arrives. It needs GKE 1.37 or later on the control plane and nodes ([guide](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/scale-to-from-zero-hpa)).
+
+### RL post-training on GKE
+
+- Tutorials: [verl on GKE](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/scaling-rl-verl-gke), [GRPO with NeMo RL](https://discuss.google.dev/t/implementing-grpo-with-nvidia-nemo-rl-on-google-kubernetes-engine/336380), and multi-host TPU training with [SkyRL](https://discuss.google.dev/t/tutorial-multi-host-training-with-tpus-and-skyrl-on-gke/343771).
+- [GKE Agent Sandbox](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/machine-learning/agent-sandbox) runs tool calls, generated code and reward checks in gVisor-isolated Pods on CPU nodes, so it works alongside GPU or TPU training.
+- [llm-d RL time-slicing](https://github.com/llm-d-incubation/llm-d-rl-time-slicing) lets several RL jobs share the same GPUs by swapping at phase boundaries. Its roadmap lists TPU support as future work. The [launch post](https://cloud.google.com/blog/products/containers-kubernetes/introducing-co-operative-time-slicing-for-rl-in-llm-d) reports duty cycles rising from about 40% to 70%.
+
 ---
 
 ## 13. Troubleshooting

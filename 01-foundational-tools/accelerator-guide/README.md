@@ -105,6 +105,21 @@ This guide helps you make that decision systematically. Use it **before** reques
 | **G2** (`2 GPU`) | NVIDIA L4 | 2 | 24 GB GDDR6 | 48 GB | 24 | 96 | 32 |
 | **G2** (`1 GPU`) | NVIDIA L4 | 1 | 24 GB GDDR6 | 24 GB | 4–32 | 16–128 | 10–32 |
 
+### Cloud TPU generations
+
+| | TPU7x (Ironwood) | v6e (Trillium) | v5p | v5e |
+|---|---|---|---|---|
+| Peak BF16 per chip | 2,307 TFLOPs | 918 TFLOPs | 459 TFLOPs | 197 TFLOPs |
+| Peak FP8 per chip | 4,614 TFLOPs | 918 TFLOPs | 459 TFLOPs | not listed |
+| HBM per chip | 192 GiB | 32 GB | 95 GiB | 16 GB |
+| HBM bandwidth per chip | 7,380 GBps | 1,638 GBps | 2,765 GBps | 800 GiBps |
+| TensorCores / SparseCores per chip | 2 / 4 | 1 / 2 | 2 / 4 | not listed |
+| Matrix unit (MXU) | 256 x 256 | 256 x 256 | 128 x 128 | 128 x 128 |
+| Chips per pod | 9,216 | 256 | 8,960 | 256 |
+| ICI bandwidth per chip | 1,200 GBps | 800 GBps | 1,200 GBps | 400 GBps |
+
+Sources: the [TPU7x](https://docs.cloud.google.com/tpu/docs/tpu7x), [v6e](https://docs.cloud.google.com/tpu/docs/v6e), [v5p](https://docs.cloud.google.com/tpu/docs/v5p) and [v5e](https://docs.cloud.google.com/tpu/docs/v5e) pages and [TPU system architecture](https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm), all last updated 2026-10-13. Units follow each page. Google engineers walk through the 9,216-chip Ironwood pod in their [Hot Chips 2025 talk](https://www.youtube.com/watch?v=Zy3LfsAxc64).
+
 ### Key Takeaways from the Catalog
 
 | Question | Answer |
@@ -175,8 +190,12 @@ When the recommendation matrix doesn't give a clear answer, use these criteria t
 | **Budget sensitivity** | Smaller / older GPUs | G2 (L4) or A2 Standard (A100 40 GB) offer best price-per-FLOP for moderate workloads |
 | **Availability urgency** | Widely available types | G2, A2 Standard are most available. A4X Max/A4X are newest and most constrained |
 | **Multi-node scaling** | High-bandwidth networking | A4X Max (3,600 Gbps), A4/A3 Ultra (3,600 Gbps) for strong scaling. A3 High (1,000 Gbps) for modest scaling |
-| **Data residency** | US zones with GPU availability | See [DWS Guide § 9](../../03-deploying-workloads/dws/README.md#9-data-residency--compliance-considerations) for zone availability by GPU type |
+| **Data residency** | US zones with GPU availability | See [DWS guide: data residency](../../03-deploying-workloads/dws/README.md#5-data-residency--compliance-considerations) for zone availability by GPU type |
 | **Fractional GPU needs** | G4 or A3 High | G4 offers ⅛, ¼, ½ GPU shapes. A3 High offers 1, 2, 4, 8 GPU shapes |
+
+### Double-precision (FP64) science codes
+
+B300 (Blackwell Ultra) has a small fraction of the FP64 throughput of B200. NVIDIA's [HGX spec table](https://www.nvidia.com/en-us/data-center/hgx/) lists FP64 at 10 TFLOPS for HGX B300 and 296 TFLOPS for HGX B200, both 8-GPU systems (read 2026-10-15). Run CFD, climate, molecular dynamics and other double-precision codes on A4 (B200), or on H4D CPUs for MPI codes. Don't put them on A4X Max, whose GB300 uses the same Blackwell Ultra GPU.
 
 ---
 
@@ -281,6 +300,18 @@ Not every workload needs 8 GPUs. Google Cloud offers **fractional shapes** to ri
 | **NVLink domains** | A4X Max/A4X provide 72-GPU NVLink domains (18 instances). Within a domain, all GPUs communicate at NVLink speed (1,800 GB/s). Use for largest models. |
 | **Topology-Aware Scheduling** | On GKE, use [TAS](https://cloud.google.com/ai-hypercomputer/docs/workloads/schedule-gke-workloads-tas) to schedule pods on topologically-close nodes. |
 | **Dense allocation** | Request dense allocation for multi-node training to minimize network hops. All A-series 8-GPU types support this via Cluster Toolkit / reservations. |
+
+### TPU: fit matmuls to the MXU
+
+The MXU is 256 x 256 on v6e and TPU7x, and 128 x 128 on earlier TPUs. For peak FLOPs, matrix-multiply dimensions should be larger than the MXU ([TPU performance guide](https://docs.cloud.google.com/tpu/docs/performance-guide)). A smaller dimension, such as an attention head_dim of 64 on a 256-wide unit, leaves most of the MXU idle.
+
+### Size a job before you ask for chips
+
+- Training a dense model takes about 6 x parameters x tokens FLOPs, plus an attention term that grows with sequence length. For a mixture-of-experts model, count active parameters.
+- Wall-clock time is that FLOP count divided by (chips x peak FLOP/s per chip x MFU). We plan with 30% to 40% MFU until we've measured our own.
+- For serving, prefill is compute-bound and decode is memory-bandwidth-bound, so size them separately.
+- Round up to a real slice size, because TPU slices come in fixed sizes.
+- [How to Scale Your Model](https://jax-ml.github.io/scaling-book) works through all of this for TPUs and GPUs.
 
 ---
 
