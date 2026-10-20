@@ -44,6 +44,7 @@ You'll need these tools:
 | Fit a model to the TPU matrix unit | [Fit matmuls to the MXU](./01-foundational-tools/accelerator-guide/README.md#tpu-fit-matmuls-to-the-mxu) |
 | Estimate how many chips and how long | [Size a job](./01-foundational-tools/accelerator-guide/README.md#size-a-job-before-you-ask-for-chips) |
 | Port a model to TPU and beat the GPU baseline | [Porting a model to TPU](#porting-a-model-to-tpu) |
+| Port a PyTorch model with a coding agent | [TPU agent suite](https://github.com/google-pytorch/tpu-agent-suite) (Preview, Claude Code and Antigravity) |
 | Choose between on-demand, Spot, Flex-start, Calendar mode and reservations | [Capacity vs. deployment](./03-deploying-workloads/README.md) |
 | See which quota each capacity option uses | [Quota and pricing](./03-deploying-workloads/dws/README.md#7-quota--pricing) |
 | See current prices by machine type | [Prices by machine type](./03-deploying-workloads/dws/README.md#prices-by-machine-type) |
@@ -71,6 +72,8 @@ Copy a working recipe before you write anything new:
 - [MaxText](https://maxtext.readthedocs.io/en/latest/): LLM training in JAX on TPUs and GPUs.
 
 ## Porting a model to TPU
+
+For PyTorch, start with TorchTPU. Google's [PyTorch on TPU](https://docs.cloud.google.com/tpu/docs/pytorch-on-tpu) page covers it, plus vLLM-TorchTPU and SGLang-TorchTPU for serving and TorchTitan for training, and the [TorchTPU docs](https://torchtpu.readthedocs.io/en/latest/) cover install and APIs.
 
 What worked on our ports, in order:
 
