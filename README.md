@@ -66,7 +66,7 @@ You'll need these tools:
 
 Copy a working recipe before you write anything new:
 
-- [AI-Hypercomputer/tpu-recipes](https://github.com/AI-Hypercomputer/tpu-recipes): training and inference recipes for TPUs.
+- [AI-Hypercomputer/tpu-recipes](https://github.com/AI-Hypercomputer/tpu-recipes): training and inference recipes for TPUs, including vLLM-TorchTPU serving on [Ironwood](https://github.com/AI-Hypercomputer/tpu-recipes/tree/main/inference/ironwood/vLLM/vLLM-TorchTPU) and [Trillium](https://github.com/AI-Hypercomputer/tpu-recipes/tree/main/inference/trillium/vLLM/vLLM-TorchTPU/Gemma4-26B).
 - [AI-Hypercomputer/gpu-recipes](https://github.com/AI-Hypercomputer/gpu-recipes): the same for GPUs.
 - [GoogleCloudPlatform/accelerated-platforms](https://github.com/GoogleCloudPlatform/accelerated-platforms): GKE reference architectures for inference and training.
 - [MaxText](https://maxtext.readthedocs.io/en/latest/): LLM training in JAX on TPUs and GPUs.
@@ -99,7 +99,7 @@ For a custom Pallas kernel, try [MaxKernel](https://github.com/AI-Hypercomputer/
   - [Beyond fine-tuning: training and RL on GKE](https://www.youtube.com/watch?v=GjQJepOZP7o)
   - [Stop wasting GPU FLOPs on cold starts](https://www.youtube.com/watch?v=EXQ3AksFXcM)
 - [Inside the 8th-generation TPU](https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive)
-- [TorchTPU: running PyTorch natively on TPUs](https://developers.googleblog.com/torchtpu-running-pytorch-natively-on-tpus-at-google-scale/)
+- [TorchTPU is now open source](https://cloud.google.com/blog/topics/ai-infrastructure/torchtpu-is-now-open-source-run-native-pytorch-on-tpus), with deep dives on [vLLM and SGLang](https://developers.googleblog.com/announcing-new-vllm-and-sglang-inference-engines-on-tpu/) and [TorchTitan](https://developers.googleblog.com/integrating-torchtpu-into-torchtitan-and-optimizing-models-for-tpu/), and the [TorchTPU paper](https://arxiv.org/abs/2610.24161).
 - [Design storage for AI and ML workloads](https://docs.cloud.google.com/architecture/ai-ml/storage-for-ai-ml)
 - [Kueue for AI: atomic admission and topology awareness](https://medium.com/google-cloud/kueue-for-ai-the-power-of-atomic-admission-topology-awareness-59c2fd1f86ed)
 
