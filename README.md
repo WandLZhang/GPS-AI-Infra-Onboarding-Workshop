@@ -73,7 +73,7 @@ Copy a working recipe before you write anything new:
 
 ## Porting a model to TPU
 
-For PyTorch, start with TorchTPU. Google's [PyTorch on TPU](https://docs.cloud.google.com/tpu/docs/pytorch-on-tpu) page covers it, plus vLLM-TorchTPU and SGLang-TorchTPU for serving and TorchTitan for training, and the [TorchTPU docs](https://torchtpu.readthedocs.io/en/latest/) cover install and APIs.
+For PyTorch, start with TorchTPU. Google's [PyTorch on TPU](https://docs.cloud.google.com/tpu/docs/pytorch-on-tpu) page covers it, plus vLLM-TorchTPU and SGLang-TorchTPU for serving and TorchTitan for training, and the [TorchTPU docs](https://torchtpu.readthedocs.io/en/latest/) cover install and APIs. To run TorchTPU with Ray on GKE, start from Google's [fine-tuning](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/train-models-tpu-ray-torchtpu) and [serving](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/serve-llm-tpu-ray-torchtpu) tutorials.
 
 What worked on our ports, in order:
 

@@ -1877,7 +1877,7 @@ An `autoscaling/v2` HPA with `minReplicas: 0` and an external or object metric, 
 
 ### RL post-training on GKE
 
-- Tutorials: [verl on GKE](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/scaling-rl-verl-gke), [GRPO with NeMo RL](https://discuss.google.dev/t/implementing-grpo-with-nvidia-nemo-rl-on-google-kubernetes-engine/336380), and multi-host TPU training with [SkyRL](https://discuss.google.dev/t/tutorial-multi-host-training-with-tpus-and-skyrl-on-gke/343771).
+- Tutorials: [verl on GKE](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/scaling-rl-verl-gke), [GRPO with NeMo RL](https://discuss.google.dev/t/implementing-grpo-with-nvidia-nemo-rl-on-google-kubernetes-engine/336380), multi-host TPU training with [SkyRL](https://discuss.google.dev/t/tutorial-multi-host-training-with-tpus-and-skyrl-on-gke/343771), and [verl GRPO on TPU](https://github.com/verl-project/verl/tree/main/examples/tpu/grpo) (preview), which runs a TorchTitan trainer and a vLLM rollout on two TPU slices with Ray.
 - [GKE Agent Sandbox](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/machine-learning/agent-sandbox) runs tool calls, generated code and reward checks in gVisor-isolated Pods on CPU nodes, so it works alongside GPU or TPU training.
 - [llm-d RL time-slicing](https://github.com/llm-d-incubation/llm-d-rl-time-slicing) lets several RL jobs share the same GPUs by swapping at phase boundaries. Its roadmap lists TPU support as future work. The [launch post](https://cloud.google.com/blog/products/containers-kubernetes/introducing-co-operative-time-slicing-for-rl-in-llm-d) reports duty cycles rising from about 40% to 70%.
 
