@@ -58,6 +58,7 @@ You'll need these tools:
 | Build VM images and lock down networking | [disk-images](./02-core-infrastructure/disk-images/), [zero-trust-iap-access](./02-core-infrastructure/zero-trust-iap-access/) |
 | Run RL post-training | [RL post-training on GKE](./03-deploying-workloads/gke/README.md#rl-post-training-on-gke) |
 | See why a TPU job died | [TPU hardware health](./04-monitoring-observability/README.md#36-tpu-hardware-health-cloud-monitoring-beta) |
+| Diagnose a hung or failed TPU job with a coding agent | [ML Workload Debugging Wiki](https://github.com/google/ml-workload-debugging-wiki) (Claude Code and Antigravity; [doc](https://docs.cloud.google.com/tpu/docs/agent-wiki)) |
 | Profile a job with XProf | [XProf](./04-monitoring-observability/README.md#6-xprof--performance-profiling--visualization) |
 | Set budgets and alerts | [billing](./05-billing-usage/) |
 | Get help | [Get help](#get-help) |
