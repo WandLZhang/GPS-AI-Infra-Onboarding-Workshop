@@ -414,8 +414,8 @@ GPU workloads are **always at risk of interruption**. Without checkpointing, you
               │
     ┌─────────┼─────────────┬──────────────┐
     │         │             │              │
-  Rapid     GCS +       HyperDisk    ParallelStore
-  Bucket    GCSFuse     (block)      (Lustre)
+  Rapid     GCS +       HyperDisk    Managed
+  Bucket    GCSFuse     (block)      Lustre
     │         │             │              │
   Best for  Good for     Good for     Good for
   largest   most cases   single-node  HPC/POSIX
@@ -430,7 +430,7 @@ GPU workloads are **always at risk of interruption**. Without checkpointing, you
 | **GCS (standard)** | High | Low ms | ❌ Full rewrite | Most workloads — simple, durable, widely supported | $ |
 | **GCS + GCSFuse** | High (with tuning) | Low ms | ❌ Full rewrite | K8s-native workloads via CSI driver | $ |
 | **HyperDisk** | Tunable IOPS/throughput | Sub-ms | N/A (block) | Single-node checkpoint to persistent block storage | $$ |
-| **ParallelStore (Lustre)** | Very high parallel I/O | Low | N/A (POSIX) | HPC workloads, existing Lustre-based pipelines | $$$ |
+| **[Managed Lustre](https://cloud.google.com/managed-lustre/docs/overview)** | Very high parallel I/O | Low | N/A (POSIX) | HPC workloads, existing Lustre-based pipelines | $$$ |
 | **Local SSD** | Highest (local) | Lowest | N/A | Temp scratch during training; **NOT durable** — do NOT rely on for checkpoints | Included |
 
 > **⚠️ Critical:** Never use Local SSD as your only checkpoint destination. Local SSD data is **lost** when the VM is deleted (DWS expiry, Spot preemption, maintenance). Always checkpoint to durable storage (GCS, Rapid Bucket, HyperDisk).
