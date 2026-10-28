@@ -179,12 +179,13 @@ These images come **pre-installed** with NVIDIA drivers, CUDA, cuDNN, NCCL, and 
 | `deeplearning-platform-release` | `common-cu124-ubuntu-2204` | CUDA 12.4 on Ubuntu 22.04 |
 | `deeplearning-platform-release` | `pytorch-2-4-cu124-debian-11` | PyTorch 2.4 + CUDA 12.4 |
 
-#### HPC VM Images
+#### HPC VM Images and Advanced Compute Images
 
 | Image Project | Image Family | Pre-installed Software |
 |---------------|-------------|----------------------|
 | `cloud-hpc-image-public` | `hpc-rocky-linux-8` | Intel MPI, HPC tuning, libfabric, Slurm-ready |
-| `cloud-hpc-image-public` | `hpc-centos-7` | HPC-optimized CentOS 7 |
+| `advanced-compute-images` | `aci-cpu-rocky-linux-9-amd64` | Advanced Compute Images (Preview): Cloud RDMA drivers, Open MPI, configurable Intel MPI |
+| `advanced-compute-images` | `aci-cpu-rocky-linux-9-slurm-2605-amd64` | Same, plus Slurm 26.05 |
 
 ### List Available Public Images
 
@@ -205,6 +206,12 @@ gcloud compute images list \
 # List HPC images
 gcloud compute images list \
     --project=cloud-hpc-image-public \
+    --no-standard-images \
+    --format="table(name, family, status)"
+
+# List Advanced Compute Images (Preview)
+gcloud compute images list \
+    --project=advanced-compute-images \
     --no-standard-images \
     --format="table(name, family, status)"
 
@@ -1392,6 +1399,7 @@ gcloud compute resource-policies delete my-daily-schedule --region=$REGION --qui
 - [Deep Learning VM Images](https://cloud.google.com/deep-learning-vm/docs/images)
 - [Deep Learning Containers](https://cloud.google.com/deep-learning-containers/docs/choosing-container)
 - [HPC VM Images](https://cloud.google.com/compute/docs/instances/create-hpc-vm)
+- [Advanced Compute Images (Preview)](https://cloud.google.com/compute/docs/images/workload/aci-images)
 - [NVIDIA GPU Drivers on GCE](https://cloud.google.com/compute/docs/gpus/install-drivers-gpu)
 - [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/)
 - [Building VM Images with Packer](https://cloud.google.com/build/docs/building/build-vm-images-with-packer)
