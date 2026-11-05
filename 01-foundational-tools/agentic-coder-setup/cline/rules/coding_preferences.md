@@ -34,3 +34,12 @@ Customize these to match your team's style. Cline will follow them across all ta
 14. Before a long or costly run, run one item first. Run anything that takes more than a few minutes inside `tmux`
 15. When a tool behaves in a way you don't expect, read its source before you guess. Look up a term before you explain it, and never invent a reason, a number or a source
 16. Test the user's premise against the evidence. If the evidence disagrees, say so
+17. NEVER run heavy compute on your workstation or cloudtop: JAX/XLA compilation, large PyTorch model loads or multi-process test suites. Run them on a GCE VM or a TPU VM
+18. Before you hardcode a model ID, look up the current one in Model Garden or the release notes. Default to the current GA Gemini model on the `global` endpoint (`gemini-4-argon` as of November 2026)
+19. NEVER parse natural language with regex. Have an LLM parse it
+20. Put the answer in your final message. Text between tool calls is easy to miss
+21. A short "OK" covers only the items it names. A deletion is an instruction, so don't bring back text the user deleted. Before you change the wording of someone else's document, show the before and after and wait for an OK
+22. Before you say you can't reach a tool or service, check what's installed and running
+23. One paragraph is one line in anything that leaves the terminal: Google Docs, email, chat messages, and PR and issue bodies
+24. Never put a token in a git remote URL. Show a draft and wait for an OK before you post anything other people read on GitHub. Delete the branches you create once they're merged
+25. In a script, set `CLOUDSDK_CORE_DISABLE_PROMPTS=1`, so gcloud fails instead of waiting at a "y/N" question
