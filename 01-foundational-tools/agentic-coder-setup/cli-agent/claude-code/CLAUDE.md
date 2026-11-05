@@ -18,6 +18,15 @@ limitations under the License.
 
 ## Python
 - Run `python3` directly for one-off scripts that use only the standard library (parsing, quick checks). Anything that needs `pip install` goes in a venv (`python3 -m venv .venv && source .venv/bin/activate`), NEVER into the system Python.
+- NEVER run heavy compute on your workstation or cloudtop: JAX/XLA compilation, large PyTorch model loads, or multi-process test suites. Run them on a GCE VM or a TPU VM sized for the job. Local JAX compilation once ran a workstation out of memory and killed it.
+
+## LLM APIs
+- Before you hardcode a model ID in code that calls an LLM API, look up the current one in Model Garden or the release notes. Preview IDs retire, and a stale one stayed hardcoded in three setup repos after it was replaced.
+- Default to the current GA Gemini model on the `global` endpoint (`gemini-4-argon` as of November 2026).
+- When output quality matters more than cost or latency, test two or three models on the real task before you pick one.
+
+## Parsing
+- NEVER parse natural language with regex: labels, categories, free-text answers. Have an LLM parse it.
 
 ## File Management
 - NEVER create markdown or text files telling me what to do — just walk through and run the deployments
@@ -30,11 +39,25 @@ limitations under the License.
 
 ## Output
 - NEVER truncate output or limit reading. Do NOT use head, tail, or pipes that reduce output. Always capture and display full command output.
+- Put the answer in your final message. Text between tool calls is easy to miss.
+
+## Scope
+- A short "OK" covers only the items it names. Ask before you act on the rest.
+- Fix the problems you hit while you do the task. Don't go looking for more past the ask.
+- A deletion is an instruction. Don't bring back text I deleted.
+- Before you change the wording of a document someone else wrote, show the before and after in chat and wait for an OK.
+- Before you say you can't reach a tool or service, check what's installed and running: `claude mcp list`, `docker ps`, your project folders.
+
+## Line Breaks
+- One paragraph is one line in anything that leaves the terminal: Google Docs, email, chat messages, and PR and issue bodies. Hard-wrap only `.md` files in a repo. A plain-text email draft gets hard-wrapped at about 70 characters, so the reader sees a break in the middle of every sentence.
 
 ## Git
 - NEVER add AI attribution to anything you write. No `Co-Authored-By:` trailer naming an agent, no "Generated with" line, no 🤖 — not in commit messages, not in PR bodies, not in issue comments, release notes, or changelogs. Write the message or body and stop. (`settings.json` also disables this at the harness level via the `attribution` keys; this rule covers the cases settings cannot reach.)
 - Never run `git config user.name` or `git config user.email` — the machine's existing identity is correct.
 - Never commit secrets (AIza*, gho_*/ghp_*, hf_*, sk-*, AKIA*). Reference environment variables instead.
+- Never put a token in a git remote URL. `git remote -v` prints it in plain text. Run `gh auth setup-git` and let `gh` hand git the token.
+- Show me a draft and wait for an OK before you post anything other people read on GitHub: issue and PR comments and bodies, reviews, release notes. That includes editing something already posted.
+- Delete the branches you create once they're merged, locally and on the remote.
 
 ## Cloud Spend
 - A Cloud Billing budget sends alerts. It doesn't stop spending, so check what's running yourself.
@@ -57,6 +80,7 @@ limitations under the License.
 - When a library or tool behaves in a way you don't expect, read its source on GitHub before you guess.
 - Look up a term before you explain it. Never invent a reason, a number or a source.
 - Test the user's premise against the evidence. If the evidence disagrees, say so.
+- In a script, set `CLOUDSDK_CORE_DISABLE_PROMPTS=1`. Without it, gcloud stops at a "y/N" question when an API is off and waits forever; one setup script hung for 10 minutes that way.
 
 ## Writing Style
 
@@ -70,6 +94,11 @@ limitations under the License.
 - **Never "guard" or "guarded".** Say what the code does. Not "guarded on `cfg.x > 0`" — instead "builds it only when `cfg.x > 0`".
 - **No noun piles.** A subject built from stacked nouns is unreadable. Not "a parameter-count assertion for a dense configuration would be the natural one" — instead "the obvious test checks the parameter count of a dense config".
 - **Simple words, short sentences.** Prefer a plain question to a hedged statement.
+- **Let the number do the work.** Don't announce a trend and then list the figures that show it. Not "MFU rises with model size: 10.5%, 11.1%, 14.9%". Instead "MFU: 10.5% at 1.4B, 11.1% at 3.6B, 14.9% at 6.9B".
+- **Never tell the reader what to think about a number.** Cut "it matters more than I expected" and "the key point is". Put the number down and stop.
+- **Caveats belong in the notes, not the body.** State the figure plainly, and put the hedge where a person checking the work will look.
+- **Half the words.** If a colleague could make the same point in half the length, the draft is too long. Cut whole sentences.
+- **No tilde for "approximately".** Write "about" or the figure. A tilde in prose reads as a home directory or a typo.
 - **No meta-commentary in a deliverable.** An artifact holds the thing, not an account of making it. Never add a section explaining what you left out and why, what you considered and rejected, or what changed since the last version — no "Dropped, and why", no "Notes on this revision", no "Alternatives considered", no trailing caveat paragraph. If a decision is worth recording it goes in the commit message or the chat reply. The reader wants the list, not your reasoning about the list.
 
 ### No AI slop

@@ -18,9 +18,14 @@
 # and writes the VS Code Claude Code extension defaults.
 #
 # Usage:
-#   GOOGLE_DEV_KNOWLEDGE_API_KEY=AIza... \
-#     GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx \
+#   GOOGLE_DEV_KNOWLEDGE_API_KEY=<key> \
+#     GITHUB_PERSONAL_ACCESS_TOKEN=<token> \
+#     HF_TOKEN=<token> \
 #     ./setup.sh <GCP_PROJECT_ID> [REGION]
+#
+# Only the project ID is required. Each token you leave out skips its MCP server.
+# Set NO_VSCODE=1 to skip the VS Code steps, for example on a terminal-only box.
+# When it finishes, run claude-smoke-test to check the docs MCP, gcp-pricing and logging.
 #
 # Defaults:
 #   REGION = "global"  (Vertex AI Anthropic Claude global endpoint)
@@ -58,10 +63,12 @@ echo "[1/9] Checking Node.js..."
 if command -v node &>/dev/null && [[ "$(node --version)" == v20* ]]; then
     echo "  ✓ Node.js $(node --version) already installed"
 else
+    # Pin NVM_DIR first. The nvm installer follows an inherited NVM_DIR, so a shell
+    # that already points at another nvm would install there instead of here.
+    export NVM_DIR="$HOME_DIR/.nvm"
     if [ ! -d "$HOME_DIR/.nvm" ]; then
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
     fi
-    export NVM_DIR="$HOME_DIR/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     nvm install 20
     nvm use 20
@@ -125,6 +132,13 @@ echo "  ✓ claude-start installed to ~/bin/claude-start"
 cp "$SCRIPT_DIR/bin/claude-vscode-wrapper" "$HOME_DIR/bin/claude-vscode-wrapper"
 chmod +x "$HOME_DIR/bin/claude-vscode-wrapper"
 echo "  ✓ claude-vscode-wrapper installed to ~/bin/claude-vscode-wrapper"
+# claude-smoke-test checks the three tools the workshop relies on. ws-login switches
+# the gcloud CLI from the workstation's service account to your own account.
+for b in claude-smoke-test ws-login; do
+    cp "$SCRIPT_DIR/bin/$b" "$HOME_DIR/bin/$b"
+    chmod +x "$HOME_DIR/bin/$b"
+done
+echo "  ✓ claude-smoke-test and ws-login installed to ~/bin"
 
 # ------------------------------------------------------------------
 # 5. CLI global rules + settings
@@ -135,9 +149,14 @@ mkdir -p "$HOME_DIR/.claude/hooks"
 cp "$SCRIPT_DIR/CLAUDE.md" "$HOME_DIR/.claude/CLAUDE.md"
 
 # settings.json carries __HOME__ because a hook command has to be an absolute
-# path, the same reason vscode/machine-settings.json does.
+# path, the same reason vscode/machine-settings.json does. It carries the project
+# and region too: Debian's stock .bashrc returns early in a non-interactive
+# shell, so the exports below never reach `claude -p` from a script, and Claude
+# stops with "No projectId was given". The settings env reaches every session.
 SETTINGS_JSON="$(cat "$SCRIPT_DIR/settings.json")"
-printf '%s\n' "${SETTINGS_JSON//__HOME__/$HOME_DIR}" > "$HOME_DIR/.claude/settings.json"
+SETTINGS_JSON="${SETTINGS_JSON//__HOME__/$HOME_DIR}"
+SETTINGS_JSON="${SETTINGS_JSON//__PROJECT_ID__/$PROJECT_ID}"
+printf '%s\n' "${SETTINGS_JSON//__REGION__/$REGION}" > "$HOME_DIR/.claude/settings.json"
 
 # md_write_guard denies any Bash command that overwrites a .md file which
 # already exists. Shell redirects and inline python rewrites skip the staleness
@@ -201,7 +220,9 @@ echo "[6/8] Installing VS Code Machine settings..."
 VSCODE_MACHINE_DIR="$HOME_DIR/.codeoss-cloudworkstations/data/Machine"
 MACHINE_JSON="$(cat "$SCRIPT_DIR/vscode/machine-settings.json")"
 MACHINE_JSON="${MACHINE_JSON//__HOME__/$HOME_DIR}"
-if [ -d "$HOME_DIR/.codeoss-cloudworkstations" ]; then
+if [ -n "${NO_VSCODE:-}" ]; then
+    echo "  - NO_VSCODE is set, so no Machine settings"
+elif [ -d "$HOME_DIR/.codeoss-cloudworkstations" ]; then
     mkdir -p "$VSCODE_MACHINE_DIR"
     printf '%s\n' "$MACHINE_JSON" > "$VSCODE_MACHINE_DIR/settings.json"
     echo "  ✓ Machine settings -> $VSCODE_MACHINE_DIR/settings.json"
@@ -232,7 +253,9 @@ if [ -n "${VSCODE_IPC_HOOK_CLI:-}" ] && [ -x /opt/code-oss/bin/remote-cli/code-o
 else
     CODE_CLI=/opt/code-oss/bin/codeoss-cloudworkstations
 fi
-if [ -x "$CODE_CLI" ]; then
+if [ -n "${NO_VSCODE:-}" ]; then
+    echo "  - NO_VSCODE is set, so no extension"
+elif [ -x "$CODE_CLI" ]; then
     KCS_DIR="$(mktemp -d)"
     cp -r "$SCRIPT_DIR/vscode/keep-claude-sessions" "$KCS_DIR/extension"
     (cd "$KCS_DIR" && python3 -m zipfile -c keep-claude-sessions.vsix extension) \
@@ -281,8 +304,11 @@ if [ -n "$GOOGLE_DEV_KEY" ]; then
         || echo "  ⚠ google-dev-knowledge (already registered or error)"
 else
     echo "  ⚠ GOOGLE_DEV_KNOWLEDGE_API_KEY not set; skipping google-dev-knowledge"
-    echo "    Get a key from https://console.cloud.google.com/apis/credentials and re-run:"
-    echo "    GOOGLE_DEV_KNOWLEDGE_API_KEY=AIza... ./setup.sh $PROJECT_ID"
+    echo "    Create a key restricted to the Developer Knowledge API:"
+    echo "      gcloud services enable developerknowledge.googleapis.com --project=$PROJECT_ID"
+    echo "      gcloud services api-keys create --project=$PROJECT_ID --display-name=\"DK API Key\""
+    echo "      gcloud services api-keys update <name from the output> --api-target=service=developerknowledge.googleapis.com"
+    echo "    Then re-run with GOOGLE_DEV_KNOWLEDGE_API_KEY=<keyString from the output>"
 fi
 
 claude mcp add -s user \
@@ -301,7 +327,21 @@ if [ -n "$GITHUB_PAT" ]; then
         || echo "  ⚠ github-mcp (already registered or error)"
 else
     echo "  ⚠ GITHUB_PERSONAL_ACCESS_TOKEN not set; skipping github-mcp registration"
-    echo "    Re-run with: GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx ./setup.sh $PROJECT_ID"
+    echo "    Re-run with: GITHUB_PERSONAL_ACCESS_TOKEN=<token> ./setup.sh $PROJECT_ID"
+fi
+
+# Hugging Face over native streamable HTTP. A bridge such as `npx mcp-remote`
+# runs a subprocess per session, and orphaned bridges stalled tool discovery for
+# about 300 seconds per session until we switched to native HTTP.
+if [ -n "${HF_TOKEN:-}" ]; then
+    claude mcp add -s user --transport http \
+        huggingface \
+        "https://huggingface.co/mcp" \
+        --header "Authorization:Bearer $HF_TOKEN" 2>/dev/null \
+        && echo "  ✓ huggingface" \
+        || echo "  ⚠ huggingface (already registered or error)"
+else
+    echo "  - HF_TOKEN not set; skipping huggingface (optional, for models, datasets and papers)"
 fi
 
 # ------------------------------------------------------------------
@@ -329,9 +369,21 @@ npx --yes skills add petergyang/no-ai-slop --skill no-ai-slop --global --yes >/d
     || echo "  ⚠ no-ai-slop install failed (non-fatal)"
 
 # ------------------------------------------------------------------
+# superpowers plugin
+# ------------------------------------------------------------------
+# settings.json enables it and names its marketplace; this fetches the files. It
+# adds process skills such as systematic debugging, writing a plan before a big
+# change, and checking the result before saying a task is done.
+echo ""
+echo "[+] Installing the superpowers plugin..."
+claude plugin install superpowers --marketplace anthropics/claude-plugins-official >/dev/null 2>&1 \
+    && echo "  ✓ superpowers installed" \
+    || echo "  ⚠ superpowers install failed (non-fatal)"
+
+# ------------------------------------------------------------------
 # Check that Claude answers through Vertex AI
 # ------------------------------------------------------------------
-# One short request, about $0.06. When it fails, this prints the usual cause
+# One short request: $0.13 in a November 2026 test. When it fails, this prints the usual cause
 # for that error code, so a room full of setups doesn't need one-on-one help.
 # disableAllHooks keeps the Stop hook from adding a second, paid reply here.
 echo ""
@@ -378,5 +430,6 @@ echo ""
 echo "Next steps:"
 echo "  1. source ~/.bashrc   (or open a new terminal)"
 echo "  2. gcloud auth login  (if not already)"
-echo "  3. claude-start"
-echo "  4. Before you delete this machine: claude-backup gs://YOUR_BUCKET"
+echo "  3. claude-smoke-test  (checks the docs MCP, gcp-pricing and Cloud Logging)"
+echo "  4. claude-start"
+echo "  5. Before you delete this machine: claude-backup gs://YOUR_BUCKET"

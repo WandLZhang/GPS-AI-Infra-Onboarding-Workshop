@@ -33,9 +33,7 @@
       "mcp__github-mcp__pull_request_read",
       "mcp__github-mcp__issue_read",
       "mcp__github-mcp__get_me",
-      "mcp__google-dev-knowledge__search_documents",
-      "mcp__google-dev-knowledge__get_document",
-      "mcp__google-dev-knowledge__batch_get_documents",
+      "mcp__google-dev-knowledge__*",
       "mcp__google-cloud-logging__list_*",
       "mcp__google-cloud-logging__get_*"
     ],
@@ -79,9 +77,21 @@
   "promptCacheTtl": "1h",
   "model": "claude-opus-5-5[1m]",
   "effortLevel": "xhigh",
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
   "env": {
     "CLAUDE_CODE_USE_VERTEX": "1",
-    "CLOUD_ML_REGION": "global",
+    "ANTHROPIC_VERTEX_PROJECT_ID": "__PROJECT_ID__",
+    "CLOUD_ML_REGION": "__REGION__",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-opus-5-5[1m]",
     "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5-5[1m]",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5[1m]",

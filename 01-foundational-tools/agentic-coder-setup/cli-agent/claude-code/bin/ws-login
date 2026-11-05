@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ws-login: run the gcloud command line as YOU instead of the workstation's service account.
+#
+# By default this changes only the gcloud CLI account. Application Default Credentials (ADC)
+# stay on the service account, because Claude Code reaches Vertex AI through ADC. Switching
+# ADC makes Claude run as you, and an account with no Vertex AI access on this project stops
+# Claude cold.
+#
+#   ws-login          gcloud CLI only. Claude keeps running as the workstation.
+#   ws-login --adc    gcloud CLI and ADC. Use it only for an account with Vertex AI access here.
+#
+# To go back to the service account:
+#   gcloud auth revoke --all && rm -f ~/.config/gcloud/application_default_credentials.json
+set -e
+if [ "${1:-}" = "--adc" ]; then
+  shift
+  echo "Switching ADC as well. Claude will call Vertex AI as this account until you revert."
+  gcloud auth login --update-adc --no-launch-browser "$@"
+else
+  gcloud auth login --no-launch-browser "$@"
+fi
+echo
+echo "gcloud runs as: $(gcloud config get-value account 2>/dev/null)"
+if [ -f "$HOME/.config/gcloud/application_default_credentials.json" ]; then
+  echo "ADC:            your login, so Claude runs as you"
+else
+  echo "ADC:            the workstation service account, so Claude runs as the workstation"
+fi
+echo
+echo "to go back to the service account:"
+echo "  gcloud auth revoke --all && rm -f ~/.config/gcloud/application_default_credentials.json"

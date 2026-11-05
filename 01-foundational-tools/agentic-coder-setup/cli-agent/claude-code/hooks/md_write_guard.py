@@ -39,7 +39,8 @@ import sys
 WRITE_HINTS = ("open(", ".write(", "writelines", "truncate", "shutil.copy", "shutil.move")
 
 REDIRECT = re.compile(r">>?\s*([^\s;|&<>()]+)")
-SED_I = re.compile(r"\bsed\b[^;|&]*?\s-i\b[^;|&]*")
+# A sed -i call runs to the next ;, |, & or newline. A backslash-newline continues it.
+SED_I = re.compile(r"\bsed\b(?:\\\n|[^;|&\n])*?(?:[ \t]|\\\n)-i\b(?:\\\n|[^;|&\n])*")
 TEE = re.compile(r"\btee\b(?:\s+-a)?\s+([^\s;|&<>()]+)")
 MD_TOKEN = re.compile(r"[\w./~@+-]+\.md\b")
 CD = re.compile(r"\bcd\s+([^\s;|&<>()]+)")
