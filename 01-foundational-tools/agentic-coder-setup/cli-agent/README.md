@@ -29,17 +29,20 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 - Accelerator check: before Claude ends a turn, a Stop hook lists the GPUs and TPUs still running in your project (see [Accelerator guard](#accelerator-guard))
 - Restarts: Claude Code installs under `$HOME`, and a boot hook puts back `gh` and `tmux` on Cloud Workstations and Cloud Shell (see [Boot hook](#boot-hook))
 - VS Code Claude Code extension: same model, same effort, via the launch wrapper
+- Project and region: in the `env` block of `~/.claude/settings.json` as well as `~/.bashrc`, so `claude -p` from a script finds them
+- Plugin: superpowers, for systematic debugging, plans and checking work before calling it done
 
 ### Quick install (one-shot)
 
 ```bash
 cd 01-foundational-tools/agentic-coder-setup/cli-agent/claude-code
-GOOGLE_DEV_KNOWLEDGE_API_KEY=AIza... \
-  GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx \
+GOOGLE_DEV_KNOWLEDGE_API_KEY=<key> \
+  GITHUB_PERSONAL_ACCESS_TOKEN=<token> \
+  HF_TOKEN=<token> \
   ./setup.sh <YOUR_GCP_PROJECT_ID>
 ```
 
-The script installs Node 20 + Claude Code CLI, writes the Vertex env vars to `~/.bashrc`, drops the `claude-start` launcher and the `claude-vscode-wrapper` into `~/bin`, copies CLI rules + permissions to `~/.claude/`, writes the VS Code extension defaults (Code OSS Machine settings), installs the Cloud Logging proxy + GitHub MCP binary, and registers all three MCP servers. It ends with one request to Claude through Vertex AI, about $0.06. If that fails, it prints the fix for the error code, such as turning on Claude in Model Garden.
+The script installs Node 20 and the Claude Code CLI, and writes the Vertex env vars to `~/.bashrc`. It puts `claude-start`, `claude-vscode-wrapper`, `claude-smoke-test`, `ws-login` and `claude-backup` in `~/bin`. It copies the rules, settings and hooks to `~/.claude/` and writes the VS Code extension defaults. It installs the Cloud Logging proxy and the GitHub MCP binary, registers each MCP server whose key you gave it, and installs `gcp-pricing`, `no-ai-slop` and superpowers. It ends with one request to Claude through Vertex AI, which cost $0.13 in our test. If that request fails, it prints the fix for the error code, such as turning on Claude in Model Garden. Then run `claude-smoke-test`.
 
 ### Manual install (step-by-step)
 
@@ -69,19 +72,22 @@ Then `source ~/.bashrc`.
 mkdir -p ~/.claude
 cp claude-code/CLAUDE.md ~/.claude/CLAUDE.md
 
-# Permissions, model, effort and hooks. settings.json names its hooks by
-# absolute path, so put your home directory in place of __HOME__.
+# Permissions, model, effort, hooks and env. settings.json names its hooks by
+# absolute path and carries your project and region, so fill in all three.
 # (It grants /tmp as an additional directory so `gcp-pricing` captures can be
 #  written and grepped without a prompt on every run.)
-sed "s|__HOME__|$HOME|g" claude-code/settings.json > ~/.claude/settings.json
+sed -e "s|__HOME__|$HOME|g" -e "s|__PROJECT_ID__|<YOUR_PROJECT_ID>|g" -e "s|__REGION__|global|g" \
+    claude-code/settings.json > ~/.claude/settings.json
 mkdir -p ~/.claude/hooks
 cp claude-code/hooks/*.py ~/.claude/hooks/
 
-# Launcher scripts (Opus 5.5, max effort)
+# Launchers (Opus 5.5, max effort), the smoke test, ws-login and claude-backup
 mkdir -p ~/bin
-cp claude-code/bin/claude-start ~/bin/claude-start
-cp claude-code/bin/claude-vscode-wrapper ~/bin/claude-vscode-wrapper
-chmod +x ~/bin/claude-start ~/bin/claude-vscode-wrapper
+cp claude-code/bin/* ~/bin/
+chmod +x ~/bin/claude-start ~/bin/claude-vscode-wrapper ~/bin/claude-smoke-test ~/bin/ws-login ~/bin/claude-backup
+
+# The superpowers plugin that settings.json enables
+claude plugin install superpowers --marketplace anthropics/claude-plugins-official
 ```
 
 #### Register MCP servers
@@ -105,6 +111,11 @@ curl -sL "https://github.com/github/github-mcp-server/releases/download/${LATEST
 chmod +x ~/mcp/github-mcp-server/github-mcp-server
 claude mcp add -s user -e "GITHUB_PERSONAL_ACCESS_TOKEN=<YOUR_GITHUB_PAT>" \
     github-mcp -- ~/mcp/github-mcp-server/github-mcp-server stdio
+
+# Hugging Face (native HTTP, optional; a read token from huggingface.co/settings/tokens)
+claude mcp add -s user --transport http \
+    huggingface "https://huggingface.co/mcp" \
+    --header "Authorization:Bearer <YOUR_HF_TOKEN>"
 ```
 
 ### Launch
@@ -199,6 +210,10 @@ gcloud storage rsync -r gs://YOUR_BUCKET/<old-hostname>/projects ~/.claude/proje
 - **An extension-host restart can leave the old `claude` running** with parent PID 1, still holding its connections. Find these with `ps -eo pid,ppid,args`, and end the `claude` processes whose parent is 1.
 - **Docs, Sheets and Drive calls need the Drive scope.** Application Default Credentials carry `cloud-platform` but not Drive, so those calls return `403 insufficient authentication scopes`. Log in with `gcloud auth login --enable-gdrive-access`, then send the token from `gcloud auth print-access-token`.
 - **`pkill -f` and `pgrep -f` match their own shell**, because the shell's command line holds the pattern. Match on the process name with `pgrep -x`, or put the pattern in a script file.
+- **WebSearch can fail while WebFetch works.** On Vertex AI, WebSearch is a server-side tool, so the org policy `constraints/vertexai.allowedPartnerModelFeatures` has to allow it. WebFetch runs on your machine, so the policy doesn't touch it.
+- **A model you just turned on in Model Garden can answer "not available" now and then for a while.** Run a check several times before you trust one pass.
+- **Cloud Workstations run on UTC.** Convert times before you schedule or compare anything.
+- **Web previews go on port 8080.** Bind your server to `0.0.0.0`, then open `https://8080-$WEB_HOST`.
 
 ## VS Code Claude Code extension defaults
 
@@ -254,6 +269,12 @@ Gemini CLI supports MCP via its settings file (`~/.gemini/settings.json`):
 ```json
 {
   "mcpServers": {
+    "google-dev-knowledge": {
+      "httpUrl": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "<YOUR_API_KEY>"
+      }
+    },
     "google-cloud-logging": {
       "command": "node",
       "args": ["~/mcp/google-cloud-logging/proxy.mjs"]
@@ -272,5 +293,7 @@ Gemini CLI supports MCP via its settings file (`~/.gemini/settings.json`):
 ### Launch
 
 ```bash
-gemini
+gemini --model gemini-4-argon
 ```
+
+`gemini-4-argon` is the GA Gemini model as of November 2026. Check Model Garden for the current one before you pin it.
