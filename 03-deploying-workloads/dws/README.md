@@ -419,7 +419,7 @@ DWS prices are well below on-demand, but the discount depends on the machine typ
 
 - On H100 and H200, Flex-start costs less per hour than Spot, and Flex-start VMs aren't preempted during their run of up to 7 days.
 - On B200, Spot is the cheapest option, and there's no on-demand price.
-- Spot prices change. Re-pull any row before you quote it: `gcp-pricing accelerator --filter a3-megagpu-8g` or `gcp-pricing tpu --filter Trillium` ([install gcp-pricing](../../01-foundational-tools/agentic-coder-setup/README.md#8-install-the-gcp-pricing-cli)).
+- Spot prices change. Re-pull any row before you quote it: `gcp-pricing accelerator --filter a3-megagpu-8g` or `gcp-pricing tpu --filter Trillium` ([install gcp-pricing](https://github.com/WandLZhang/gcp-pricing-scraper)).
 
 ### DWS Pricing
 
