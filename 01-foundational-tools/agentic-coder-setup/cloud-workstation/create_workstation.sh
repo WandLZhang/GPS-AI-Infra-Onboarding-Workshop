@@ -374,7 +374,7 @@ if [ -f "$SELF_DIR/box_setup.sh" ]; then
   OUT="$(mktemp)"
   gcloud workstations ssh "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" --region="$REGION" \
     --project="$PROJECT" --command="echo $B64 | base64 -d > /tmp/box_setup.sh && ${KEYVAR}bash /tmp/box_setup.sh $PROJECT $WORKSHOP_BRANCH" \
-    </dev/null 2>&1 | grep -vE "^(Warning: Permanently added|Picking local unused port|Listening on port)" | tee "$OUT"
+    </dev/null 2>&1 | grep --line-buffered -vE "^(Warning: Permanently added|Picking local unused port|Listening on port)" | tee "$OUT"
   GAPS="$(sed -n 's/^GAPS=//p' "$OUT")"
   [ -n "$GAPS" ] || GAPS="unknown: the SSH step didn't finish"
   rm -f "$OUT"
