@@ -435,7 +435,7 @@ curl -fsSL https://raw.githubusercontent.com/WandLZhang/gcp-pricing-scraper/main
 # ------------------------------------------------------------------
 # no-ai-slop skill (global)
 # ------------------------------------------------------------------
-# Lands in ~/.agents/skills/ (the universal location, so Cline, Gemini CLI and
+# Lands in ~/.agents/skills/ (the universal location, so Gemini CLI and
 # Antigravity pick it up too) and symlinks into ~/.claude/skills/.
 #
 # The skill is invocation-triggered -- it gives you /no-ai-slop for editing a

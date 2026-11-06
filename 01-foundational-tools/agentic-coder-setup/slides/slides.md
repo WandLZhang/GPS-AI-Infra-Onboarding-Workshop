@@ -18,7 +18,7 @@ Licensed under the Apache License, Version 2.0
 <div style="display:flex;gap:12px;align-items:center;margin:24px 0 40px;font-size:16px;font-weight:400;">
   <span style="background:#fff7d6;padding:6px 16px;border-radius:20px;border:1px solid #f9ab00;color:#3c4043;">gcloud</span>
   <span style="color:#80868b;">→</span>
-  <span style="background:#d6e8ff;padding:6px 16px;border-radius:20px;border:1px solid #1a73e8;color:#3c4043;">VS Code + Cline</span>
+  <span style="background:#d6e8ff;padding:6px 16px;border-radius:20px;border:1px solid #1a73e8;color:#3c4043;">VS Code + agy</span>
   <span style="color:#80868b;">→</span>
   <span style="background:#e8f5e9;padding:6px 16px;border-radius:20px;border:1px solid #1e8e3e;color:#3c4043;">deploy landing zone</span>
 </div>
@@ -32,7 +32,7 @@ Licensed under the Apache License, Version 2.0
   <div style="text-align:center;font-size:24px;color:#80868b;margin:12px 0;">↓</div>
   <div style="background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:28px 40px;text-align:center;font-size:30px;font-weight:500;color:#202124;">Set up access</div>
   <div style="text-align:center;font-size:24px;color:#80868b;margin:12px 0;">↓</div>
-  <div style="background:#e8f5e9;border:2px solid #1e8e3e;border-radius:12px;padding:28px 40px;text-align:center;font-size:30px;font-weight:500;color:#202124;">Configure Cline / Claude Code</div>
+  <div style="background:#e8f5e9;border:2px solid #1e8e3e;border-radius:12px;padding:28px 40px;text-align:center;font-size:30px;font-weight:500;color:#202124;">Configure Claude Code</div>
 </div>
 
 ---
@@ -100,7 +100,7 @@ Licensed under the Apache License, Version 2.0
 
 ---
 
-<!-- Config sub-box 3: + Cline settings + screenshot -->
+<!-- Config sub-box 3: + agy -->
 
 <div style="display:flex;flex-direction:column;height:100%;gap:0;">
   <div style="display:flex;gap:16px;margin:0;">
@@ -111,10 +111,7 @@ Licensed under the Apache License, Version 2.0
   <div style="display:flex;gap:12px;margin:0;">
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Enable Opus 5.5<br/><span style="font-size:13px;font-weight:400;color:#5f6368;">Vertex Model Garden</span></div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;"><code style="font-size:12px;white-space:nowrap;">gcloud auth login</code><br/><code style="font-size:12px;white-space:nowrap;">gcloud auth application-default login</code></div>
-    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Cline settings</div>
-  </div>
-  <div style="display:flex;justify-content:center;margin:16px 0 0 0;">
-    <img src="visuals/cline-settings.png" style="border:1px solid #ccc;border-radius:8px;max-height:300px;" />
+    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Install agy<br/><code style="font-size:12px;white-space:nowrap;">curl -fsSL https://antigravity.google/cli/install.sh | bash</code></div>
   </div>
 </div>
 
@@ -131,14 +128,14 @@ Licensed under the Apache License, Version 2.0
   <div style="display:flex;gap:12px;margin:0;">
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Enable Opus 5.5</div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;"><code style="font-size:12px;white-space:nowrap;">gcloud auth login</code><br/><code style="font-size:12px;white-space:nowrap;">gcloud auth application-default login</code></div>
-    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Cline settings</div>
+    <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">agy</div>
     <div style="flex:1;background:#d6e8ff;border:2px solid #1a73e8;border-radius:12px;padding:14px 12px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:18px;font-weight:500;color:#202124;">Sign up for <a href="https://github.com/signup" style="color:#1a73e8;">GitHub</a></div>
   </div>
 </div>
 
 ---
 
-<!-- Final: Configure Cline / Claude Code + the prompt -->
+<!-- Final: Configure Claude Code + the prompt -->
 
 <!-- _class: compact -->
 
@@ -151,14 +148,14 @@ Licensed under the Apache License, Version 2.0
   <div style="display:flex;gap:8px;margin:0;">
     <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">Enable Opus</div>
     <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">gcloud auth</div>
-    <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">Cline settings</div>
+    <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">agy</div>
     <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">GitHub</div>
   </div>
   <div style="text-align:center;font-size:18px;color:#80868b;margin:6px 0;">↓</div>
   <div style="background:#e8f5e9;border:2px solid #1e8e3e;border-radius:12px;padding:16px 24px;font-size:16px;color:#202124;">
-    <div style="font-size:24px;font-weight:500;text-align:center;margin-bottom:12px;">Configure Cline / Claude Code</div>
+    <div style="font-size:24px;font-weight:500;text-align:center;margin-bottom:12px;">Configure Claude Code</div>
     <div style="background:#fff;border-radius:8px;padding:14px 18px;border:1px solid #e8eaed;font-size:15px;line-height:1.7;">
-      <strong>Paste into Cline:</strong><br/>
+      <strong>Paste into agy:</strong><br/>
       Please install the MCPs and Claude Code according to <a href="https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop/tree/main/01-foundational-tools/agentic-coder-setup" style="color:#1a73e8;">https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop/tree/main/01-foundational-tools/agentic-coder-setup</a>. You may have to install <code>gh</code> and ask the user to <code>gh auth</code> in the terminal.
     </div>
   </div>
@@ -166,7 +163,7 @@ Licensed under the Apache License, Version 2.0
 
 ---
 
-<!-- Next: use Cline to deploy fast-science -->
+<!-- Next: use Claude Code to deploy fast-science -->
 
 <!-- _class: compact -->
 
@@ -179,14 +176,14 @@ Licensed under the Apache License, Version 2.0
   <div style="display:flex;gap:8px;margin:0;">
     <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">Enable Opus</div>
     <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">gcloud auth</div>
-    <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">Cline settings</div>
+    <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">agy</div>
     <div style="flex:1;background:#d6e8ff;border:1px solid #1a73e8;border-radius:10px;padding:12px 8px;text-align:center;font-size:14px;font-weight:500;color:#202124;">GitHub</div>
   </div>
   <div style="text-align:center;font-size:18px;color:#80868b;margin:6px 0;">↓</div>
-  <div style="background:#e8f5e9;border:1px solid #1e8e3e;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:500;color:#202124;text-align:center;">Configure Cline / Claude Code</div>
+  <div style="background:#e8f5e9;border:1px solid #1e8e3e;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:500;color:#202124;text-align:center;">Configure Claude Code</div>
   <div style="text-align:center;font-size:18px;color:#80868b;margin:6px 0;">↓</div>
   <div style="background:#e8f5e9;border:2px solid #1e8e3e;border-radius:12px;padding:16px 24px;font-size:16px;color:#202124;">
-    <div style="font-size:24px;font-weight:500;text-align:center;margin-bottom:12px;">Use Cline to deploy fast-science</div>
+    <div style="font-size:24px;font-weight:500;text-align:center;margin-bottom:12px;">Use Claude Code to deploy fast-science</div>
     <div style="background:#fff;border-radius:8px;padding:14px 18px;border:1px solid #e8eaed;font-size:15px;line-height:1.7;">
       <strong>L0 — Landing Zone</strong><br/>
       <a href="https://github.com/WandLZhang/fast-science-0-stellar-engine" style="color:#1a73e8;">https://github.com/WandLZhang/fast-science-0-stellar-engine</a><br/><br/>

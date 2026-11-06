@@ -130,7 +130,7 @@ section pre code {
   color: var(--gps-ink-soft);
 }
 
-/* ---------- Blockquote (used for the Cline copy-paste prompt) ---------- */
+/* ---------- Blockquote (used for the copy-paste prompt) ---------- */
 section blockquote {
   background: var(--gps-surface);
   border-left: 4px solid var(--gps-yellow);

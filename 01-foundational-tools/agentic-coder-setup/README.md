@@ -20,7 +20,7 @@ limitations under the License.
 
 ---
 
-This sets up Claude Code the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing. Antigravity, Gemini CLI and Cline work too: see [Other agents](#other-agents).
+This sets up Claude Code the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing. Antigravity and Gemini CLI work too: see [Other agents](#other-agents).
 
 1. [Pick your machine](#1-pick-your-machine)
 2. [Turn on Claude and get your keys](#2-turn-on-claude-and-get-your-keys)
@@ -202,9 +202,6 @@ For a price, ask it to run `gcp-pricing`, for example `gcp-pricing tpu --filter 
 
 - **Antigravity.** In the Agent panel, open MCP Servers, search for Google Developer Knowledge and install it; it uses your Google credentials, so it needs no key. Copy [`gemini-cli/GEMINI.md`](./cli-agent/gemini-cli/GEMINI.md) to `~/.gemini/GEMINI.md` for the rules.
 - **Gemini CLI.** Install it with `npm install -g @google/gemini-cli` and start it with `gemini --model gemini-4-argon`. [cli-agent/README.md](./cli-agent/README.md#gemini-cli) has the rules and MCP config.
-- **Cline.** Install the Cline extension (publisher `saoudrizwan`) in VS Code or Code OSS, choose "I have my own API key", and point it at Vertex AI with your project ID ([screenshot](../../visuals/cline-settings.png)). Then start a Cline task with this repo open and paste:
-
-  > Set up MCP servers using the template in `01-foundational-tools/agentic-coder-setup/cline/cline_mcp_settings.template.json`. Install each server per its `_install` instructions, copy the proxy scripts from `mcp-servers/`, and generate the final `cline_mcp_settings.json`. Also copy every file in `cline/rules/` into my Cline Rules folder (`~/Documents/Cline/Rules` on Linux/Mac). My HuggingFace token is `<HF_TOKEN>`.
 
 ## What's in this folder
 
@@ -232,8 +229,7 @@ agentic-coder-setup/
 │   │   └── GEMINI.md                      # Rules for Gemini CLI and Antigravity
 │   └── shared/
 │       └── google-cloud-logging/proxy.mjs # Cloud Logging MCP proxy
-└── cline/                                 # Cline config
-    ├── cline_mcp_settings.template.json   # MCP settings template
-    ├── mcp-servers/                       # Proxies for Cloud Logging and the docs MCP
-    └── rules/                             # Development, coding, pricing and writing rules
+└── cloud-workstation/
+    ├── create_workstation.sh              # Builds the workstation and sets it up, in one run
+    └── box_setup.sh                       # The part that runs on the workstation
 ```
