@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Create a Cloud Workstation for the workshop in an Argolis project.
+# Create a Cloud Workstation for the workshop in a project in your organization.
 #
 #   ./create_workstation.sh PROJECT_ID [USER_EMAIL]
 #   ./create_workstation.sh PROJECT_ID [USER_EMAIL] --dry-run
@@ -26,7 +26,7 @@
 #   https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=PROJECT_ID
 #
 #   1. Turns on the APIs a workstation and Claude Code on Vertex AI need.
-#   2. Resets the org policies a new Argolis project inherits that stop a workstation, and allows
+#   2. Resets the restrictive org policies a new project inherits, and allows
 #      Anthropic's partner model features on Vertex AI, which Claude Code's web search needs.
 #   3. Asks Claude Opus 5.5 for a reply. If it doesn't answer, prints the Model Garden link and
 #      keeps going: the cluster takes minutes, which is time to turn it on.
@@ -123,8 +123,8 @@ print(message.splitlines()[0][:200])
   rm -f "$body"
 }
 
-# Every constraint a new Argolis project inherits that has had to be reset to build one of these
-# workstations or to run what people build on them. Reset puts each back to Google's default.
+# Every inherited constraint that has had to be reset to build one of these workstations or to
+# run what people build on them. Reset puts each back to Google's default.
 CONSTRAINTS="
 compute.vmExternalIpAccess
 compute.requireShieldedVm

@@ -16,13 +16,9 @@ limitations under the License.
 
 # Agentic Coder Setup
 
-## ▶ [Slides](https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/slides.html)
-
----
-
 One script builds a Cloud Workstation in your Google Cloud project and puts two coding agents on it: agy (the Antigravity CLI) and Claude Code. Claude Code comes set up the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing.
 
-You need a project in an Argolis org where you're an org admin. A new, empty project works. The setup takes about 15 minutes.
+You need a project in an organization where you're an org admin. A new, empty project works. The setup takes about 15 minutes.
 
 1. [Turn on Claude Opus 5.5](#1-turn-on-claude-opus-55)
 2. [Run the script in Cloud Shell](#2-run-the-script-in-cloud-shell)
@@ -54,7 +50,7 @@ Click **Authorize** when Cloud Shell asks. To run the script again, paste the se
 
 | What the script does | Time on a new project |
 |---|---|
-| Turns on the APIs and resets the [org policies](#org-policies) a new Argolis project inherits | 1 min 47 s |
+| Turns on the APIs and resets the restrictive [org policies](#org-policies) a new project inherits | 1 min 47 s |
 | Asks Claude Opus 5.5 for a reply, and prints the Model Garden link if it doesn't answer | 2 s |
 | Creates the default network, the workstation's service account and a Developer Knowledge API key | 1 min 6 s |
 | Creates the workstation cluster | 3 min 16 s |
@@ -117,7 +113,7 @@ Paste the prompt from [step 3](#3-open-the-workstation) into agy, or fix it by h
 
 ### Student
 
-1. Create a project in your Argolis org, with billing: [New project](https://console.cloud.google.com/projectcreate).
+1. Create a project in your organization, with billing: [New project](https://console.cloud.google.com/projectcreate).
 2. Turn on Claude Opus 5.5 in Model Garden ([step 1](#1-turn-on-claude-opus-55)).
 3. In Cloud Shell, click **Authorize** when the script first calls gcloud.
 4. Open the workstation link the script prints, and open a terminal.
@@ -140,7 +136,7 @@ Nothing on the workstation asks for a sign-in code. The exception is `ws-login`,
 
 ## Org policies
 
-A new Argolis project inherits the 33 restrictive constraints below. The script resets each one to Google's default, then allows Anthropic's partner model features. Neither agent hit any other policy on the test projects. The script also resets five constraints that other Argolis projects carried: `compute.managed.disableGuestAttributesAccess`, `compute.disableSshInBrowser`, `iam.workloadIdentityPoolProviders`, `run.allowedVPCEgress` and `cloudfunctions.requireVPCConnector`.
+A new project in our test organization inherited the 33 restrictive constraints below. The script resets each one to Google's default, then allows Anthropic's partner model features. Neither agent hit any other policy on the test projects. The script also resets five constraints we've met on other projects: `compute.managed.disableGuestAttributesAccess`, `compute.disableSshInBrowser`, `iam.workloadIdentityPoolProviders`, `run.allowedVPCEgress` and `cloudfunctions.requireVPCConnector`.
 
 | Constraint | On a new project | What it stops |
 |---|---|---|
@@ -256,7 +252,7 @@ Each piece exists because something went wrong without it.
 
 | Setting | What it prevents |
 |---|---|
-| Reads run without asking; writes, deletes and new tools ask first | A delete you didn't mean, in a project you share. |
+| Bypass permissions mode by default, without its warning screen | A long run that stops at a permission prompt while nobody's watching. The hooks below still run in this mode. |
 | `/tmp` as an additional directory | Every `gcp-pricing` capture in `/tmp` stopped for a permission prompt. |
 | `attribution` off | The default `Co-Authored-By` trailer on every commit. |
 | `cleanupPeriodDays: 3650` | Claude Code deletes conversations older than 30 days at startup by default. |
@@ -321,7 +317,7 @@ For a price, ask it to run `gcp-pricing`, for example `gcp-pricing tpu --filter 
 ```
 agentic-coder-setup/
 ├── README.md                              # This file
-├── slides/                                # The slides linked at the top
+├── slides/                                # An earlier deck: VS Code and agy on your own machine
 ├── cli-agent/                             # Claude Code and Gemini CLI
 │   ├── README.md                          # Each setup step, cost, gotchas
 │   ├── claude-code/
