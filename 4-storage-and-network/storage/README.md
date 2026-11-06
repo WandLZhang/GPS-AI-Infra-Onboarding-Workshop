@@ -87,7 +87,7 @@ There is **no native direct sync** between Google Drive and Cloud Storage. For r
 
 > **Designing storage for a new workload?** Read Google's architecture guide, [Design storage for AI and ML workloads](https://docs.cloud.google.com/architecture/ai-ml/storage-for-ai-ml).
 
-> **Looking for BigQuery?** BigQuery is a data preparation and analytics service that operates *upstream* of the storage I/O layer covered here. For BigQuery ML, BigQuery DataFrames, export-to-GCS patterns, and Dataflow ETL pipelines, see the [Data Pipeline & Preparation guide](../data-pipeline/).
+> **Looking for BigQuery?** BigQuery is a data preparation and analytics service that operates *upstream* of the storage I/O layer covered here. For BigQuery ML, BigQuery DataFrames, export-to-GCS patterns, and Dataflow ETL pipelines, see the [Data Pipeline & Preparation guide](../data-prep/).
 
 ---
 

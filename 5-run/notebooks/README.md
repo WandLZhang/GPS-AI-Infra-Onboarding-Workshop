@@ -64,7 +64,7 @@ Colab Enterprise is **different from** the free [Google Colaboratory](https://co
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../../capacity/dws/).
+> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../../3-get-capacity/flex-start/).
 
 ---
 
@@ -84,12 +84,12 @@ Colab Enterprise is **different from** the free [Google Colaboratory](https://co
 
 | Scenario | Better Alternative |
 |---|---|
-| Large-scale distributed training (multi-node) | [Vertex AI](../vertex-ai/) (FLEX_START), [Cluster Toolkit](../cluster-toolkit/), [Cluster Director](../cluster-director/) |
-| Production inference / serving | [Cluster Toolkit](../cluster-toolkit/) (GKE) |
-| H100 / H200 / B200 / TPU workloads | [Cluster Toolkit](../cluster-toolkit/), [XPK](../xpk/), [Compute Engine](../../capacity/flex-start-mig/) |
-| Long-running training (> 18 hours) | [Vertex AI](../vertex-ai/), [Cluster Toolkit](../cluster-toolkit/), [Compute Engine](../../capacity/flex-start-mig/) |
-| Slurm-native HPC workloads | [Cluster Director](../cluster-director/) |
-| Guaranteed start time with DWS Calendar Mode | [Calendar Mode](../../capacity/future-reservations/) |
+| Large-scale distributed training (multi-node) | [Vertex AI](../vertex-ai/) (FLEX_START), [Cluster Toolkit](../kubernetes/cluster-toolkit/), [Cluster Director](../slurm/) |
+| Production inference / serving | [Cluster Toolkit](../kubernetes/cluster-toolkit/) (GKE) |
+| H100 / H200 / B200 / TPU workloads | [Cluster Toolkit](../kubernetes/cluster-toolkit/), [XPK](../kubernetes/xpk/), [Compute Engine](../vms/) |
+| Long-running training (> 18 hours) | [Vertex AI](../vertex-ai/), [Cluster Toolkit](../kubernetes/cluster-toolkit/), [Compute Engine](../vms/) |
+| Slurm-native HPC workloads | [Cluster Director](../slurm/) |
+| Guaranteed start time with DWS Calendar Mode | [Calendar Mode](../../3-get-capacity/calendar-mode/) |
 
 ---
 
@@ -145,7 +145,7 @@ Custom runtime templates give you full control over the machine type, accelerato
 | **A100 40GB** | ✅ | ✅ | ✅ | ✅ | a2-highgpu |
 | **A100 80GB** | ✅ | ✅ | ✅ | ✅ | a2-ultragpu |
 
-> **Not supported in Colab Enterprise:** H100, H200, B200, TPUs. For these accelerators, use [Vertex AI](../vertex-ai/), [Cluster Toolkit](../cluster-toolkit/), or [Compute Engine](../../capacity/flex-start-mig/).
+> **Not supported in Colab Enterprise:** H100, H200, B200, TPUs. For these accelerators, use [Vertex AI](../vertex-ai/), [Cluster Toolkit](../kubernetes/cluster-toolkit/), or [Compute Engine](../vms/).
 
 #### Workload Sizing Guide for Colab Enterprise
 
@@ -159,7 +159,7 @@ Custom runtime templates give you full control over the machine type, accelerato
 | **Small model training (< 1B)** | L4 or T4 | 1 | Fits comfortably; L4 offers better price-performance |
 | **Medium model fine-tune (7B, full)** | A100 40GB | 2–4 | ~126 GB for full fine-tune with Adam; distribute across GPUs |
 
-> For detailed memory sizing formulas, see the [Accelerator Selection Guide](../../accelerators/).
+> For detailed memory sizing formulas, see the [Accelerator Selection Guide](../../2-choose-hardware/).
 
 ---
 
@@ -520,7 +520,7 @@ subprocess.run(["kubectl", "apply", "-f", "/tmp/job.yaml"], check=True)
 
 **Best for:** Teams with existing GKE infrastructure that want the notebook-first development experience.
 
-> For full GKE DWS details, see the [Cluster Toolkit Guide](../cluster-toolkit/) or [XPK Guide](../xpk/).
+> For full GKE DWS details, see the [Cluster Toolkit Guide](../kubernetes/cluster-toolkit/) or [XPK Guide](../kubernetes/xpk/).
 
 ### DWS Integration Decision Guide
 
@@ -747,12 +747,12 @@ Colab Enterprise pricing has two components:
 
 ### Related Guides in This Repository
 
-- [DWS Concepts](../../capacity/dws/) — Capacity acquisition models, pricing, compliance
+- [DWS Concepts](../../3-get-capacity/flex-start/) — Capacity acquisition models, pricing, compliance
 - [Vertex AI DWS Training](../vertex-ai/) — Serverless training with FLEX_START (deploy from Colab)
-- [Cluster Toolkit](../cluster-toolkit/) — Production GKE clusters with DWS flex-start
-- [XPK](../xpk/) — Quick PoC GKE clusters with DWS flex-start
-- [Accelerator Selection Guide](../../accelerators/) — GPU sizing, checkpointing, consumption models
-- [Storage for AI Workloads](../../infrastructure/storage/) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Cluster Toolkit](../kubernetes/cluster-toolkit/) — Production GKE clusters with DWS flex-start
+- [XPK](../kubernetes/xpk/) — Quick PoC GKE clusters with DWS flex-start
+- [Accelerator Selection Guide](../../2-choose-hardware/) — GPU sizing, checkpointing, consumption models
+- [Storage for AI Workloads](../../4-storage-and-network/storage/) — GCSFuse, Rapid Cache, Rapid Bucket
 - [Deployment Methods Overview](../) — Compare all deployment methods
 
 ---

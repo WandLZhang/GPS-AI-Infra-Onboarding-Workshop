@@ -1,6 +1,6 @@
-# Observe and debug GPU and TPU jobs
+# Debug and profile GPU and TPU jobs
 
-Watch GPU and TPU jobs with dashboards and alerts, read their logs, and profile them with XProf. Come here when a job runs slow, hangs or dies.
+Watch GPU and TPU jobs with dashboards and alerts, read their logs, profile them with XProf, and speed them up. Come here when a job runs slow, hangs or dies.
 
 ## What we'd pick
 
@@ -9,7 +9,7 @@ Watch GPU and TPU jobs with dashboards and alerts, read their logs, and profile 
 - Set alerts before a long run. A hung job keeps billing until someone notices. Start with [our five](#alerts-we-set-first).
 - When a TPU job dies, check [hardware health](#tpu-hardware-health) before you debug code. The ICI link, HBM and PCIe metrics show whether the hardware failed.
 - For a hung or failed TPU job on GKE, run the [ML Workload Debugging Wiki](https://github.com/google/ml-workload-debugging-wiki) in your harness. It matches the job's logs against known failure modes and names the culprit hosts.
-- Read logs through the Cloud Logging remote MCP server. The [harness setup](../harness-setup/) connects it, so your harness queries a job's logs itself.
+- Read logs through the Cloud Logging remote MCP server. The [harness setup](../1-setup/) connects it, so your harness queries a job's logs itself.
 - Profile early with XProf. Its collection overhead on TPU is under 1%, so profile during development too.
 - Write profiles to Cloud Storage. Local profiles go away when the run ends. XProfiler reads from the bucket.
 - Open large profiles on an XProfiler VM, then delete the VM. It loads big profiles faster than a local TensorBoard. It bills while it runs.
@@ -136,6 +136,12 @@ Pick the tool by the question you have:
 | How close am I to the HBM limit? | Memory Viewer | Peak allocation against the chip's HBM |
 | Is an op compute-bound or memory-bound? | Roofline Analysis | Ops near the slanted line are memory-bound; ops near the flat line are compute-bound |
 | What did XLA run? | Graph Viewer | Redundant ops and the communication pattern |
+
+### TPU: fit matmuls to the MXU
+
+The MXU is 256 x 256 on v6e and TPU7x, and 128 x 128 on earlier TPUs. For peak FLOPs, matrix-multiply dimensions should be larger than the MXU ([TPU performance guide](https://docs.cloud.google.com/tpu/docs/performance-guide)). A smaller dimension, such as an attention head_dim of 64 on a 256-wide unit, leaves most of the MXU idle.
+
+For a port that runs but runs slow, [What worked on our ports](../2-choose-hardware/port-to-tpu.md#what-worked-on-our-ports-in-order) lists the order we tune in.
 
 ### Traps and fixes
 

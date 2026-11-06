@@ -227,7 +227,7 @@ gcloud compute project-info describe \
 | **Best for** | Production training | Cost-sensitive batch training | Fault-tolerant / checkpointed |
 | **A4X Max / A4X** | ✅ Required | ❌ Not supported | ❌ Not supported |
 
-> For a comprehensive guide to all DWS consumption options (including Compute Engine MIG resize and Vertex AI), see the [DWS Concepts Guide](../../capacity/dws/).
+> For a comprehensive guide to all DWS consumption options (including Compute Engine MIG resize and Vertex AI), see the [DWS Concepts Guide](../../../3-get-capacity/flex-start/).
 
 ---
 
@@ -870,13 +870,13 @@ kubectl describe node <node-name> | grep -A5 "Allocatable"
 | **Use Assured Workloads** | For FedRAMP High, DoD IL4/IL5 — automatically enforces resource location constraints |
 | **Align storage and compute regions** | Keep GCS buckets and Filestore in the same region as your GPU cluster |
 
-> For detailed data residency and compliance guidance, see the [DWS Guide — Data Residency & Compliance](../../capacity/dws/#5-data-residency--compliance-considerations).
+> For detailed data residency and compliance guidance, see the [DWS Guide — Data Residency & Compliance](../../../3-get-capacity/flex-start/#5-data-residency--compliance-considerations).
 
 ### Cost Optimization
 
 | Strategy | Detail |
 |---|---|
-| **Reservation + DWS fallback** | For GKE clusters, use Kueue's multi-flavor ClusterQueue to try reservations first, fall back to DWS. See [DWS Guide — GKE Integration](../../capacity/dws/#3-how-dws-integrates-with-gke) |
+| **Reservation + DWS fallback** | For GKE clusters, use Kueue's multi-flavor ClusterQueue to try reservations first, fall back to DWS. See [DWS Guide — GKE Integration](../../../3-get-capacity/flex-start/#3-how-dws-integrates-with-gke) |
 | **Multi-zone submission** | If not zone-bound, create separate DWS clusters or node pools in multiple zones |
 | **Cancel unused requests** | Monitor pending provisioning requests and cancel any you no longer need |
 
@@ -902,7 +902,7 @@ kubectl describe node <node-name> | grep -A5 "Allocatable"
 
 ### DWS & Workload Scheduling
 
-- [DWS Concepts Guide](../../capacity/dws/) — Full DWS documentation with all consumption options
+- [DWS Concepts Guide](../../../3-get-capacity/flex-start/) — Full DWS documentation with all consumption options
 - [About GPU Obtainability with Flex-Start](https://cloud.google.com/kubernetes-engine/docs/concepts/dws)
 - [Deploy GPUs with DWS on GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest)
 - [Flex-Start Training on GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/dws-flex-start-training)
@@ -918,10 +918,10 @@ kubectl describe node <node-name> | grep -A5 "Allocatable"
 
 ### Related Sections in This Repository
 
-- [DWS Concepts](../../capacity/dws/) — Dynamic Workload Scheduler concepts, pricing, compliance
-- [Deployment Methods Overview](../) — Compare all deployment methods
-- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
-- [Zero Trust IAP Access](../../infrastructure/zero-trust-iap-access/README.md) — Securing cluster access
+- [DWS Concepts](../../../3-get-capacity/flex-start/) — Dynamic Workload Scheduler concepts, pricing, compliance
+- [Deployment Methods Overview](../../) — Compare all deployment methods
+- [Storage for AI Workloads](../../../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Zero Trust IAP Access](../../../4-storage-and-network/private-vms/README.md) — Securing cluster access
 
 ---
 

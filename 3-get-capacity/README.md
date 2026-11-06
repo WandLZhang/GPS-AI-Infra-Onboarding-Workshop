@@ -1,18 +1,18 @@
-# Capacity: get GPUs and TPUs
+# Get capacity: GPUs and TPUs, and the quota to use them
 
-How you get accelerators is a separate choice from where you run them. Pick a capacity option here, then a platform in [workloads](../workloads/).
+How you get GPUs and TPUs is a separate choice from where you run them. Pick a capacity option and check your quota here, then pick a platform in [run](../5-run/).
 
 ## The options
 
 | Option | What you get | Page |
 |---|---|---|
-| On-demand | Immediate, full price, if available | [Prices by machine type](./dws/README.md#prices-by-machine-type) |
-| Reservations | Guaranteed, committed, long-term | [DWS](./dws/README.md#where-dws-fits-in-the-gpu-acquisition-strategy) |
-| Flex-start | Queued, up to 53% discount, up to 7 days | [DWS](./dws/), and [flex-start-mig](./flex-start-mig/) for Flex-start VMs through managed instance groups |
-| Calendar mode | Guaranteed start time, committed cost | [future-reservations](./future-reservations/), and [Check Calendar availability](./dws/README.md#check-calendar-availability-before-you-book) |
-| Spot | Cheapest, preemptible, no guarantee | [spot-capacity-advisor](./spot-capacity-advisor/), which ranks zones for Spot |
+| On-demand | Immediate, full price, if available | [Prices](../7-cost/prices.md) |
+| Reservations | Guaranteed, committed, long-term | [reservations.md](./reservations.md) for affinity and dense placement |
+| Flex-start | Queued, up to 53% discount, up to 7 days | [flex-start](./flex-start/), and [VMs](../5-run/vms/) for Flex-start VMs through managed instance groups |
+| Calendar mode | Guaranteed start time, committed cost, 1 to 90 days | [calendar-mode](./calendar-mode/), with its [availability check](./calendar-mode/README.md#check-calendar-availability-before-you-book) |
+| Spot | Cheapest, preemptible, no guarantee | [spot](./spot/), which ranks zones for Spot |
 
-[Quota and pricing](./dws/README.md#7-quota--pricing) lists which quota each option uses.
+[quota.md](./quota.md) lists the quota each option uses, and how to raise it.
 
 ## Choose an option
 
@@ -63,42 +63,33 @@ Your choice of accelerator constrains which consumption models are available:
 | **G4** | ✅ | ✅ | ✅ | ✅ |
 | **G2** | ✅ | ❌ | ✅ | ✅ |
 
-For TPUs and the current list, ask your harness the Flex-start question below.
+For TPUs, Calendar mode takes TPU7x, v6e and v5p ([Calendar mode](./calendar-mode/README.md#sizes-durations-and-machine-types)). For the current list, ask your harness the Flex-start question below.
 
 ## Look up facts that change
 
-Prices and zones change. This repo dates the numbers it prints. Get the current ones here:
+Zones and support change. This repo dates the numbers it prints. Get the current ones here:
 
 | Fact | Get it now |
 |---|---|
-| Price of a machine type | `gcp-pricing accelerator --filter <machine-type>` or `gcp-pricing tpu --filter <generation>` ([gcp-pricing](https://github.com/WandLZhang/gcp-pricing-scraper)) |
+| Price of a machine type | [Get today's price](../7-cost/prices.md#get-todays-price) |
 | Which machine types take Flex-start and Calendar mode | Ask your harness: "Which GPU and TPU machine types support Dynamic Workload Scheduler flex-start and calendar mode?" |
-| Zones that take Calendar requests | [`discover-calendar-zones.py`](./dws/discover-calendar-zones.py) |
-| Spot obtainability by zone | [Capacity Advisor for Spot](./spot-capacity-advisor/) |
+| Zones that take Calendar requests | [`discover-calendar-zones.py`](./calendar-mode/discover-calendar-zones.py) |
+| Spot obtainability by zone | [Capacity Advisor for Spot](./spot/) |
 | GPU zones | [GPU regions and zones](https://cloud.google.com/compute/docs/regions-zones/gpu-regions-zones) |
 | TPU zones | [TPU regions and zones](https://docs.cloud.google.com/tpu/docs/regions-zones) |
 
-[Ask your harness](../harness-setup/README.md#ask-your-harness) lists more questions the docs MCP answers.
-
-## Spray requests across zones and poll for capacity
-
-These scripts live in [slurm-multi-region-gpu-public](https://github.com/WandLZhang/slurm-multi-region-gpu-public):
-
-- [spot-spray](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/spot-spray.sh)
-- [flex-spray](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/flex-spray.sh)
-- [flex-poll](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/flex-poll.sh)
-- [calendar-poll](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/calendar-poll.sh)
-- [spot-obtainability-poll](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/spot-obtainability-poll.sh)
+[Ask your harness](../1-setup/README.md#ask-your-harness) lists more questions the docs MCP answers. Scripts that spray requests across zones and poll for capacity are in [examples](../8-examples/README.md#spray-requests-across-zones-and-poll-for-capacity).
 
 ## Keep a training job alive on Spot
 
-See [Training on Spot](./spot-capacity-advisor/README.md#keep-a-training-job-alive-on-spot), and [Spot VMs on GKE](../workloads/gke/README.md#spot-vms-for-ai-jobs) for the shutdown window. On GKE, a [custom ComputeClass](../workloads/gke/README.md#fall-back-across-capacity-types-with-custom-computeclasses) falls back from a reservation to Flex-start, Spot and on-demand.
+See [Keep a training job alive on Spot](./spot/README.md#keep-a-training-job-alive-on-spot) and [checkpointing](../5-run/checkpointing.md). On GKE, [Spot VMs for AI jobs](../5-run/kubernetes/README.md#spot-vms-for-ai-jobs) gives the shutdown window, and a [custom ComputeClass](../5-run/kubernetes/README.md#fall-back-across-capacity-types-with-custom-computeclasses) falls back from a reservation to Flex-start, Spot and on-demand.
 
 ## In this folder
 
-| Folder | What's in it |
+| Page | What's in it |
 |---|---|
-| [dws](./dws/) | Dynamic Workload Scheduler: Flex-start and Calendar mode, prices, quota, data residency and Calendar zone discovery |
-| [flex-start-mig](./flex-start-mig/) | Flex-start VMs through managed instance group resize requests |
-| [future-reservations](./future-reservations/) | Calendar mode future reservations with a guaranteed start time |
-| [spot-capacity-advisor](./spot-capacity-advisor/) | The Capacity Advisor for Spot API: best zone, region and machine for Spot |
+| [flex-start](./flex-start/) | Dynamic Workload Scheduler and Flex-start: how it queues, how it works with GKE, supported machine types, data residency |
+| [calendar-mode](./calendar-mode/) | Calendar mode future reservations: sizes, lead times, the availability check and Calendar zone discovery |
+| [spot](./spot/) | Spot VMs: the Capacity Advisor for Spot API and keeping training alive through preemption |
+| [quota.md](./quota.md) | The quota each option uses, how to view it, raise it and alert on it |
+| [reservations.md](./reservations.md) | Reservation affinity, machine topology, dense allocation and topology-aware scheduling |

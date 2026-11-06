@@ -1,10 +1,12 @@
-# Infrastructure
+# Storage and network
 
-Network access, boot images, storage and the data pipeline under a GPU or TPU job.
+Where your data, model weights and checkpoints live, how VMs reach the network without public IPs, and the images they boot from.
 
 | Folder | What's in it |
 |---|---|
-| [zero-trust-iap-access](./zero-trust-iap-access/) | VMs with no public IPs, reached through Identity-Aware Proxy, with Cloud NAT for outbound traffic |
-| [disk-images](./disk-images/) | Disk images for GPU and HPC VMs, and [Packer](./disk-images/packer/) templates to build your own |
-| [storage](./storage/) | Cloud Storage FUSE, Rapid Cache, Rapid Bucket, Managed Lustre and Google Drive sync, for loading weights and writing checkpoints |
-| [data-pipeline](./data-pipeline/) | BigQuery, Dataflow and BigQuery DataFrames for preparing ML data |
+| [storage](./storage/) | Cloud Storage FUSE, Rapid Cache, Rapid Bucket, Managed Lustre and Google Drive sync, for loading weights fast and writing checkpoints |
+| [private-vms](./private-vms/) | VMs with no public IPs, reached through Identity-Aware Proxy (IAP), with Cloud NAT for outbound traffic |
+| [vm-images](./vm-images/) | Disk images for GPU and HPC VMs, and [Packer](./vm-images/packer/) templates to build your own |
+| [data-prep](./data-prep/) | BigQuery, Dataflow and BigQuery DataFrames for preparing ML data |
+
+How often to checkpoint, and where to write checkpoints, is in [checkpointing](../5-run/checkpointing.md).

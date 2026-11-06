@@ -539,13 +539,14 @@ def create_key_concepts_slide(prs):
     # Repository structure card
     add_card(slide, Inches(6.6), Inches(4.2), Inches(5.8), Inches(2.5),
              "📁 Repository Structure",
-             "harness-setup/     → agy and Claude Code on a workstation\n"
-             "accelerators/      → Pick, size, port to TPU\n"
-             "capacity/          → DWS, Spot, reservations\n"
-             "infrastructure/    → Networking, storage, disk images\n"
-             "workloads/         → GKE, Vertex AI, Slurm\n"
-             "monitoring/        → TPU health, dashboards\n"
-             "billing/           → Cost controls, CUDs",
+             "1-setup/                → agy and Claude Code on a workstation\n"
+             "2-choose-hardware/      → Pick, size, port to TPU\n"
+             "3-get-capacity/         → Flex-start, Calendar, Spot, quota\n"
+             "4-storage-and-network/  → Storage, private VMs, images\n"
+             "5-run/                  → Slurm, GKE, VMs, Vertex AI\n"
+             "6-debug-and-profile/    → Logs, TPU health, XProf\n"
+             "7-cost/                 → Prices, budgets, CUDs\n"
+             "8-examples/             → Recipes and full projects",
              accent_color=GCP_PRIMARY)
 
 

@@ -1,13 +1,13 @@
-# GKE for AI and ML workloads
+# Kubernetes: GKE for AI and ML workloads
 
-Google Kubernetes Engine (GKE) runs containerized training and serving on GPU and TPU nodes. Reach for it when your code already ships as containers, or when you want queued batch jobs and model serving on one cluster.
+Google Kubernetes Engine (GKE) runs containerized training and serving on GPU and TPU nodes. [Cluster Toolkit](./cluster-toolkit/) and [XPK](./xpk/) build GKE clusters for you. Reach for it when your code already ships as containers, or when you want queued batch jobs and model serving on one cluster.
 
 ## What we'd pick
 
 - **Autopilot for the first cluster.** You request GPUs in the Pod spec, and GKE installs the drivers and creates the nodes. GPU Pods use node-based billing, so you pay for the node's hardware plus a management premium.
 - **Standard for privileged Pods or node settings that Autopilot blocks.** GPUDirect RDMA on A4 and A3 Ultra works in Autopilot and in Standard.
-- **Cluster Toolkit for multi-node GPU training.** Its GKE blueprints create the RDMA networks, GPU node pools and Kueue in one `gcluster deploy`. See [Cluster Toolkit](../cluster-toolkit/).
-- **XPK for a quick proof of concept.** Its Python CLI wraps cluster creation (`xpk cluster create`) and job submission (`xpk workload create`). See [XPK](../xpk/).
+- **Cluster Toolkit for multi-node GPU training.** Its GKE blueprints create the RDMA networks, GPU node pools and Kueue in one `gcluster deploy`. See [Cluster Toolkit](./cluster-toolkit/).
+- **XPK for a quick proof of concept.** Its Python CLI wraps cluster creation (`xpk cluster create`) and job submission (`xpk workload create`). See [XPK](./xpk/).
 - **Flex-start for single-node jobs that can wait.** GKE creates flex-start nodes one at a time. They run for up to seven days at Dynamic Workload Scheduler prices, with discounts up to 53%.
 - **Flex-start with queued provisioning and Kueue for multi-node jobs that must start together.** GKE allocates every requested node at once, in one zone. Kueue creates and tracks the provisioning requests.
 - **No auto-repair on flex-start node pools.** These nodes don't support automatic repair, and a repair evicts every Pod on the node. Create the pool with `--no-enable-autorepair`. Set maintenance windows and exclusions around long runs.
@@ -15,7 +15,7 @@ Google Kubernetes Engine (GKE) runs containerized training and serving on GPU an
 - **Workload Identity Federation for GKE for bucket access.** Autopilot turns it on by default, and Pods need no key files.
 - **One GPU before many nodes.** Run the image and the training script on one GPU before you queue a multi-node job.
 - **Scale idle serving to zero.** If a model server sits idle for hours, give its Deployment an `autoscaling/v2` HPA with `minReplicas: 0`. Drive it with an External or Object metric, such as a Pub/Sub backlog. This needs GKE 1.37 or later on the control plane and nodes.
-- **Cluster Director for MPI jobs under Slurm.** If your group already submits work with `sbatch`, use [Cluster Director](../cluster-director/).
+- **Cluster Director for MPI jobs under Slurm.** If your group already submits work with `sbatch`, use [Cluster Director](../slurm/).
 
 ### Spot VMs for AI jobs
 
@@ -31,7 +31,7 @@ From the [GKE Spot VMs page](https://docs.cloud.google.com/kubernetes-engine/doc
 - Stateful workloads should finish shutting down within 25 seconds to avoid persistent volume corruption.
 - Spot VMs don't expire. The older preemptible VMs stop after 24 hours.
 
-For training, finish a checkpoint inside the shutdown window. Otherwise, checkpoint on a timer and accept losing the steps since the last one. More in [Keep a training job alive on Spot](../../capacity/spot-capacity-advisor/README.md#keep-a-training-job-alive-on-spot).
+For training, finish a checkpoint inside the shutdown window. Otherwise, checkpoint on a timer and accept losing the steps since the last one. More in [Keep a training job alive on Spot](../../3-get-capacity/spot/README.md#keep-a-training-job-alive-on-spot).
 
 ### Fall back across capacity types with custom ComputeClasses
 
@@ -40,6 +40,44 @@ Pick a custom [ComputeClass](https://docs.cloud.google.com/kubernetes-engine/doc
 ComputeClasses don't support queued provisioning. For a reservation that falls back to queued provisioning, use the Kueue setup on the [queued provisioning page](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest). It attaches the provisioning check to the DWS flavor only, with `admissionChecksStrategy` and `onFlavors`.
 
 For how Kueue admits a whole job at once and places it by topology, read [Kueue for AI: atomic admission and topology awareness](https://medium.com/google-cloud/kueue-for-ai-the-power-of-atomic-admission-topology-awareness-59c2fd1f86ed).
+
+### Cap GPU use per team with Kueue
+
+For GKE AI workloads, [Kueue](https://kueue.sigs.k8s.io/) provides workload-level resource quotas:
+
+```yaml
+# ClusterQueue with GPU resource limits
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ClusterQueue
+metadata:
+  name: gpu-training-queue
+spec:
+  resourceGroups:
+    - coveredResources: ["cpu", "memory", "nvidia.com/gpu"]
+      flavors:
+        - name: a3-ultra-spot
+          resources:
+            - name: "nvidia.com/gpu"
+              nominalQuota: 16        # Max 16 GPUs
+            - name: "cpu"
+              nominalQuota: 208
+            - name: "memory"
+              nominalQuota: 1872Gi
+---
+# ResourceQuota per namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: gpu-quota
+  namespace: ml-training
+spec:
+  hard:
+    requests.nvidia.com/gpu: "8"     # Max 8 GPUs for this namespace
+    requests.cpu: "104"
+    requests.memory: "936Gi"
+```
+
+A class that shares TPUs through a Kueue queue is in [classroom](../classroom/).
 
 ### RL post-training on GKE
 
@@ -107,7 +145,7 @@ kubectl get provisioningrequests -A
 
 ### Related pages in this repo
 
-- [DWS](../../capacity/dws/) compares Flex-start and calendar mode across products, lists prices, and covers [data residency](../../capacity/dws/README.md#5-data-residency--compliance-considerations).
-- [Spot Capacity Advisor](../../capacity/spot-capacity-advisor/) ranks zones for Spot.
-- [Storage](../../infrastructure/storage/README.md) compares Cloud Storage FUSE, Rapid Cache, Rapid Bucket and Managed Lustre for training data.
-- [Monitoring](../../monitoring/) covers the GKE AI/ML dashboards.
+- [DWS](../../3-get-capacity/flex-start/) compares Flex-start and calendar mode across products, lists prices, and covers [data residency](../../3-get-capacity/flex-start/README.md#5-data-residency--compliance-considerations).
+- [Spot Capacity Advisor](../../3-get-capacity/spot/) ranks zones for Spot.
+- [Storage](../../4-storage-and-network/storage/README.md) compares Cloud Storage FUSE, Rapid Cache, Rapid Bucket and Managed Lustre for training data.
+- [Monitoring](../../6-debug-and-profile/) covers the GKE AI/ML dashboards.

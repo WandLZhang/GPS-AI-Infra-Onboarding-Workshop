@@ -1,7 +1,7 @@
 # Copyright 2026 Google LLC
 # Licensed under the Apache License, Version 2.0
 #
-# Builds the harness-setup Marp deck and publishes the resulting
+# Builds the 1-setup Marp deck and publishes the resulting
 # static HTML to the gh-pages branch — viewable at
 #   https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/
 #
@@ -14,7 +14,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "harness-setup/slides/**"
+      - "1-setup/slides/**"
       - "visuals/**"
       - ".github/workflows/marp-pages.yml"
   workflow_dispatch:
@@ -32,10 +32,10 @@ jobs:
         uses: docker://marpteam/marp-cli:latest
         with:
           args: >-
-            -I harness-setup/slides/
+            -I 1-setup/slides/
             -o build/
             --html
-            --theme-set harness-setup/slides/theme.css
+            --theme-set 1-setup/slides/theme.css
         env:
           MARP_USER: root:root
 

@@ -1,6 +1,6 @@
-# Accelerator Selection, Sizing & Checkpointing Guide
+# Choose and Size a GPU or TPU
 
-> How to pick the right GPU accelerator for your workload, size it correctly (memory, shapes, node count), understand reservation affinity and topology, and implement checkpointing to protect your training investment.
+> How to pick the right GPU or TPU for your workload, and size it correctly (memory, shapes, node count).
 
 ---
 
@@ -10,11 +10,9 @@
 2. [Accelerator Catalog — Complete Specs at a Glance](#2-accelerator-catalog--complete-specs-at-a-glance)
 3. [Picking the Right Accelerator for the Right Job](#3-picking-the-right-accelerator-for-the-right-job)
 4. [Sizing Your Accelerator — Memory, Shapes & Node Count](#4-sizing-your-accelerator--memory-shapes--node-count)
-5. [Reservation Affinity & Topology](#5-reservation-affinity--topology)
-6. [Checkpointing](#6-checkpointing)
-7. [References](#7-references)
+5. [References](#5-references)
 
-Which capacity options each machine type takes is in [capacity](../capacity/README.md#which-machine-types-take-which-option). Porting a model to TPU has its own page: [port-to-tpu.md](./port-to-tpu.md).
+Porting a model to TPU, and benchmarking it against a GPU, has its own page: [port-to-tpu.md](./port-to-tpu.md). Which capacity options each machine type takes is in [get capacity](../3-get-capacity/README.md#which-machine-types-take-which-option). Reservation affinity and dense placement are in [reservations](../3-get-capacity/reservations.md). Checkpointing is in [run](../5-run/checkpointing.md).
 
 ---
 
@@ -27,7 +25,7 @@ Choosing the right accelerator is the **single most impactful decision** you mak
 - **Availability** — newer/larger accelerators are harder to obtain; your consumption model (reservation, DWS, Spot) depends on the machine type
 - **Time-to-result** — an undersized cluster doubles your wall-clock time; an oversized cluster wastes budget
 
-This guide helps you make that decision systematically. Use it **before** requesting quota, making reservations, or deploying workloads via [Cluster Toolkit](../workloads/cluster-toolkit/README.md) or [DWS](../capacity/dws/README.md).
+This guide helps you make that decision systematically. Use it **before** requesting quota, making reservations, or deploying workloads via [Cluster Toolkit](../5-run/kubernetes/cluster-toolkit/README.md) or [DWS](../3-get-capacity/flex-start/README.md).
 
 ### Learn how accelerators behave
 
@@ -35,33 +33,7 @@ This guide helps you make that decision systematically. Use it **before** reques
 - For an overview of Google Cloud's AI infrastructure, watch [The future of AI infrastructure](https://www.youtube.com/watch?v=PJQPMv8TqLA) and [AI Hypercomputer: resilient AI infrastructure at scale](https://www.youtube.com/watch?v=cvpasuzUB0Q) (Google Cloud Next '26).
 - For what's new in TPUs, see [Cloud TPU generations](#cloud-tpu-generations).
 
-### Where This Guide Fits
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    AI Infrastructure Onboarding Journey             │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐  │
-│  │ 1. PLAN (you are here)                                        │  │
-│  │    ├── Pick accelerator type    ◄── This guide, Sections 2–3  │  │
-│  │    ├── Size memory & shape      ◄── This guide, Section 4     │  │
-│  │    ├── Plan checkpointing       ◄── This guide, Section 6     │  │
-│  │    ├── Request quota            ◄── DWS: Quota & Pricing      │  │
-│  │    └── Make reservations        ◄── capacity/                 │  │
-│  ├───────────────────────────────────────────────────────────────┤  │
-│  │ 2. BUILD                                                      │  │
-│  │    ├── Set up networking, storage, disk images                │  │
-│  │    └── infrastructure/                                        │  │
-│  ├───────────────────────────────────────────────────────────────┤  │
-│  │ 3. DEPLOY                                                     │  │
-│  │    ├── Cluster Toolkit / XPK / Vertex AI / DWS               │  │
-│  │    └── workloads/                                             │  │
-│  ├───────────────────────────────────────────────────────────────┤  │
-│  │ 4. OPERATE                                                    │  │
-│  │    └── Monitoring, dashboards, TPU observability              │  │
-│  └───────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
-```
+The steps around this one are in the [journey map](../README.md#the-journey).
 
 ---
 
@@ -199,7 +171,7 @@ When the recommendation matrix doesn't give a clear answer, use these criteria t
 | **Budget sensitivity** | Smaller / older GPUs | G2 (L4) or A2 Standard (A100 40 GB) offer best price-per-FLOP for moderate workloads |
 | **Availability urgency** | Widely available types | G2, A2 Standard are most available. A4X Max/A4X are newest and most constrained |
 | **Multi-node scaling** | High-bandwidth networking | A4X Max (3,600 Gbps), A4/A3 Ultra (3,600 Gbps) for strong scaling. A3 High (1,000 Gbps) for modest scaling |
-| **Data residency** | US zones with GPU availability | See [DWS guide: data residency](../capacity/dws/README.md#5-data-residency--compliance-considerations) for zone availability by GPU type |
+| **Data residency** | US zones with GPU availability | See [DWS guide: data residency](../3-get-capacity/flex-start/README.md#5-data-residency--compliance-considerations) for zone availability by GPU type |
 | **Fractional GPU needs** | G4 or A3 High | G4 offers ⅛, ¼, ½ GPU shapes. A3 High offers 1, 2, 4, 8 GPU shapes |
 
 ### Double-precision (FP64) science codes
@@ -310,265 +282,18 @@ Not every workload needs 8 GPUs. Google Cloud offers **fractional shapes** to ri
 | **Topology-Aware Scheduling** | On GKE, use [TAS](https://cloud.google.com/ai-hypercomputer/docs/workloads/schedule-gke-workloads-tas) to schedule pods on topologically-close nodes. |
 | **Dense allocation** | Request dense allocation for multi-node training to minimize network hops. All A-series 8-GPU types support this via Cluster Toolkit / reservations. |
 
-### TPU: fit matmuls to the MXU
-
-The MXU is 256 x 256 on v6e and TPU7x, and 128 x 128 on earlier TPUs. For peak FLOPs, matrix-multiply dimensions should be larger than the MXU ([TPU performance guide](https://docs.cloud.google.com/tpu/docs/performance-guide)). A smaller dimension, such as an attention head_dim of 64 on a 256-wide unit, leaves most of the MXU idle.
-
 ### Size a job before you ask for chips
 
 - Training a dense model takes about 6 x parameters x tokens FLOPs, plus an attention term that grows with sequence length. For a mixture-of-experts model, count active parameters.
 - Wall-clock time is that FLOP count divided by (chips x peak FLOP/s per chip x MFU). We plan with 30% to 40% MFU until we've measured our own.
 - For serving, prefill is compute-bound and decode is memory-bandwidth-bound, so size them separately.
 - Round up to a real slice size, because TPU slices come in fixed sizes.
+- On TPU, fit matrix dimensions to the MXU: [TPU: fit matmuls to the MXU](../6-debug-and-profile/README.md#tpu-fit-matmuls-to-the-mxu).
 - [How to Scale Your Model](https://jax-ml.github.io/scaling-book) works through all of this for TPUs and GPUs.
 
 ---
 
-## 5. Reservation Affinity & Topology
-
-### Understanding Reservation Affinity
-
-When creating GPU node pools or VMs, you configure **reservation affinity** to control how your workload consumes reserved capacity:
-
-| Affinity Type | When to Use | How It Works |
-|---|---|---|
-| **Specific reservation** | You have a named reservation | VMs target that specific reservation. Required for A4X Max, A4X. |
-| **Any matching reservation** | You have reservations and want automatic matching | VMs consume any reservation that matches the machine type and zone. |
-| **No reservation** | Using DWS flex-start or Spot | VMs do not consume reservations. Required for DWS node pools. |
-
-### Machine Type Topology
-
-Different machine types have different physical topology characteristics that affect workload performance:
-
-| Machine Type | NVLink Domain | GPU Interconnect Topology | Inter-Node Network | Placement |
-|---|---|---|---|---|
-| **A4X Max / A4X** | 72 GPUs (18 instances) | NVL72 rack-scale, NVLink-C2C | RoCE, 8-way (A4X Max) / 4-way (A4X) rail-aligned | Always dense |
-| **A4** | 8 GPUs (1 instance) | All-to-all NVLink within node | RoCE, 4-way rail-aligned | Dense available |
-| **A3 Ultra** | 8 GPUs (1 instance) | All-to-all NVLink within node | RoCE, 4-way rail-aligned | Dense available |
-| **A3 Mega** | 8 GPUs (1 instance) | All-to-all NVLink within node | GPUDirect-TCPXO | Dense available |
-| **A3 High** (8g) | 8 GPUs (1 instance) | All-to-all NVLink within node | GPUDirect-TCPX | Compact placement optional |
-| **A3 High** (1g/2g/4g) | Within VM only | NVLink within allocated GPUs | Standard | Standard |
-| **G4** | Within VM only | PCIe Gen 5 with P2P | Standard | Standard |
-| **G2** | Within VM only | PCIe | Standard | Compact placement optional |
-
-### Dense Allocation
-
-For distributed training, **dense allocation** ensures your VMs are placed physically close together, minimizing network hops and latency:
-
-- **Automatically dense:** A4X Max, A4X (always provisioned as dense NVL72 domains)
-- **Dense via reservation/DWS:** A4, A3 Ultra, A3 Mega, A3 High (8g), A3 Edge — request dense allocation through reservations or DWS resize requests
-- **Compact placement policy:** A3 High, A2, G2 — use `--placement-policy` to request close placement (contact your account team for A3 with max distance)
-
-### Topology-Aware Scheduling (TAS) on GKE
-
-For GKE clusters with A4, A3 Ultra, A3 Mega, or A4X machine types, enable [Topology-Aware Scheduling](https://cloud.google.com/ai-hypercomputer/docs/workloads/schedule-gke-workloads-tas) to let GKE's scheduler place pods on nodes that are topologically close:
-
-```yaml
-# Example: Request topology-aware scheduling in a JobSet
-apiVersion: jobset.x-k8s.io/v1alpha2
-kind: JobSet
-metadata:
-  annotations:
-    alpha.jobset.sigs.k8s.io/exclusive-topology: cloud.google.com/gke-topology-block
-spec:
-  replicatedJobs:
-    - name: workers
-      template:
-        spec:
-          template:
-            spec:
-              nodeSelector:
-                cloud.google.com/gke-accelerator: nvidia-b200
-              topologySpreadConstraints:
-                - maxSkew: 1
-                  topologyKey: cloud.google.com/gke-topology-block
-                  whenUnsatisfiable: DoNotSchedule
-```
-
----
-
-## 6. Checkpointing
-
-### Why Checkpointing is Critical
-
-GPU workloads are **always at risk of interruption**. Without checkpointing, you lose all training progress when:
-
-| Event | Risk Level | Impact |
-|---|---|---|
-| **DWS run duration expires** (max 7 days) | 🔴 Guaranteed | VMs are deleted at expiry — all in-memory state is lost |
-| **Spot VM preemption** | 🔴 High | Can happen at any time with no guarantee of advance warning |
-| **Host maintenance** | 🟡 Scheduled | 7–90 day advance notification depending on machine type |
-| **Hardware failure** | 🟡 Rare | GPU or host failures can occur during long training runs |
-| **Software crash** | 🟡 Variable | OOM, NCCL timeout, NaN divergence |
-
-> **Rule of Thumb:** The cost of lost work = `(hourly_GPU_cost × hours_since_last_checkpoint × GPU_count)`. For a 64-GPU A3 Mega cluster, losing 6 hours of training can cost **thousands of dollars** in wasted compute.
-
-### Checkpointing Strategy Decision Tree
-
-```
-                    What is your workload type?
-                               │
-              ┌────────────────┼────────────────┐
-              │                │                │
-         Training         Fine-tuning       Inference
-              │                │                │
-    Checkpoint every     Checkpoint every    No checkpointing
-    30 min – 2 hours     epoch or every      needed (stateless)
-              │          30 min – 1 hour          │
-              │                │             Save model artifacts
-              │                │             to durable storage
-              │                │             before serving
-              ▼                ▼
-    Where to store checkpoints?
-              │
-    ┌─────────┼─────────────┬──────────────┐
-    │         │             │              │
-  Rapid     GCS +       HyperDisk    Managed
-  Bucket    GCSFuse     (block)      Lustre
-    │         │             │              │
-  Best for  Good for     Good for     Good for
-  largest   most cases   single-node  HPC/POSIX
-  scale                  recovery     workloads
-```
-
-### Storage Options for Checkpointing
-
-| Storage | Write Throughput | Latency | Append Support | Best For | Cost Tier |
-|---|---|---|---|---|---|
-| **[Rapid Bucket](../infrastructure/storage/README.md)** | Up to 15 TB/s | Sub-ms | ✅ Appendable objects | Largest-scale training, streaming checkpoint writes | $$ |
-| **GCS (standard)** | High | Low ms | ❌ Full rewrite | Most workloads — simple, durable, widely supported | $ |
-| **GCS + GCSFuse** | High (with tuning) | Low ms | ❌ Full rewrite | K8s-native workloads via CSI driver | $ |
-| **HyperDisk** | Tunable IOPS/throughput | Sub-ms | N/A (block) | Single-node checkpoint to persistent block storage | $$ |
-| **[Managed Lustre](https://cloud.google.com/managed-lustre/docs/overview)** | Very high parallel I/O | Low | N/A (POSIX) | HPC workloads, existing Lustre-based pipelines | $$$ |
-| **Local SSD** | Highest (local) | Lowest | N/A | Temp scratch during training; **NOT durable** — do NOT rely on for checkpoints | Included |
-
-> **⚠️ Critical:** Never use Local SSD as your only checkpoint destination. Local SSD data is **lost** when the VM is deleted (DWS expiry, Spot preemption, maintenance). Always checkpoint to durable storage (GCS, Rapid Bucket, HyperDisk).
-
-### Recommended Checkpointing Patterns
-
-#### Pattern 1: Synchronous Checkpointing to GCS (Most Common)
-
-Best for: most training workloads up to ~100B parameters
-
-```python
-# PyTorch example — checkpoint every N steps
-import torch
-import os
-
-CHECKPOINT_DIR = "gs://my-bucket/checkpoints/run-001"
-CHECKPOINT_INTERVAL = 500  # steps
-
-def save_checkpoint(model, optimizer, step, loss):
-    checkpoint = {
-        'step': step,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'loss': loss,
-    }
-    path = os.path.join(CHECKPOINT_DIR, f"checkpoint-{step}.pt")
-    torch.save(checkpoint, path)
-    print(f"Checkpoint saved at step {step} to {path}")
-
-# In training loop:
-for step, batch in enumerate(dataloader):
-    loss = train_step(model, batch)
-    if step % CHECKPOINT_INTERVAL == 0:
-        save_checkpoint(model, optimizer, step, loss)
-```
-
-#### Pattern 2: Asynchronous Checkpointing with Orbax (JAX/Flax)
-
-Best for: Large JAX/Flax models where synchronous checkpointing is too slow
-
-```python
-# JAX/Orbax example — asynchronous checkpointing
-import orbax.checkpoint as ocp
-
-# Configure async checkpointer
-options = ocp.CheckpointManagerOptions(
-    max_to_keep=3,  # Keep last 3 checkpoints
-    save_interval_steps=500,
-)
-checkpoint_manager = ocp.CheckpointManager(
-    'gs://my-bucket/checkpoints/run-001',
-    options=options,
-)
-
-# In training loop:
-for step in range(num_steps):
-    state = train_step(state, batch)
-    checkpoint_manager.save(step, args=ocp.args.StandardSave(state))
-
-# Restore from latest checkpoint:
-step = checkpoint_manager.latest_step()
-state = checkpoint_manager.restore(step)
-```
-
-#### Pattern 3: Checkpoint to Rapid Bucket with Append (Largest Scale)
-
-Best for: Trillion-parameter models, streaming writes
-
-```python
-# Use Rapid Bucket for appendable checkpoint writes
-# Rapid Bucket supports append-without-rewrite, which is ideal
-# for incrementally writing large checkpoint files
-
-# Set CHECKPOINT_DIR to a Rapid Bucket (zonal storage)
-CHECKPOINT_DIR = "gs://my-rapid-bucket/checkpoints/run-001"
-
-# Use the same PyTorch/JAX checkpoint code as above —
-# GCSFuse v3.7.2+ and GKE v1.35.0+ support Rapid Buckets
-```
-
-### Checkpointing Frequency Guidelines
-
-| Workload Duration | GPU Count | Recommended Interval | Rationale |
-|---|---|---|---|
-| **< 4 hours** | Any | Every 30 min or every epoch | Short runs — minimal checkpoint overhead relative to total time |
-| **4–24 hours** | 1–8 | Every 1 hour | Balance between lost-work cost and checkpoint I/O overhead |
-| **4–24 hours** | 8–64 | Every 30 min | More GPUs = higher cost of lost work |
-| **1–7 days (DWS)** | Any | Every 30 min – 1 hour | DWS VMs are deleted at `maxRunDurationSeconds` — checkpoint well before expiry |
-| **> 7 days (reserved)** | Any | Every 1–2 hours | Long runs with maintenance windows — checkpoint before maintenance |
-| **Spot VMs** | Any | Every 15–30 min | High preemption risk — frequent checkpoints minimize lost work |
-
-### Checkpoint Size Estimation
-
-| Model Size | Checkpoint Size (FP16) | Checkpoint Size (FP32) | Notes |
-|---|---|---|---|
-| 1B params | ~2 GB | ~4 GB | + optimizer state (Adam: ~8 GB FP32) |
-| 7B params | ~14 GB | ~28 GB | + optimizer state (~56 GB) |
-| 70B params | ~140 GB | ~280 GB | + optimizer state (~560 GB) |
-| 405B params | ~810 GB | ~1,620 GB | + optimizer state (~3,240 GB). Use async checkpointing. |
-
-> **Tip:** Use **mixed-precision checkpointing** — save model weights in FP16/BF16 and optimizer states in FP32. This halves checkpoint size for weights while preserving optimizer precision.
-
-### Framework-Specific Checkpointing Reference
-
-| Framework | Checkpointing Library | GCS Support | Async Support | Key Config |
-|---|---|---|---|---|
-| **PyTorch** | `torch.save()` / `torch.distributed.checkpoint` | Via GCSFuse mount or `fsspec` | `torch.distributed.checkpoint` supports async | Set `CHECKPOINT_DIR=gs://...` |
-| **JAX/Flax** | [Orbax](https://github.com/google/orbax) | Native GCS support | ✅ `AsyncCheckpointer` | `ocp.CheckpointManager(gs://...)` |
-| **TensorFlow** | `tf.train.Checkpoint` | Native GCS support | ✅ Via `experimental_io_device` | `checkpoint.write(gs://...)` |
-| **DeepSpeed** | `model.save_checkpoint()` | Via GCSFuse mount | ✅ Via `async_checkpoint` | `ds_config.json`: `"checkpoint": {"async": true}` |
-| **Megatron-LM** | Built-in checkpointing | Via GCSFuse mount | ✅ Via `--async-save` flag | `--save gs://... --save-interval 500` |
-
-### XLA Compilation Caching (JAX/TPU)
-
-For JAX workloads, also enable **XLA compilation caching** to avoid recompilation on restart (which can add 10–60 minutes to recovery time):
-
-```bash
-# Set before running JAX workload
-export JAX_COMPILATION_CACHE_DIR=gs://my-bucket/xla-cache
-
-# Requires gcsfs package
-pip install gcsfs
-```
-
-> This is separate from model checkpointing — it caches compiled XLA programs. See [Storage README](../infrastructure/storage/README.md) for details.
-
----
-
-## 7. References
+## 5. References
 
 ### Google Cloud Documentation
 
@@ -578,24 +303,15 @@ pip install gcsfs
 - [GPU Regions and Zones](https://cloud.google.com/compute/docs/regions-zones/gpu-regions-zones) — Availability matrix for all GPU types
 - [AI Hypercomputer Overview](https://cloud.google.com/ai-hypercomputer/docs/overview) — Architecture and capabilities
 - [Storage Services for AI](https://cloud.google.com/ai-hypercomputer/docs/storage) — Google's recommended storage for training/inference
-- [Topology-Aware Scheduling on GKE](https://cloud.google.com/ai-hypercomputer/docs/workloads/schedule-gke-workloads-tas) — Schedule pods on topologically-close nodes
-- [Compact Placement Policies](https://cloud.google.com/compute/docs/instances/placement-policies-overview#about-compact-policies) — Control VM physical placement
-
-### Checkpointing & Storage
-
-- [Orbax Checkpointing (JAX)](https://github.com/google/orbax) — Async checkpointing for JAX/Flax
-- [PyTorch Distributed Checkpoint](https://pytorch.org/docs/stable/distributed.checkpoint.html) — Distributed checkpointing for PyTorch
-- [DeepSpeed Checkpointing](https://www.deepspeed.ai/docs/config-json/#checkpoint-options) — Async checkpointing configuration
-- [JAX Compilation Cache](https://jax.readthedocs.io/en/latest/persistent_compilation_cache.html) — XLA compilation caching
 
 ### Related Sections in This Repository
 
 - [Port a model to TPU](./port-to-tpu.md) — TorchTPU, what worked on our ports, MaxKernel and the TPU agent suite
-- [Capacity](../capacity/README.md) — Which capacity options each machine type takes, and how to choose one
-- [DWS Guide](../capacity/dws/README.md) — Dynamic Workload Scheduler comprehensive guide
-- [Cluster Toolkit](../workloads/cluster-toolkit/README.md) — Deploy AI-optimized GKE clusters
-- [Storage for AI Workloads](../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
-- [XPK](../workloads/xpk/README.md) — Accelerated Processing Kit for quick PoCs
+- [Get capacity](../3-get-capacity/README.md) — Which capacity options each machine type takes, and how to choose one
+- [Reservations](../3-get-capacity/reservations.md) — Reservation affinity, topology and dense allocation
+- [Checkpointing](../5-run/checkpointing.md) — Strategies, storage options and frequency for checkpoints
+- [Storage for AI Workloads](../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
+- [Debug and profile](../6-debug-and-profile/README.md) — Profile with XProf, and fit matmuls to the MXU
 
 ---
 

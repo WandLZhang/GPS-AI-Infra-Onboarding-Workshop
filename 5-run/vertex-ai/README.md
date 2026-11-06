@@ -19,7 +19,7 @@
 
 ## 1. Overview
 
-Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../../capacity/dws/) natively for **serverless training jobs**. By setting the scheduling strategy to `FLEX_START`, Vertex AI queues your training job and runs it when GPU resources become available — with zero infrastructure management.
+Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../../3-get-capacity/flex-start/) natively for **serverless training jobs**. By setting the scheduling strategy to `FLEX_START`, Vertex AI queues your training job and runs it when GPU resources become available — with zero infrastructure management.
 
 ### Key Points
 
@@ -42,7 +42,7 @@ Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../../capacity/dws/
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../../capacity/dws/).
+> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../../3-get-capacity/flex-start/).
 
 ---
 
@@ -60,11 +60,11 @@ Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../../capacity/dws/
 
 | Scenario | Better Alternative |
 |---|---|
-| Need raw VM control | [Compute Engine](../../capacity/flex-start-mig/) |
-| Need Kubernetes-native pipelines | [Cluster Toolkit](../cluster-toolkit/) or [XPK](../xpk/) |
-| Need Slurm job scheduling | [Cluster Director](../cluster-director/) |
-| Need guaranteed start time | [Calendar Mode](../../capacity/future-reservations/) |
-| Inference / serving workloads | [Cluster Toolkit](../cluster-toolkit/) (GKE) |
+| Need raw VM control | [Compute Engine](../vms/) |
+| Need Kubernetes-native pipelines | [Cluster Toolkit](../kubernetes/cluster-toolkit/) or [XPK](../kubernetes/xpk/) |
+| Need Slurm job scheduling | [Cluster Director](../slurm/) |
+| Need guaranteed start time | [Calendar Mode](../../3-get-capacity/calendar-mode/) |
+| Inference / serving workloads | [Cluster Toolkit](../kubernetes/cluster-toolkit/) (GKE) |
 
 ---
 
@@ -205,9 +205,9 @@ job.run(
 
 ### Related Guides in This Repository
 
-- [DWS Concepts](../../capacity/dws/) — Capacity acquisition models, pricing, compliance
+- [DWS Concepts](../../3-get-capacity/flex-start/) — Capacity acquisition models, pricing, compliance
 - [Deployment Methods Overview](../) — Compare all deployment methods
-- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Storage for AI Workloads](../../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
 
 ---
 

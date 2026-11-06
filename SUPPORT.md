@@ -1,6 +1,6 @@
 # Get help
 
-Ask your harness first. It reads the current docs: [Ask your harness](./harness-setup/README.md#ask-your-harness).
+Ask your harness first. It reads the current docs: [Ask your harness](./1-setup/README.md#ask-your-harness).
 
 - **Quota:** request an increase from the Quotas page ([how](https://cloud.google.com/docs/quotas/help/request_increase)).
 - **Support:** [Google Cloud support](https://cloud.google.com/support).

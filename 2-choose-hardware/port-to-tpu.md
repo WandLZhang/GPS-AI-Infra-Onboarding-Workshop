@@ -1,6 +1,6 @@
 # Port a model to TPU
 
-Bring a PyTorch or JAX model up on Cloud TPU, then make it beat the GPU baseline. Size the job first with [Size a job before you ask for chips](./README.md#size-a-job-before-you-ask-for-chips) and [Fit matmuls to the MXU](./README.md#tpu-fit-matmuls-to-the-mxu).
+Bring a PyTorch or JAX model up on Cloud TPU, then make it beat the GPU baseline. Size the job first with [Size a job before you ask for chips](./README.md#size-a-job-before-you-ask-for-chips) and [Fit matmuls to the MXU](../6-debug-and-profile/README.md#tpu-fit-matmuls-to-the-mxu).
 
 ## Start with TorchTPU
 
@@ -8,14 +8,14 @@ For PyTorch, start with TorchTPU. Google's [PyTorch on TPU](https://docs.cloud.g
 
 To port a PyTorch model with a harness, try the [TPU agent suite](https://github.com/google-pytorch/tpu-agent-suite) (Preview, Claude Code and Antigravity).
 
-For serving recipes that already run vLLM-TorchTPU on Ironwood and Trillium, see [Start from a recipe](../workloads/README.md#start-from-a-recipe).
+For serving recipes that already run vLLM-TorchTPU on Ironwood and Trillium, see [Start from a recipe](../8-examples/README.md#start-from-a-recipe).
 
 ## What worked on our ports, in order
 
 1. Get it running before you make it fast. Expect the first number to lose to the GPU; that's normal for an untuned port.
 2. Name the baseline you got. If you compared against a different GPU than planned, say so in every readout.
 3. Sweep architecture choices before tuning flags. In vLLM's TPU backend, switching the MoE kernel backend moved throughput more than any command-line flag did.
-4. When summary numbers stop helping, switch to profiles, which show where the time goes. tpu-inference ships [`tpu_profiling.py`](https://github.com/vllm-project/tpu-inference/blob/bec31b7cce132ed995daed8d39321b943d15be73/examples/tpu_profiling.py). [Profile with XProf](../monitoring/README.md#profile-with-xprof) shows how to read a profile.
+4. When summary numbers stop helping, switch to profiles, which show where the time goes. tpu-inference ships [`tpu_profiling.py`](https://github.com/vllm-project/tpu-inference/blob/bec31b7cce132ed995daed8d39321b943d15be73/examples/tpu_profiling.py). [Profile with XProf](../6-debug-and-profile/README.md#profile-with-xprof) shows how to read a profile.
 5. Profile prefill and decode separately. They have different bottlenecks, and averaging hides both.
 6. Treat correctness, quantization and upstreaming as part of the port. For correctness, run several dozen prompts at temperature 0 against the GPU implementation and check every prompt where the tokens differ.
 

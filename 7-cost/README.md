@@ -1,6 +1,8 @@
-# Billing & Usage Report — Cost Monitoring and Limits for AI Workloads
+# Cost: Budgets, Alerts and Billing for AI Workloads
 
-> A comprehensive guide to monitoring costs, setting budgets and alerts, enforcing quotas, and optimizing spend for GPU and TPU workloads on Google Cloud — covering every project in your organization.
+> A guide to monitoring costs, setting budgets and alerts, and optimizing spend for GPU and TPU workloads on Google Cloud, covering every project in your organization.
+
+Today's prices, and how to look them up, are on [prices](./prices.md). Quota is in [get capacity](../3-get-capacity/quota.md).
 
 ---
 
@@ -11,11 +13,10 @@
 3. [Billing Export to BigQuery](#3-billing-export-to-bigquery)
 4. [Budgets & Alerts](#4-budgets--alerts)
 5. [Programmatic Cost Controls](#5-programmatic-cost-controls)
-6. [Quotas & Resource Limits](#6-quotas--resource-limits)
-7. [Committed Use Discounts (CUDs)](#7-committed-use-discounts-cuds)
-8. [Cost Optimization for AI Workloads](#8-cost-optimization-for-ai-workloads)
-9. [Per-Project Cost Monitoring Checklist](#9-per-project-cost-monitoring-checklist)
-10. [References](#10-references)
+6. [Committed Use Discounts (CUDs)](#6-committed-use-discounts-cuds)
+7. [Cost Optimization for AI Workloads](#7-cost-optimization-for-ai-workloads)
+8. [Per-Project Cost Monitoring Checklist](#8-per-project-cost-monitoring-checklist)
+9. [References](#9-references)
 
 ---
 
@@ -490,138 +491,15 @@ gcloud services list --project=$PROJECT_ID --available
 # Navigate to: APIs & Services → Dashboard → Select API → Quotas → Edit
 ```
 
-### 5.3 GKE Cost Controls with Kueue
-
-For GKE AI workloads, [Kueue](https://kueue.sigs.k8s.io/) provides workload-level resource quotas:
-
-```yaml
-# ClusterQueue with GPU resource limits
-apiVersion: kueue.x-k8s.io/v1beta1
-kind: ClusterQueue
-metadata:
-  name: gpu-training-queue
-spec:
-  resourceGroups:
-    - coveredResources: ["cpu", "memory", "nvidia.com/gpu"]
-      flavors:
-        - name: a3-ultra-spot
-          resources:
-            - name: "nvidia.com/gpu"
-              nominalQuota: 16        # Max 16 GPUs
-            - name: "cpu"
-              nominalQuota: 208
-            - name: "memory"
-              nominalQuota: 1872Gi
----
-# ResourceQuota per namespace
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: gpu-quota
-  namespace: ml-training
-spec:
-  hard:
-    requests.nvidia.com/gpu: "8"     # Max 8 GPUs for this namespace
-    requests.cpu: "104"
-    requests.memory: "936Gi"
-```
+To cap GPUs per team on GKE, use a Kueue ClusterQueue: [Cap GPU use per team with Kueue](../5-run/kubernetes/README.md#cap-gpu-use-per-team-with-kueue).
 
 ---
 
-## 6. Quotas & Resource Limits
-
-Quotas are hard limits on how many resources a project can consume. They are the most effective guard against runaway GPU/TPU costs.
-
-### 6.1 View Current Quotas
-
-```bash
-# View all Compute Engine quotas for a project
-gcloud compute project-info describe --project=$PROJECT_ID \
-    --format="table(quotas.metric,quotas.limit,quotas.usage)"
-
-# View GPU-specific quotas
-gcloud compute project-info describe --project=$PROJECT_ID \
-    --format="table(quotas.metric,quotas.limit,quotas.usage)" \
-    | grep -i gpu
-
-# View quotas for a specific region
-gcloud compute regions describe us-central1 \
-    --project=$PROJECT_ID \
-    --format="table(quotas.metric,quotas.limit,quotas.usage)" \
-    | grep -i gpu
-
-# View TPU quotas
-gcloud services quota list \
-    --service=tpu.googleapis.com \
-    --project=$PROJECT_ID
-```
-
-### 6.2 Key GPU/TPU Quotas
-
-| Quota | Scope | Description |
-|---|---|---|
-| `NVIDIA_H100_GPUS` | Per region | Max H100 GPUs in a region |
-| `NVIDIA_H200_GPUS` | Per region | Max H200 GPUs in a region |
-| `NVIDIA_A100_GPUS` | Per region | Max A100 GPUs in a region |
-| `NVIDIA_L4_GPUS` | Per region | Max L4 GPUs in a region |
-| `GPUS_ALL_REGIONS` | Global | Max GPUs across all regions |
-| `PREEMPTIBLE_NVIDIA_H100_GPUS` | Per region | Max Spot/preemptible H100 GPUs |
-| `TPU v6e cores per project per zone` | Per zone | Max TPU v6e cores |
-| `TPU v5p cores per project per zone` | Per zone | Max TPU v5p cores |
-| `TPU v5 lite pod cores per project per zone` | Per zone | Max TPU v5e cores |
-
-### 6.3 Request Quota Increases
-
-```bash
-# Request a GPU quota increase via the console
-# Navigate to: IAM & Admin → Quotas → Filter by "GPU"
-# Select the quota → Edit Quotas → Enter new limit → Submit
-
-# Direct URL
-# https://console.cloud.google.com/iam-admin/quotas?project=$PROJECT_ID
-```
-
-> **Best Practice:** Request only the quota you need. Lower quotas act as a natural spending cap — you physically cannot spin up more GPUs/TPUs than your quota allows.
-
-### 6.4 Default TPU Quotas
-
-| TPU Version | On-Demand Default | Preemptible Default |
-|---|---|---|
-| **v6e** | 512 cores/zone | 1,536 cores/zone |
-| **v5p** | 128 cores/zone | 768 cores/zone |
-| **v5e** | 512 cores/zone | 1,536 cores/zone |
-| **v4** | 0 cores/zone | 0 cores/zone |
-
-> **Note:** TPU v4 requires manual quota approval. All TPU v6e and v5p on-demand quota increases require manual approval (auto-approve threshold is 0).
-
-### 6.5 Monitor Quota Usage with Alerts
-
-Set up alerts when quota usage approaches the limit:
-
-```bash
-# Create a Cloud Monitoring alert for GPU quota usage
-# Navigate to: Monitoring → Alerting → Create Policy
-
-# PromQL for GPU quota utilization
-# serviceruntime.googleapis.com/quota/allocation/usage
-# filtered by quota_metric containing "gpu"
-```
-
-**Recommended quota alerts:**
-
-| Alert | Condition | Threshold | Action |
-|---|---|---|---|
-| **GPU quota > 80%** | Usage / Limit > 0.8 | Warning | Request quota increase proactively |
-| **GPU quota > 95%** | Usage / Limit > 0.95 | Critical | Immediate review — jobs may fail |
-| **TPU quota > 80%** | Usage / Limit > 0.8 | Warning | Request quota increase proactively |
-
----
-
-## 7. Committed Use Discounts (CUDs)
+## 6. Committed Use Discounts (CUDs)
 
 For sustained AI workloads, CUDs provide significant cost savings in exchange for a 1-year or 3-year commitment.
 
-### 7.1 CUD Types
+### 6.1 CUD Types
 
 | CUD Type | Discount | Commitment | Best For |
 |---|---|---|---|
@@ -629,7 +507,7 @@ For sustained AI workloads, CUDs provide significant cost savings in exchange fo
 | **Spend-based** | Up to **52%** (3-year) | Minimum hourly spend on a service | Variable workloads across services (GKE, Cloud Run, etc.) |
 | **Compute flexible** | Up to **46%** (3-year) | Spend commitment, flexible across machine families | Mixed GPU types or evolving infrastructure |
 
-### 7.2 CUD Recommendations from FinOps Hub
+### 6.2 CUD Recommendations from FinOps Hub
 
 The FinOps Hub provides automated CUD recommendations based on your historical usage:
 
@@ -638,7 +516,7 @@ The FinOps Hub provides automated CUD recommendations based on your historical u
 3. Click on CUD recommendations to see projected savings
 4. Use the **Simulate scenarios** feature to model different commitment levels
 
-### 7.3 CUD Analysis Dashboard
+### 6.3 CUD Analysis Dashboard
 
 Analyze the effectiveness of your existing CUDs:
 
@@ -653,7 +531,7 @@ Analyze the effectiveness of your existing CUDs:
 | **CUD coverage rate** | > 70% of eligible spend | Purchase additional CUDs |
 | **Unused commitment fees** | $0 | Investigate underutilization |
 
-### 7.4 CUD Attribution
+### 6.4 CUD Attribution
 
 Understand how CUD fees and credits are attributed across projects:
 
@@ -664,9 +542,9 @@ Understand how CUD fees and credits are attributed across projects:
 
 ---
 
-## 8. Cost Optimization for AI Workloads
+## 7. Cost Optimization for AI Workloads
 
-### 8.1 Optimization Strategies
+### 7.1 Optimization Strategies
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -696,7 +574,7 @@ Understand how CUD fees and credits are attributed across projects:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 8.2 Compute Savings
+### 7.2 Compute Savings
 
 | Strategy | Savings | Trade-off | When to Use |
 |---|---|---|---|
@@ -707,7 +585,7 @@ Understand how CUD fees and credits are attributed across projects:
 | **Right-sizing VMs** | 10–40% | Requires profiling | Overprovisioned VMs (check FinOps Hub) |
 | **Idle resource cleanup** | 100% of idle cost | Requires process/automation | Forgotten dev clusters, unused disks |
 
-### 8.3 Storage Savings
+### 7.3 Storage Savings
 
 | Strategy | How | Savings |
 |---|---|---|
@@ -740,7 +618,7 @@ gcloud storage buckets update gs://$BUCKET_NAME \
     --lifecycle-file=/tmp/lifecycle.json
 ```
 
-### 8.4 Monitoring Cost Savings
+### 7.4 Monitoring Cost Savings
 
 | Strategy | How | Savings |
 |---|---|---|
@@ -751,7 +629,7 @@ gcloud storage buckets update gs://$BUCKET_NAME \
 
 ---
 
-## 9. Per-Project Cost Monitoring Checklist
+## 8. Per-Project Cost Monitoring Checklist
 
 Every project running AI workloads should implement the following. Use this as a checklist during project setup and during periodic reviews.
 
@@ -822,7 +700,7 @@ gcloud compute project-info describe --project=$PROJECT_ID \
 
 ---
 
-## 10. References
+## 9. References
 
 ### Budgets & Alerts
 
@@ -853,21 +731,15 @@ gcloud compute project-info describe --project=$PROJECT_ID \
 - [CUD Attribution](https://cloud.google.com/docs/cuds-attribution) — Proportional and prioritized attribution
 - [CUD Metadata Export](https://cloud.google.com/billing/docs/how-to/export-data-bigquery-tables/cud-export) — Export CUD data to BigQuery
 
-### Quotas
-
-- [Compute Engine Quotas & Limits](https://cloud.google.com/compute/quotas-limits) — GPU quotas per region
-- [Cloud TPU Quotas](https://cloud.google.com/tpu/docs/quota) — TPU core quotas per zone
-- [Request a Quota Increase](https://cloud.google.com/docs/quotas/help/request_increase) — How to request more
-- [Quota Adjuster](https://cloud.google.com/docs/quotas/quota-adjuster) — Automate quota adjustments
-- [Cloud Quotas Overview](https://cloud.google.com/docs/quotas/overview) — How quotas work
-
 ### Related Sections in This Repository
 
-- [Accelerator Guide](../accelerators/README.md) — GPU selection and sizing (impacts cost)
-- [DWS Guide](../capacity/dws/README.md) — DWS Flex-Start for up to 53% discount
-- [Cluster Toolkit](../workloads/cluster-toolkit/README.md) — Reservation-bound and Spot GKE clusters
-- [Storage Guide](../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, storage tiering
-- [Monitoring & Observability](../monitoring/README.md) — Monitoring cost optimization strategies
+- [Prices](./prices.md) — Today's price for a machine type, and dated Flex-start, Calendar and Spot prices
+- [Quota](../3-get-capacity/quota.md) — View quotas, request increases, and alert on usage
+- [Choose hardware](../2-choose-hardware/README.md) — GPU selection and sizing (impacts cost)
+- [Flex-start](../3-get-capacity/flex-start/README.md) — DWS Flex-start for discounted, queued capacity
+- [Cluster Toolkit](../5-run/kubernetes/cluster-toolkit/README.md) — Reservation-bound and Spot GKE clusters
+- [Storage Guide](../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, storage tiering
+- [Debug and profile](../6-debug-and-profile/README.md) — Dashboards, alerts and profiles
 - [Get help](../SUPPORT.md) — Support cases, forums, quota increases and compute for academic research
 
 ---

@@ -33,7 +33,7 @@ Open [Cloud Shell](https://shell.cloud.google.com/?show=terminal) and paste:
 
 ```bash
 git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
-GPS-AI-Infra-Onboarding-Workshop/harness-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
+GPS-AI-Infra-Onboarding-Workshop/1-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
 ```
 
 Click **Authorize** when Cloud Shell asks. The script turns on the Vertex AI API first, then prints the Model Garden link for [step 2](#2-turn-on-claude-opus-55). To run the script again, run `git -C GPS-AI-Infra-Onboarding-Workshop pull`, then paste the second line. Each step checks what exists first.
@@ -123,7 +123,7 @@ Paste the prompt from [step 3](#3-open-the-workstation) into agy, or fix it by h
 
    ```bash
    GITHUB_PERSONAL_ACCESS_TOKEN=<token> HF_TOKEN=<token> \
-     ~/GPS-AI-Infra-Onboarding-Workshop/harness-setup/claude-code/setup.sh <PROJECT_ID>
+     ~/GPS-AI-Infra-Onboarding-Workshop/1-setup/claude-code/setup.sh <PROJECT_ID>
    ```
 
 Nothing on the workstation asks for a sign-in code. The exception is `ws-login`, which runs gcloud as you instead of the service account.
@@ -180,7 +180,7 @@ A new project in our test organization inherited the 33 restrictive constraints 
 When a student's org isn't ready, build their workstation in your own project. Run the loop in tmux, so a closed tab doesn't stop it:
 
 ```bash
-cd GPS-AI-Infra-Onboarding-Workshop/harness-setup/cloud-workstation
+cd GPS-AI-Infra-Onboarding-Workshop/1-setup/cloud-workstation
 for EMAIL in student1@example.com student2@example.com student3@example.com; do
   ./create_workstation.sh <PROJECT_ID> "$EMAIL"
 done
@@ -207,7 +207,7 @@ gcloud auth application-default login
 gcloud config set project <PROJECT_ID>
 gcloud services enable aiplatform.googleapis.com
 git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
-cd GPS-AI-Infra-Onboarding-Workshop/harness-setup/claude-code
+cd GPS-AI-Infra-Onboarding-Workshop/1-setup/claude-code
 NO_VSCODE=1 ./setup.sh <PROJECT_ID>
 source ~/.bashrc
 claude-smoke-test
@@ -306,7 +306,7 @@ With the Developer Knowledge MCP set up, your harness answers questions like the
 - "How do I serve an LLM with vLLM on TPUs in GKE?"
 - "What tensor dimensions and batch sizes does the Cloud TPU performance guide recommend?"
 
-For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pricing-scraper): `gcp-pricing accelerator --filter <machine-type>` or `gcp-pricing tpu --filter <generation>`, for example `gcp-pricing tpu --filter Trillium`. Pricing pages render in JavaScript, so a plain fetch returns an empty page. The CLI captures every table and region to a file the harness can search. For zones, capacity options and the other facts that change, see [Look up facts that change](../capacity/README.md#look-up-facts-that-change).
+For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pricing-scraper): `gcp-pricing accelerator --filter <machine-type>` or `gcp-pricing tpu --filter <generation>`, for example `gcp-pricing tpu --filter Trillium`. Pricing pages render in JavaScript, so a plain fetch returns an empty page. The CLI captures every table and region to a file the harness can search. For zones, capacity options and the other facts that change, see [Look up facts that change](../3-get-capacity/README.md#look-up-facts-that-change).
 
 ## Other harnesses
 
@@ -316,7 +316,7 @@ For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pri
 ## What's in this folder
 
 ```
-harness-setup/
+1-setup/
 ├── README.md                              # This file
 ├── cloud-workstation/
 │   ├── create_workstation.sh              # Builds the workstation and sets it up, in one run

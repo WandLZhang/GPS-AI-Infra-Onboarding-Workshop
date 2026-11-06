@@ -1,4 +1,4 @@
-# Calendar Mode — Future Reservations with Guaranteed Start Time
+# Calendar Mode: Book GPUs or TPUs for Fixed Dates
 
 > Reserve GPU/TPU capacity for a specific future time window with guaranteed provisioning. Unlike flex-start (which provisions when available), calendar mode guarantees resources at your requested start time — with a committed cost obligation.
 
@@ -43,7 +43,7 @@ Future Reservations in **Calendar Mode** let you reserve GPU capacity for a **sp
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../dws/).
+> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../flex-start/).
 
 ---
 
@@ -61,10 +61,10 @@ Future Reservations in **Calendar Mode** let you reserve GPU capacity for a **sp
 
 | Scenario | Better Alternative |
 |---|---|
-| Time-flexible, cost-sensitive workloads | [Compute Engine Flex-start](../flex-start-mig/) or [Cluster Toolkit](../../workloads/cluster-toolkit/) |
-| Quick PoC or experimentation | [XPK](../../workloads/xpk/) with `--flex` |
-| Serverless training | [Vertex AI](../../workloads/vertex-ai/) |
-| Need Slurm-based scheduling | [Cluster Director](../../workloads/cluster-director/) |
+| Time-flexible, cost-sensitive workloads | [Compute Engine Flex-start](../../5-run/vms/) or [Cluster Toolkit](../../5-run/kubernetes/cluster-toolkit/) |
+| Quick PoC or experimentation | [XPK](../../5-run/kubernetes/xpk/) with `--flex` |
+| Serverless training | [Vertex AI](../../5-run/vertex-ai/) |
+| Need Slurm-based scheduling | [Cluster Director](../../5-run/slurm/) |
 
 ---
 
@@ -110,6 +110,23 @@ Future Reservations in **Calendar Mode** let you reserve GPU capacity for a **sp
 | **Auto-delete** | Required (enabled) | Reservation deleted at end time |
 | **Share type** | Single-project or Shared (up to 100 projects) | Can share across projects in your org |
 
+### Sizes, durations and machine types
+
+| Property | Value |
+|---|---|
+| **Start time** | Guaranteed at your requested time |
+| **Min lead time** | 87 hours (GPUs), 6 hours (TPUs) |
+| **Pricing** | Discounted vs. on-demand: about 30% to 53% off, depending on the machine type ([Prices by machine type](../../7-cost/prices.md#prices-by-machine-type)) |
+| **Cost commitment** | Cannot cancel after submission — you pay from start time regardless |
+| **Allocation** | Dense (GPUs), Flexible (TPUs) |
+| **Share type** | Single-project or shared (up to 100 projects) |
+| **Request size** | GPUs: 1 to 80 VMs. H4D: 1 to 256 VMs. TPUs: 1, 4, 8, 16, 32, 64, 128, 256, 512 or 1,024 chips |
+| **How far ahead** | Availability shows up to 60 days ahead for GPUs and H4D, 120 days for TPUs |
+| **Duration** | 1 to 90 days |
+| **Machine types** | GPU and H4D: A4, A3 Ultra, A3 Mega, A3 High with 8 GPUs, A3 Edge and H4D. TPU: TPU7x, v6e and v5p |
+
+> Source: [Future reservation requests in calendar mode](https://docs.cloud.google.com/compute/docs/instances/future-reservations-calendar-mode-overview) (last updated 2026-10-13). A2, G2 and G4 aren't on the list, and the advice API rejects them with "This machine family is not supported in Calendar Mode." On 2026-10-15 the API also rejected TPU7x, which is on the list, and returned zones for v5e, which isn't.
+
 ---
 
 ## 6. Step-by-Step Example
@@ -122,6 +139,23 @@ export ZONE="us-central1-a"
 
 gcloud config set project $PROJECT_ID
 ```
+
+### Check Calendar availability before you book
+
+The advice API tells you when and where you could book, and creates nothing:
+
+```bash
+gcloud compute advice calendar-mode \
+  --machine-type=a3-megagpu-8g --vm-count=1 --region=us-central1 \
+  --duration-range=min=7d,max=7d \
+  --start-time-range=from=<YYYY-MM-DD>,to=<YYYY-MM-DD>
+```
+
+- It needs the `compute.advice.calendarMode` permission on the project you run it from.
+- The API returns the longest block up to your `max` duration, even when a shorter block starts sooner. On 2026-10-15, a 7-day request for `a3-megagpu-8g` in us-central1 came back for Nov 9 to Nov 16, and a 1-to-30-day range came back for Dec 9 to Jan 8. Set `max` to the length you need.
+- `NO_CAPACITY` means the zone takes Calendar requests for that machine type but has nothing free in your window. `NOT_SUPPORTED` means the zone doesn't take Calendar requests for that machine type, even if it carries the machine type. Retrying won't change it.
+- [`discover-calendar-zones.py`](./discover-calendar-zones.py) runs the check for the A3, A4, H4D and TPU v5e, v5p and v6e machine types in every region that has them, and writes each zone's status to a CSV.
+- [`calendar-poll.sh`](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/calendar-poll.sh) checks H100, H200 and B200 across US regions and prints each bookable window. Schedule it daily with cron. It books only if you set `CALENDAR_AUTOBOOK=1`.
 
 ### 1. Check Future Resource Availability
 
@@ -190,7 +224,7 @@ gcloud compute instances create training-vm-001 \
 | **Use Assured Workloads** | For FedRAMP High, DoD IL4/IL5 — automatically enforces resource location constraints |
 | **Document zone selection rationale** | For audit purposes, document why specific zones were chosen |
 
-> For detailed compliance guidance, see the [DWS Guide — Data Residency & Compliance](../dws/#5-data-residency--compliance-considerations).
+> For detailed compliance guidance, see the [DWS Guide — Data Residency & Compliance](../flex-start/#5-data-residency--compliance-considerations).
 
 ---
 
@@ -217,10 +251,10 @@ gcloud compute instances create training-vm-001 \
 
 ### Related Guides in This Repository
 
-- [DWS Concepts](../dws/) — Capacity acquisition models, pricing, compliance
-- [Compute Engine Flex-start](../flex-start-mig/) — Queued provisioning (no guaranteed start)
-- [Deployment Methods Overview](../../workloads/) — Compare all deployment methods
-- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
+- [DWS Concepts](../flex-start/) — Capacity acquisition models, pricing, compliance
+- [Compute Engine Flex-start](../../5-run/vms/) — Queued provisioning (no guaranteed start)
+- [Deployment Methods Overview](../../5-run/) — Compare all deployment methods
+- [Storage for AI Workloads](../../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
 
 ---
 

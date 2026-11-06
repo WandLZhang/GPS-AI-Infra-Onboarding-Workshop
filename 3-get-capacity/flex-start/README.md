@@ -1,6 +1,6 @@
-# Dynamic Workload Scheduler (DWS) — Concepts & Capacity Acquisition
+# Flex-start and Dynamic Workload Scheduler (DWS)
 
-> Understand how Dynamic Workload Scheduler (DWS) enables cost-effective GPU and TPU resource acquisition on Google Cloud. This guide covers DWS concepts, capacity models, pricing, compliance, and best practices — independent of any specific deployment method.
+> Understand how Dynamic Workload Scheduler (DWS) enables cost-effective GPU and TPU resource acquisition on Google Cloud. DWS runs two capacity options: Flex-start, which this page covers, and [Calendar mode](../calendar-mode/). This guide also covers DWS concepts, compliance and best practices that apply to both.
 
 ---
 
@@ -104,7 +104,7 @@ Flex-start is DWS's queued provisioning model. Your request persists until capac
 |---|---|
 | **Start time** | When capacity becomes available (not guaranteed) |
 | **Max duration** | 7 days |
-| **Pricing** | Discounted vs. on-demand: about 50% to 57% off on the GPU and TPU types in [Prices by machine type](#prices-by-machine-type) |
+| **Pricing** | Discounted vs. on-demand: about 50% to 57% off on the GPU and TPU types in [Prices by machine type](../../7-cost/prices.md#prices-by-machine-type) |
 | **Allocation** | Dense (VMs placed close together) |
 | **All-at-once** | Yes — all VMs created simultaneously |
 | **Preemptible?** | No — once provisioned, VMs run until duration expires or you delete them |
@@ -113,22 +113,7 @@ To catch Flex-start capacity sooner, [`flex-spray.sh`](https://github.com/WandLZ
 
 ### Calendar Mode (Guaranteed Start)
 
-Calendar mode uses future reservations to guarantee capacity at a specific start time.
-
-| Property | Value |
-|---|---|
-| **Start time** | Guaranteed at your requested time |
-| **Min lead time** | 87 hours (GPUs), 6 hours (TPUs) |
-| **Pricing** | Discounted vs. on-demand: about 30% to 53% off, depending on the machine type ([Prices by machine type](#prices-by-machine-type)) |
-| **Cost commitment** | Cannot cancel after submission — you pay from start time regardless |
-| **Allocation** | Dense (GPUs), Flexible (TPUs) |
-| **Share type** | Single-project or shared (up to 100 projects) |
-| **Request size** | GPUs: 1 to 80 VMs. H4D: 1 to 256 VMs. TPUs: 1, 4, 8, 16, 32, 64, 128, 256, 512 or 1,024 chips |
-| **How far ahead** | Availability shows up to 60 days ahead for GPUs and H4D, 120 days for TPUs |
-| **Duration** | 1 to 90 days |
-| **Machine types** | GPU and H4D: A4, A3 Ultra, A3 Mega, A3 High with 8 GPUs, A3 Edge and H4D. TPU: TPU7x, v6e and v5p |
-
-> Source: [Future reservation requests in calendar mode](https://docs.cloud.google.com/compute/docs/instances/future-reservations-calendar-mode-overview) (last updated 2026-10-13). A2, G2 and G4 aren't on the list, and the advice API rejects them with "This machine family is not supported in Calendar Mode." On 2026-10-15 the API also rejected TPU7x, which is on the list, and returned zones for v5e, which isn't.
+Calendar mode uses future reservations to guarantee capacity at a specific start time. Its sizes, lead times, machine types and availability check are on the [Calendar mode](../calendar-mode/) page.
 
 ### Choosing Between Flex-start and Calendar Mode
 
@@ -146,28 +131,11 @@ Calendar mode uses future reservations to guarantee capacity at a specific start
               • Cannot cancel         • Cancel anytime
 ```
 
-### Check Calendar availability before you book
-
-The advice API tells you when and where you could book, and creates nothing:
-
-```bash
-gcloud compute advice calendar-mode \
-  --machine-type=a3-megagpu-8g --vm-count=1 --region=us-central1 \
-  --duration-range=min=7d,max=7d \
-  --start-time-range=from=<YYYY-MM-DD>,to=<YYYY-MM-DD>
-```
-
-- It needs the `compute.advice.calendarMode` permission on the project you run it from.
-- The API returns the longest block up to your `max` duration, even when a shorter block starts sooner. On 2026-10-15, a 7-day request for `a3-megagpu-8g` in us-central1 came back for Nov 9 to Nov 16, and a 1-to-30-day range came back for Dec 9 to Jan 8. Set `max` to the length you need.
-- `NO_CAPACITY` means the zone takes Calendar requests for that machine type but has nothing free in your window. `NOT_SUPPORTED` means the zone doesn't take Calendar requests for that machine type, even if it carries the machine type. Retrying won't change it.
-- [`discover-calendar-zones.py`](./discover-calendar-zones.py) runs the check for the A3, A4, H4D and TPU v5e, v5p and v6e machine types in every region that has them, and writes each zone's status to a CSV.
-- [`calendar-poll.sh`](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/calendar-poll.sh) checks H100, H200 and B200 across US regions and prints each bookable window. Schedule it daily with cron. It books only if you set `CALENDAR_AUTOBOOK=1`.
-
 ---
 
 ## 3. How DWS Integrates with GKE
 
-When DWS is used through GKE-based deployment methods ([Cluster Toolkit](../../workloads/cluster-toolkit/), [XPK](../../workloads/xpk/)), the integration works through **queued provisioning** and **[Kueue](https://kueue.sigs.k8s.io/)** (Kubernetes-native job queuing).
+When DWS is used through GKE-based deployment methods ([Cluster Toolkit](../../5-run/kubernetes/cluster-toolkit/), [XPK](../../5-run/kubernetes/xpk/)), the integration works through **queued provisioning** and **[Kueue](https://kueue.sigs.k8s.io/)** (Kubernetes-native job queuing).
 
 ### Architecture
 
@@ -217,7 +185,7 @@ Job submitted → Kueue tries Reservation flavor (Priority 1)
                                                     └── DWS queues and provisions when available
 ```
 
-> For step-by-step implementation of this pattern, see the [Cluster Toolkit Guide](../../workloads/cluster-toolkit/) or [DWS on GKE documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest).
+> For step-by-step implementation of this pattern, see the [Cluster Toolkit Guide](../../5-run/kubernetes/cluster-toolkit/) or [DWS on GKE documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest).
 
 ### GKE Version Requirements
 
@@ -232,7 +200,7 @@ Job submitted → Kueue tries Reservation flavor (Priority 1)
 
 ### GPU Machine Types Available with DWS
 
-For GPUs, **Flex-start VMs are available in all zones where the GPU machine types are available**. Calendar mode takes fewer machine types and fewer zones. See [Calendar Mode](#calendar-mode-guaranteed-start) for the types and [Check Calendar availability](#check-calendar-availability-before-you-book) for the zones.
+For GPUs, **Flex-start VMs are available in all zones where the GPU machine types are available**. Calendar mode takes fewer machine types and fewer zones. See [Calendar mode](../calendar-mode/README.md#sizes-durations-and-machine-types) for the types and [Check Calendar availability](../calendar-mode/README.md#check-calendar-availability-before-you-book) for the zones.
 
 | Machine Type | GPU | GPUs per VM | Key US Zones | Notes |
 |---|---|---|---|---|
@@ -347,7 +315,7 @@ For FedRAMP High, DoD IL4/IL5 workloads that require US-only data residency:
 
 4. **Consider zone-specific capacity**: If your compliance requirement restricts you to specific zones (e.g., `us-east4` for DoD/IC proximity), understand that DWS will queue your request rather than redirecting it to another zone. Plan for potentially longer wait times in zones with less capacity.
 
-5. **Storage residency alignment**: Ensure your training data, model artifacts, and checkpoint storage (GCS buckets, Rapid Buckets) are in the **same region** as your DWS GPU workloads. See [Storage for AI Workloads](../../infrastructure/storage/README.md).
+5. **Storage residency alignment**: Ensure your training data, model artifacts, and checkpoint storage (GCS buckets, Rapid Buckets) are in the **same region** as your DWS GPU workloads. See [Storage for AI Workloads](../../4-storage-and-network/storage/README.md).
 
 ---
 
@@ -396,44 +364,8 @@ For FedRAMP High, DoD IL4/IL5 workloads that require US-only data residency:
 
 ## 7. Quota & Pricing
 
-### Quota Requirements by Deployment Method
-
-| Deployment Method | Quota Required | Notes |
-|---|---|---|
-| **[Compute Engine](../flex-start-mig/)** | Standard GPU quota (e.g., `NVIDIA_H100_GPUS`) | Request stays pending if insufficient quota |
-| **[Calendar Mode](../future-reservations/)** | No Compute Engine quota needed (reservation-bound model) | Only need quota for non-reservation resources (disks, IPs) |
-| **[Cluster Toolkit](../../workloads/cluster-toolkit/) / [XPK](../../workloads/xpk/)** | `ACTIVE_RESIZE_REQUESTS` (default: 100/project) + GPU quota | GKE uses Compute Engine quota under the hood |
-| **[Vertex AI](../../workloads/vertex-ai/)** | Preemptible Vertex AI quota (e.g., `custom_model_training_preemptible_nvidia_h100_gpus`) | Despite name, resources are NOT preemptible |
-
-### Prices by machine type
-
-DWS prices are well below on-demand, but the discount depends on the machine type. Public prices on 2026-10-15, USD per hour:
-
-| Machine type (us-central1) | On-demand | Flex-start | Calendar | Spot |
-|---|---|---|---|---|
-| `a3-highgpu-8g` (8x H100) | $88.49 | $38.32 | $41.60 | $52.79 |
-| `a3-megagpu-8g` (8x H100) | $93.40 | $40.32 | $44.00 | $50.44 |
-| `a3-ultragpu-8g` (8x H200) | $84.81 | $42.40 | $59.36 | $50.80 |
-| `a4-highgpu-8g` (8x B200) | none | $64.44 | $90.22 | $39.63 |
-| TPU Trillium (v6e), per chip, us-east1 | $2.70 | $1.35 | $1.89 | not on the TPU pricing page |
-
-- On H100 and H200, Flex-start costs less per hour than Spot, and Flex-start VMs aren't preempted during their run of up to 7 days.
-- On B200, Spot is the cheapest option, and there's no on-demand price.
-- Spot prices change. Re-pull any row before you quote it: `gcp-pricing accelerator --filter a3-megagpu-8g` or `gcp-pricing tpu --filter Trillium` ([install gcp-pricing](https://github.com/WandLZhang/gcp-pricing-scraper)).
-
-### DWS Pricing
-
-| Component | Pricing Model |
-|---|---|
-| **Flex-start VMs** | [DWS pricing](https://cloud.google.com/products/dws/pricing) — discounted vs. on-demand |
-| **Calendar Mode reservations** | [DWS pricing](https://cloud.google.com/products/dws/pricing) — charged from start time regardless of usage |
-| **Vertex AI DWS** | [DWS pricing](https://cloud.google.com/products/dws/pricing) + [serverless training management fees](https://cloud.google.com/vertex-ai/pricing#custom-trained_models) |
-
-> **Key Pricing Facts:**
-> - You are **not charged** for creating, canceling, or deleting resize requests.
-> - For flex-start, charges begin when VMs are created and end when VMs are deleted or run duration expires.
-> - For calendar mode, you **commit to pay at the start time** regardless of whether you use the capacity. You cannot cancel after submission.
-> - If a MIG creates only some Flex-start VMs and fails to create the rest, you may still incur charges until the partial VMs are automatically deleted.
+- Quota for each way of running DWS: [Quota requirements by deployment method](../quota.md#quota-requirements-by-deployment-method).
+- Flex-start, Calendar mode and Spot prices by machine type, and the DWS pricing rules: [prices](../../7-cost/prices.md).
 
 ---
 
@@ -461,14 +393,14 @@ DWS can be consumed through multiple deployment methods. Each has its own guide 
 
 | Deployment Method | Description | Guide |
 |---|---|---|
-| **Compute Engine** | MIG resize requests for raw VMs — no K8s or Slurm needed | [→ flex-start-mig/](../flex-start-mig/) |
-| **Calendar Mode** | Future reservations with guaranteed start time | [→ future-reservations/](../future-reservations/) |
-| **Cluster Toolkit** | Production GKE clusters via Terraform blueprints with Kueue integration | [→ cluster-toolkit/](../../workloads/cluster-toolkit/) |
-| **XPK** | Quick PoC GKE clusters with `--flex` flag | [→ xpk/](../../workloads/xpk/) |
-| **Cluster Director** | Fully managed Slurm clusters with DWS flex-start and calendar mode | [→ cluster-director/](../../workloads/cluster-director/) |
-| **Vertex AI** | Serverless training with FLEX_START scheduling strategy | [→ vertex-ai/](../../workloads/vertex-ai/) |
+| **Compute Engine** | MIG resize requests for raw VMs — no K8s or Slurm needed | [→ vms/](../../5-run/vms/) |
+| **Calendar Mode** | Future reservations with guaranteed start time | [→ calendar-mode/](../calendar-mode/) |
+| **Cluster Toolkit** | Production GKE clusters via Terraform blueprints with Kueue integration | [→ cluster-toolkit/](../../5-run/kubernetes/cluster-toolkit/) |
+| **XPK** | Quick PoC GKE clusters with `--flex` flag | [→ xpk/](../../5-run/kubernetes/xpk/) |
+| **Cluster Director** | Fully managed Slurm clusters with DWS flex-start and calendar mode | [→ slurm/](../../5-run/slurm/) |
+| **Vertex AI** | Serverless training with FLEX_START scheduling strategy | [→ vertex-ai/](../../5-run/vertex-ai/) |
 
-> For a comparison of all deployment methods, see the [Deploying Workloads Overview](../../workloads/).
+> For a comparison of all deployment methods, see the [Deploying Workloads Overview](../../5-run/).
 
 ---
 
@@ -502,9 +434,9 @@ DWS can be consumed through multiple deployment methods. Each has its own guide 
 
 ### Related Guides in This Repository
 
-- [Deploying Workloads Overview](../../workloads/) — Compare all deployment methods and decision framework
-- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
-- [Zero Trust IAP Access](../../infrastructure/zero-trust-iap-access/README.md) — Securing VM access for DWS-provisioned GPU VMs
+- [Deploying Workloads Overview](../../5-run/) — Compare all deployment methods and decision framework
+- [Storage for AI Workloads](../../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
+- [Zero Trust IAP Access](../../4-storage-and-network/private-vms/README.md) — Securing VM access for DWS-provisioned GPU VMs
 
 ---
 
