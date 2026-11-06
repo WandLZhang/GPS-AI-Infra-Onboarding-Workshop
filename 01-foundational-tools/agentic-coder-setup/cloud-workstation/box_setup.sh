@@ -137,7 +137,7 @@ if [ -x "$SETUP" ]; then
 fi
 T_SETUP=$(date +%s)
 
-say "== smoke test (three requests to Claude, about \$0.60) =="
+say "== smoke test (three requests to Claude, \$0.60 to \$1.25) =="
 if [ -x "$HOME/bin/claude-smoke-test" ]; then
   "$HOME/bin/claude-smoke-test" "$PROJECT" > "$LOGS/smoke.log" 2>&1
   rc=$?

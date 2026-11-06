@@ -96,6 +96,8 @@ run() {
   echo "$out" | grep -E "ERROR|error" | sed "s/^/    /" >&2
   return 1
 }
+# IAM names a service account serviceAccount:EMAIL and a person user:EMAIL.
+member() { case "$1" in *.gserviceaccount.com) echo "serviceAccount:$1" ;; *) echo "user:$1" ;; esac; }
 # Ask Claude Opus 5.5 on Vertex AI for an 8-token reply, as the account gcloud runs as. Prints the
 # HTTP status, then the error message when there is one.
 opus_check() {
@@ -235,16 +237,30 @@ for attempt in 1 2 3 4 5; do
 done
 
 say "== org policies =="
-cleared=0; failed=0
+cleared=0; failed=0; denied=0
 for C in $CONSTRAINTS; do
   for attempt in 1 2 3 4 5; do
     out="$(gcloud org-policies reset "$C" --project="$PROJECT" 2>&1)"
     if echo "$out" | grep -q "reset: true"; then cleared=$((cleared + 1)); break; fi
     # A constraint the org doesn't carry comes back NOT_FOUND or INVALID_ARGUMENT: nothing to reset.
     echo "$out" | grep -qE "NOT_FOUND|INVALID_ARGUMENT|not supported" && break
+    # A retry can't fix a missing role, and 5 tries on each of 38 constraints take 25 minutes.
+    if echo "$out" | grep -q "PERMISSION_DENIED"; then denied=1; break; fi
     if [ "$attempt" = 5 ]; then failed=$((failed + 1)); say "  ** $C: $(echo "$out" | tail -1)"; else sleep 10; fi
   done
+  [ "$denied" = 1 ] && break
 done
+if [ "$denied" = 1 ]; then
+  ORG=""
+  while read -r id type; do
+    [ "$type" = organization ] && ORG="$id"
+  done < <(gcloud projects get-ancestors "$PROJECT" --format="value(id,type)" 2>/dev/null)
+  say "  ** $RUNNER can't change org policies on $PROJECT, so the workstation can't be built yet **"
+  say "  An org admin grants Organization Policy Administrator on the org, once:"
+  say "    gcloud organizations add-iam-policy-binding ${ORG:-ORG_ID} --member=$(member "$RUNNER") --role=roles/orgpolicy.policyAdmin"
+  say "  Then run this script again."
+  exit 1
+fi
 say "  reset $cleared, failed $failed"
 # This constraint denies everything by default, so a reset leaves it denied. Claude Code's web
 # search is a partner model feature; without this allow it fails while web fetch still works.
@@ -381,7 +397,7 @@ say "== access for $EMAIL =="
 POLICY="$(mktemp)"
 if gcloud workstations get-iam-policy "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" \
      --region="$REGION" --project="$PROJECT" --format=json > "$POLICY" 2>/dev/null; then
-  python3 - "$POLICY" "user:$EMAIL" "user:$RUNNER" <<'EOF'
+  python3 - "$POLICY" "$(member "$EMAIL")" "$(member "$RUNNER")" <<'EOF'
 import json
 import sys
 
@@ -404,7 +420,7 @@ EOF
     || say "  ** couldn't grant roles/workstations.user; $EMAIL can't open the workstation **"
 fi
 rm -f "$POLICY"
-gcloud iam service-accounts add-iam-policy-binding "$SA" --member="user:$EMAIL" \
+gcloud iam service-accounts add-iam-policy-binding "$SA" --member="$(member "$EMAIL")" \
   --role=roles/iam.serviceAccountUser --project="$PROJECT" --quiet >/dev/null 2>&1 \
   && say "  actAs on $SA" || say "  ** couldn't grant actAs on $SA **"
 
@@ -420,6 +436,11 @@ say "== on the workstation: agents, Claude Code setup, smoke test =="
 GAPS="unknown"
 BOX_OPUS=""
 if [ -f "$SELF_DIR/box_setup.sh" ]; then
+  # On first use gcloud makes an SSH key and prints a page about it. Make the key quietly instead.
+  if [ ! -f "$HOME/.ssh/google_compute_engine" ]; then
+    mkdir -p "$HOME/.ssh"
+    ssh-keygen -q -t rsa -b 3072 -N "" -f "$HOME/.ssh/google_compute_engine" < /dev/null
+  fi
   B64="$(base64 -w0 "$SELF_DIR/box_setup.sh")"
   KEYVAR=""
   [ -n "${GOOGLE_DEV_KNOWLEDGE_API_KEY:-}" ] && KEYVAR="GOOGLE_DEV_KNOWLEDGE_API_KEY='$GOOGLE_DEV_KNOWLEDGE_API_KEY' "
