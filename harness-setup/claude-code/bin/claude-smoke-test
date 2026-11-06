@@ -132,7 +132,7 @@ for name, (passed, wanted) in checks.items():
 
 print(f"  total cost ${total:.2f}")
 if failed:
-    print(f"  {failed} of 3 checks failed. See 'If a check fails' in agentic-coder-setup/README.md.")
+    print(f"  {failed} of 3 checks failed. See 'If a check fails' in harness-setup/README.md.")
     sys.exit(1)
-print("  All 3 checks passed. Your agent can read the docs, price a machine and read your logs.")
+print("  All 3 checks passed. Claude Code can read the docs, price a machine and read your logs.")
 PY

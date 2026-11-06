@@ -31,7 +31,7 @@
 #   REGION = "global"  (Vertex AI Anthropic Claude global endpoint)
 #   Model  = "claude-opus-5-5[1m]" via Vertex
 #   Effort = "max", via the --effort flag on both launchers. settings.json holds
-#            "xhigh" because its effortLevel key rejects "max" (see cli-agent/README.md).
+#            "xhigh" because its effortLevel key rejects "max" (see README.md).
 
 set -e
 
@@ -204,7 +204,7 @@ echo "  ✓ ~/.claude/hooks/accelerator_guard.py installed (Stop)"
 # ------------------------------------------------------------------
 # The boot hook reinstalls gh and tmux after each restart, and runs your
 # scripts in ~/.workstation/startup.d. claude-backup copies conversations and
-# memory to a bucket you own (see cli-agent/README.md).
+# memory to a bucket you own (see README.md).
 echo ""
 echo "[+] Installing the boot hook and claude-backup..."
 cp "$SCRIPT_DIR/bin/claude-backup" "$HOME_DIR/bin/claude-backup"

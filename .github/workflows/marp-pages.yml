@@ -1,7 +1,7 @@
 # Copyright 2026 Google LLC
 # Licensed under the Apache License, Version 2.0
 #
-# Builds the agentic-coder-setup Marp deck and publishes the resulting
+# Builds the harness-setup Marp deck and publishes the resulting
 # static HTML to the gh-pages branch — viewable at
 #   https://wandlzhang.github.io/GPS-AI-Infra-Onboarding-Workshop/
 #
@@ -14,7 +14,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "01-foundational-tools/agentic-coder-setup/slides/**"
+      - "harness-setup/slides/**"
       - "visuals/**"
       - ".github/workflows/marp-pages.yml"
   workflow_dispatch:
@@ -32,10 +32,10 @@ jobs:
         uses: docker://marpteam/marp-cli:latest
         with:
           args: >-
-            -I 01-foundational-tools/agentic-coder-setup/slides/
+            -I harness-setup/slides/
             -o build/
             --html
-            --theme-set 01-foundational-tools/agentic-coder-setup/slides/theme.css
+            --theme-set harness-setup/slides/theme.css
         env:
           MARP_USER: root:root
 

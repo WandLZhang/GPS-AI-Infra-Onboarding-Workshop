@@ -18,11 +18,11 @@
 #
 #   bash box_setup.sh PROJECT_ID [WORKSHOP_BRANCH]
 #
-# Two agents go on first, because they're hard to break and they can fix anything after them:
+# Two harnesses go on first, because they're hard to break and they can fix anything after them:
 # agy (Antigravity CLI) and Claude Code. Then a check that Claude Opus 5.5 answers, the full Claude
-# Code setup (setup.sh) and the smoke test. A step that fails after the agents are in doesn't stop
-# the run. It goes into ~/setup-gaps.md, and the last lines print a prompt that tells either agent
-# to fix the gaps.
+# Code setup (setup.sh) and the smoke test. A step that fails after the harnesses are in doesn't
+# stop the run. It goes into ~/setup-gaps.md, and the last lines print a prompt that tells either
+# harness to fix the gaps.
 #
 # GOOGLE_DEV_KNOWLEDGE_API_KEY, if set, goes to setup.sh. Without it, setup.sh uses a key from the
 # project that's restricted to the Developer Knowledge API.
@@ -33,7 +33,7 @@ PROJECT="${1:?usage: box_setup.sh PROJECT_ID [WORKSHOP_BRANCH]}"
 BRANCH="${2:-main}"
 REPO_URL="https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git"
 REPO="$HOME/GPS-AI-Infra-Onboarding-Workshop"
-SETUP="$REPO/01-foundational-tools/agentic-coder-setup/cli-agent/claude-code/setup.sh"
+SETUP="$REPO/harness-setup/claude-code/setup.sh"
 GAPS="$HOME/setup-gaps.md"
 LOGS="$HOME/.cache/workstation-setup"
 mkdir -p "$LOGS" "$HOME/Projects"
@@ -55,7 +55,7 @@ printf '# Setup gaps on %s\n\nWritten by box_setup.sh at %s for project %s. Each
   "$(hostname)" "$(date -u '+%Y-%m-%d %H:%M UTC')" "$PROJECT" > "$GAPS"
 T0=$(date +%s)
 
-say "== agents: agy and Claude Code =="
+say "== harnesses: agy and Claude Code =="
 # The official installer puts the newest agy in ~/.local/bin. Cloud Workstations images also ship
 # one at /usr/bin/agy, which is the fallback.
 if curl -fsSL https://antigravity.google/cli/install.sh | bash > "$LOGS/agy-install.log" 2>&1 \
@@ -73,7 +73,7 @@ if curl -fsSL https://claude.ai/install.sh | bash -s stable > "$LOGS/claude-inst
 else
   gap "Claude Code didn't install. Run: curl -fsSL https://claude.ai/install.sh | bash -s stable. Log: $LOGS/claude-install.log"
 fi
-T_AGENTS=$(date +%s)
+T_HARNESSES=$(date +%s)
 
 say "== Claude Opus 5.5 on Vertex AI =="
 # Claude Code answers only once Claude Opus 5.5 is on for the project in Model Garden, and only a
@@ -149,6 +149,6 @@ fi
 T_SMOKE=$(date +%s)
 
 [ "$GAP_COUNT" = 0 ] && echo "No gaps. Every step finished." >> "$GAPS"
-say "== timing: agents $((T_AGENTS - T0))s, Opus check $((T_OPUS - T_AGENTS))s, setup.sh $((T_SETUP - T_OPUS))s, smoke test $((T_SMOKE - T_SETUP))s =="
+say "== timing: harnesses $((T_HARNESSES - T0))s, Opus check $((T_OPUS - T_HARNESSES))s, setup.sh $((T_SETUP - T_OPUS))s, smoke test $((T_SMOKE - T_SETUP))s =="
 echo "OPUS=$OPUS"
 echo "GAPS=$GAP_COUNT"
