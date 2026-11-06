@@ -22,7 +22,7 @@ Today's prices, and how to look them up, are on [prices](./prices.md). Quota is 
 
 ## 1. Overview
 
-AI infrastructure workloads on Google Cloud — especially GPU and TPU training jobs — can generate significant costs. At the list prices on 2026-11-06, a 256-chip TPU v5p slice costs **$1,075.20 an hour** on demand in us-east5, at $4.20 per chip-hour. Five `a3-ultragpu-8g` VMs cost **$10,176.83 a day** on demand in us-central1, at $84.81 an hour each. Get today's price from [prices](./prices.md#get-todays-price). Without proactive cost monitoring, a misconfigured job or forgotten cluster can result in tens of thousands of dollars in unplanned spend.
+AI infrastructure workloads on Google Cloud — especially GPU and TPU training jobs — can generate significant costs. At the list prices on 2026-11-06, a 256-chip TPU v5p slice costs **$1,075.20 an hour** on demand in us-east5, at $4.20 per chip-hour. Five `a3-megagpu-8g` VMs, with 8 H100 GPUs each, cost **$11,208.09 a day** on demand in us-central1, at $93.40 an hour each. Get today's price from [prices](./prices.md#get-todays-price). Without proactive cost monitoring, a misconfigured job or forgotten cluster can result in tens of thousands of dollars in unplanned spend.
 
 Google Cloud provides a layered cost management stack to monitor, alert, and control spending:
 
