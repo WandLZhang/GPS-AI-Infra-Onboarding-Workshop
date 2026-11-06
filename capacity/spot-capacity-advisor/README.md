@@ -40,6 +40,7 @@ If you consume Spot through **Managed Instance Groups (MIGs)**, **GKE**, or **bu
    POST https://compute.googleapis.com/compute/beta/projects/{PROJECT}/regions/{REGION}/advice/capacity
    ```
    A `gcloud` surface also exists: [`gcloud alpha compute advice capacity`](https://docs.cloud.google.com/sdk/gcloud/reference/alpha/compute/advice/capacity).
+4. **`jq`** for the examples below: `apt-get install jq`.
 
 ---
 

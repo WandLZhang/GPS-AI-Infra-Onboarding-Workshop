@@ -18,6 +18,7 @@ Packer boots a temporary Compute Engine VM from a base image, runs your install 
 
 | Need | Page |
 |---|---|
+| Install Packer on your machine | [Install Packer](https://developer.hashicorp.com/packer/install) |
 | Run Packer in Cloud Build | [Building VM images using Packer](https://docs.cloud.google.com/build/docs/building/build-vm-images-with-packer) |
 | Build Slurm images in a Cluster Toolkit blueprint | [Build custom images with Packer](https://docs.cloud.google.com/cluster-toolkit/docs/modules/packer) |
 | Look up a `googlecompute` option | [Google Cloud Platform Builder](https://developer.hashicorp.com/packer/integrations/hashicorp/googlecompute/latest/components/builder/googlecompute) |
