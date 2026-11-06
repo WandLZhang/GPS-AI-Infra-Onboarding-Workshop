@@ -6,7 +6,7 @@ Hands-on guides, scripts and labs for running AI and HPC workloads on Google Clo
 
 Set up a harness with [1-harness-setup](./1-harness-setup/). A harness is an AI assistant, such as Claude Code or agy, that reads docs, runs commands and edits files for you. The setup script builds a Cloud Workstation with both.
 
-Run it in a dedicated sandbox project that holds no sensitive data. The script resets 38 org policy constraints to Google's default on that project only. VMs there can then get external IPs, and buckets there can be made public. The organization and its other projects keep their policies.
+Run it in a dedicated sandbox project that holds no sensitive data. The script resets 37 org policy constraints to Google's default on that project only.
 
 The script needs an org admin. If you aren't one, ask an admin to [build your workstation](./1-harness-setup/README.md#workstations-for-a-class), or [install the harness on a Linux machine you already use](./1-harness-setup/README.md#another-machine). If you have no billing account, apply for [research credits or the TPU Research Cloud](./SUPPORT.md).
 

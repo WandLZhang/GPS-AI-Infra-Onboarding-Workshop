@@ -16,10 +16,6 @@ limitations under the License.
 
 # Harness Setup
 
-One script builds a Cloud Workstation in your Google Cloud project and puts two harnesses on it: agy (the Antigravity CLI) and Claude Code. Claude Code comes set up the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing.
-
-> **Use a dedicated sandbox project that holds no sensitive data.** The script resets 38 org policy constraints to Google's default on that project only ([Org policies](#org-policies)). The organization and its other projects keep theirs. After the reset, VMs in the project can get external IPs and buckets there can be made public. Each class workstation's service account is an owner of the project, and Claude Code runs in bypass permissions mode ([Settings](#settings-settingsjson)).
-
 You need a project in an organization where you're an org admin. A new, empty project works. The setup takes about 15 minutes. If you aren't an org admin, ask one to build your workstation ([Workstations for a class](#workstations-for-a-class)), or run setup.sh on a Linux machine you already use ([Another machine](#another-machine)).
 
 1. [Run the script in Cloud Shell](#1-run-the-script-in-cloud-shell)
@@ -37,20 +33,6 @@ Open [Cloud Shell](https://shell.cloud.google.com/?show=terminal) and paste:
 git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
 GPS-AI-Infra-Onboarding-Workshop/1-harness-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
 ```
-
-Click **Authorize** when Cloud Shell asks. The script turns on the Vertex AI API first, then prints the Model Garden link for [step 2](#2-turn-on-claude-opus-55). To run the script again, run `git -C GPS-AI-Infra-Onboarding-Workshop pull`, then paste the second line. Each step checks what exists first.
-
-| What the script does | Time on a new project |
-|---|---|
-| Turns on the Vertex AI API and prints the Model Garden link, then turns on the other APIs and resets the restrictive [org policies](#org-policies) a new project inherits | 1 min 47 s |
-| Asks Claude Opus 5.5 for a reply, and prints the Model Garden link again if it doesn't answer | 2 s |
-| Creates the default network, the workstation's service account and a Developer Knowledge API key | 1 min 6 s |
-| Creates the workstation cluster | 3 min 16 s |
-| Creates the workstation config and the workstation, and starts it | 2 min 25 s |
-| On the workstation: installs agy and Claude Code, checks Opus 5.5 again, runs [setup.sh](./claude-code/setup.sh) and the smoke test | 1 min 54 s |
-| Total | 10 min 30 s |
-
-Once agy and Claude Code are on the workstation, a failed step doesn't stop the script. It goes into `~/setup-gaps.md` on the workstation.
 
 ## 2. Turn on Claude Opus 5.5
 
@@ -138,7 +120,7 @@ Nothing on the workstation asks for a sign-in code. The exception is `ws-login`,
 
 ## Org policies
 
-A new project in our test organization inherited the 33 restrictive constraints below. The script resets each one to Google's default, then allows Anthropic's partner model features. Neither harness hit any other policy on the test projects. The script also resets five constraints we've met on other projects: `compute.managed.disableGuestAttributesAccess`, `compute.disableSshInBrowser`, `iam.workloadIdentityPoolProviders`, `run.allowedVPCEgress` and `cloudfunctions.requireVPCConnector`.
+A new project in our test organization inherited the 33 restrictive constraints below. The script resets each one to Google's default except `storage.publicAccessPrevention`, which stays on so no bucket can be made public. Then it allows Anthropic's partner model features. Neither harness hit any other policy on the test projects. The script also resets five constraints we've met on other projects: `compute.managed.disableGuestAttributesAccess`, `compute.disableSshInBrowser`, `iam.workloadIdentityPoolProviders`, `run.allowedVPCEgress` and `cloudfunctions.requireVPCConnector`.
 
 | Constraint | On a new project | What it stops |
 |---|---|---|
@@ -167,7 +149,7 @@ A new project in our test organization inherited the 33 restrictive constraints 
 | `run.allowedBinaryAuthorizationPolicies` | allow-list | Cloud Run deploys without a listed Binary Authorization policy |
 | `cloudfunctions.allowedIngressSettings` | allow-list | Cloud Functions (1st gen) that take internet traffic |
 | `cloudfunctions.allowedVpcConnectorEgressSettings` | allow-list | Cloud Functions (1st gen) egress settings off the list |
-| `storage.publicAccessPrevention` | enforced | Public buckets and objects |
+| `storage.publicAccessPrevention` | enforced | Public buckets and objects. The script leaves this one on. |
 | `storage.uniformBucketLevelAccess` | enforced | Object ACLs on new buckets |
 | `storage.secureHttpTransport` | enforced | Unencrypted HTTP to Cloud Storage |
 | `sql.restrictAuthorizedNetworks` | enforced | Authorized networks on Cloud SQL |

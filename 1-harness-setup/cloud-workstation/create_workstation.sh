@@ -128,6 +128,8 @@ print(message.splitlines()[0][:200])
 
 # Every inherited constraint that has had to be reset to build one of these workstations or to
 # run what people build on them. Reset puts each back to Google's default.
+# storage.publicAccessPrevention isn't here on purpose: it stays on, so no bucket in the project
+# can be made public. Nothing the setup or the labs run needs a public bucket.
 CONSTRAINTS="
 compute.vmExternalIpAccess
 compute.requireShieldedVm
@@ -159,7 +161,6 @@ run.allowedBinaryAuthorizationPolicies
 cloudfunctions.allowedIngressSettings
 cloudfunctions.requireVPCConnector
 cloudfunctions.allowedVpcConnectorEgressSettings
-storage.publicAccessPrevention
 storage.uniformBucketLevelAccess
 storage.secureHttpTransport
 sql.restrictAuthorizedNetworks
@@ -260,7 +261,7 @@ for C in $CONSTRAINTS; do
     if echo "$out" | grep -q "reset: true"; then cleared=$((cleared + 1)); break; fi
     # A constraint the org doesn't carry comes back NOT_FOUND or INVALID_ARGUMENT: nothing to reset.
     echo "$out" | grep -qE "NOT_FOUND|INVALID_ARGUMENT|not supported" && break
-    # A retry can't fix a missing role, and 5 tries on each of 38 constraints take 25 minutes.
+    # A retry can't fix a missing role, and 5 tries on each of 37 constraints take 25 minutes.
     if echo "$out" | grep -q "PERMISSION_DENIED"; then denied=1; break; fi
     if [ "$attempt" = 5 ]; then failed=$((failed + 1)); say "  ** $C: $(echo "$out" | tail -1)"; else sleep 10; fi
   done

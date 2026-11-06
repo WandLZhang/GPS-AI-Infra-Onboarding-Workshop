@@ -2,7 +2,7 @@
 
 Where your data, model weights and checkpoints live, how VMs reach the network without public IPs, and the images they boot from.
 
-Put sensitive data in a separate project, not the sandbox project where you set up the harness. The harness setup resets that project's org policies, so its buckets can be made public and its VMs can get external IPs ([Org policies](../1-harness-setup/README.md#org-policies)).
+Put sensitive data in a separate project, not the sandbox project where you set up the harness. The harness setup resets that project's org policies, so its VMs can get external IPs ([Org policies](../1-harness-setup/README.md#org-policies)).
 
 | Folder | What's in it |
 |---|---|
