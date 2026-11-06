@@ -353,6 +353,8 @@ for k in keys:
     fi
 fi
 if [ -n "$GOOGLE_DEV_KEY" ]; then
+    # Remove first, so a rerun replaces the key instead of failing on "already exists".
+    claude mcp remove -s user google-dev-knowledge >/dev/null 2>&1 || true
     claude mcp add -s user --transport http \
         google-dev-knowledge \
         "https://developerknowledge.googleapis.com/mcp" \
@@ -368,6 +370,7 @@ else
     echo "    Then re-run with GOOGLE_DEV_KNOWLEDGE_API_KEY=<keyString from the output>"
 fi
 
+claude mcp remove -s user google-cloud-logging >/dev/null 2>&1 || true
 claude mcp add -s user \
     google-cloud-logging \
     -- node "$HOME_DIR/mcp/google-cloud-logging/proxy.mjs" 2>/dev/null \
@@ -376,6 +379,7 @@ claude mcp add -s user \
 
 GITHUB_PAT="${GITHUB_PERSONAL_ACCESS_TOKEN:-}"
 if [ -n "$GITHUB_PAT" ]; then
+    claude mcp remove -s user github-mcp >/dev/null 2>&1 || true
     claude mcp add -s user \
         -e "GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_PAT" \
         github-mcp \
@@ -383,7 +387,7 @@ if [ -n "$GITHUB_PAT" ]; then
         && echo "  ✓ github-mcp" \
         || echo "  ⚠ github-mcp (already registered or error)"
 else
-    echo "  ⚠ GITHUB_PERSONAL_ACCESS_TOKEN not set; skipping github-mcp registration"
+    echo "  - GITHUB_PERSONAL_ACCESS_TOKEN not set; skipping github-mcp (optional)"
     echo "    Re-run with: GITHUB_PERSONAL_ACCESS_TOKEN=<token> ./setup.sh $PROJECT_ID"
 fi
 
@@ -391,6 +395,7 @@ fi
 # runs a subprocess per session, and orphaned bridges stalled tool discovery for
 # about 300 seconds per session until we switched to native HTTP.
 if [ -n "${HF_TOKEN:-}" ]; then
+    claude mcp remove -s user huggingface >/dev/null 2>&1 || true
     claude mcp add -s user --transport http \
         huggingface \
         "https://huggingface.co/mcp" \

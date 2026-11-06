@@ -28,13 +28,17 @@
 #   3. Creates the default network, a cluster, a workstation config with the Vertex AI settings in
 #      the workstation's environment, and the workstation.
 #   4. Gives USER_EMAIL access, and makes the Developer Knowledge API key that setup.sh picks up.
+#   5. On the workstation, runs box_setup.sh: installs agy and Claude Code, runs Claude Code's
+#      setup.sh and the smoke test. Once the two agents are in, a failed step doesn't stop the run.
+#      It goes into ~/setup-gaps.md, and the last lines print a prompt that has either agent fix it.
 #
 # Run --dry-run first on any project you didn't create for this. It lists each policy it would
 # reset and marks the ones someone set by hand, which a reset would erase.
 #
 # One step stays in the console: turn on Claude Opus 5.5 for the project in Model Garden.
 #
-# Settings, as environment variables:
+# Settings, as environment variables (also WORKSHOP_BRANCH, main, for box_setup.sh, and
+# GOOGLE_DEV_KNOWLEDGE_API_KEY, passed to setup.sh when you have your own key):
 #   REGION (us-east4), MACHINE (e2-standard-8), DISK_GB (200), CLUSTER (workstations),
 #   NAME (from USER_EMAIL), IDLE_TIMEOUT (7200: seconds without use before the workstation stops).
 #
@@ -129,6 +133,10 @@ essentialcontacts.managed.allowedContactDomains
 datastream.disablePublicConnectivity
 "
 
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+WORKSHOP_BRANCH="${WORKSHOP_BRANCH:-main}"
+RUNNER="$(gcloud config get-value account 2>/dev/null)"
+T0=$(date +%s)
 say "project $PROJECT, workstation $WORKSTATION for $EMAIL, region $REGION"
 say "cost: the cluster bills \$0.20/hour while it exists, and an $MACHINE workstation about \$0.70/hour while it runs"
 
@@ -220,6 +228,7 @@ gcloud org-policies set-policy "$POLICY" --project="$PROJECT" >/dev/null 2>&1 \
   || say "  ** couldn't allow partner model features; Claude Code's web search will fail **"
 rm -f "$POLICY"
 
+T_BOOT=$(date +%s)
 say "== network =="
 if gcloud compute networks describe default --project="$PROJECT" >/dev/null 2>&1; then
   say "  default network exists"
@@ -270,6 +279,7 @@ else
     || say "  ** couldn't create the key; setup.sh will try again **"
 fi
 
+T_PREP=$(date +%s)
 say "== cluster $CLUSTER (about 5 to 20 minutes the first time) =="
 if gcloud workstations clusters describe "$CLUSTER" --region="$REGION" --project="$PROJECT" >/dev/null 2>&1; then
   say "  exists"
@@ -280,12 +290,15 @@ else
     && say "  created" || { say "  ** couldn't create the cluster; stopping **"; exit 1; }
 fi
 
+T_CLUSTER=$(date +%s)
 say "== workstation config $CONFIG =="
 # Claude Code's Vertex AI settings go in the workstation's environment, so every process gets them,
 # including the ones that never start an interactive shell.
 ENVS="CLAUDE_CODE_USE_VERTEX=1,ANTHROPIC_VERTEX_PROJECT_ID=$PROJECT,GOOGLE_CLOUD_PROJECT=$PROJECT"
 ENVS="$ENVS,CLOUD_ML_REGION=global,ANTHROPIC_SMALL_FAST_MODEL=$MODEL,CLAUDE_CODE_SUBAGENT_MODEL=$MODEL"
 ENVS="$ENVS,ANTHROPIC_DEFAULT_SONNET_MODEL=$MODEL"
+# agy signs in with the workstation's service account through ADC, so nobody has to sign in.
+ENVS="$ENVS,AGY_ADC_AUTH=true"
 if gcloud workstations configs describe "$CONFIG" --cluster="$CLUSTER" --region="$REGION" \
      --project="$PROJECT" >/dev/null 2>&1; then
   run gcloud workstations configs update "$CONFIG" --cluster="$CLUSTER" --region="$REGION" \
@@ -313,23 +326,24 @@ say "== access for $EMAIL =="
 # Project owner can create and delete a workstation but not open one: opening takes
 # roles/workstations.user on the workstation itself, plus actAs on its service account.
 # gcloud has no add-iam-policy-binding for workstations, so read the policy, add, and write it back.
+# The person running this script gets it too: the next step reaches the box over SSH.
 POLICY="$(mktemp)"
 if gcloud workstations get-iam-policy "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" \
      --region="$REGION" --project="$PROJECT" --format=json > "$POLICY" 2>/dev/null; then
-  python3 - "$POLICY" "user:$EMAIL" <<'EOF'
+  python3 - "$POLICY" "user:$EMAIL" "user:$RUNNER" <<'EOF'
 import json
 import sys
 
-path, member = sys.argv[1], sys.argv[2]
+path, members = sys.argv[1], sorted(set(m for m in sys.argv[2:] if m != "user:"))
 with open(path) as f:
     policy = json.load(f)
 for binding in policy.setdefault("bindings", []):
     if binding.get("role") == "roles/workstations.user":
-        if member not in binding.setdefault("members", []):
-            binding["members"].append(member)
+        binding.setdefault("members", [])
+        binding["members"] += [m for m in members if m not in binding["members"]]
         break
 else:
-    policy["bindings"].append({"role": "roles/workstations.user", "members": [member]})
+    policy["bindings"].append({"role": "roles/workstations.user", "members": members})
 with open(path, "w") as f:
     json.dump(policy, f)
 EOF
@@ -344,20 +358,46 @@ gcloud iam service-accounts add-iam-policy-binding "$SA" --member="user:$EMAIL" 
   && say "  actAs on $SA" || say "  ** couldn't grant actAs on $SA **"
 
 say "== starting the workstation =="
+T_WS0=$(date +%s)
 gcloud workstations start "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" \
   --region="$REGION" --project="$PROJECT" --quiet >/dev/null 2>&1
 HOST="$(gcloud workstations describe "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" \
   --region="$REGION" --project="$PROJECT" --format='value(host)' 2>/dev/null)"
+T_WS=$(date +%s)
+
+say "== on the workstation: agents, Claude Code setup, smoke test =="
+GAPS="unknown"
+if [ -f "$SELF_DIR/box_setup.sh" ]; then
+  B64="$(base64 -w0 "$SELF_DIR/box_setup.sh")"
+  KEYVAR=""
+  [ -n "${GOOGLE_DEV_KNOWLEDGE_API_KEY:-}" ] && KEYVAR="GOOGLE_DEV_KNOWLEDGE_API_KEY='$GOOGLE_DEV_KNOWLEDGE_API_KEY' "
+  OUT="$(mktemp)"
+  gcloud workstations ssh "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" --region="$REGION" \
+    --project="$PROJECT" --command="echo $B64 | base64 -d > /tmp/box_setup.sh && ${KEYVAR}bash /tmp/box_setup.sh $PROJECT $WORKSHOP_BRANCH" \
+    </dev/null 2>&1 | grep -vE "^(Warning: Permanently added|Picking local unused port|Listening on port)" | tee "$OUT"
+  GAPS="$(sed -n 's/^GAPS=//p' "$OUT")"
+  [ -n "$GAPS" ] || GAPS="unknown: the SSH step didn't finish"
+  rm -f "$OUT"
+else
+  say "  ** box_setup.sh isn't next to this script, so nothing ran on the box **"
+fi
+T_END=$(date +%s)
 
 cat <<EOF
 
-Workstation: https://$HOST/?folder=/home/user
+Timing: APIs and org policies $((T_BOOT - T0))s, network and accounts $((T_PREP - T_BOOT))s, cluster $((T_CLUSTER - T_PREP))s,
+config and workstation $((T_WS - T_CLUSTER))s (start $((T_WS - T_WS0))s), on the box $((T_END - T_WS))s. Total $(( (T_END - T0) / 60 )) min.
 
-Next, in the console: turn on Claude Opus 5.5 for $PROJECT in Model Garden.
+Workstation: https://$HOST/?folder=/home/user
+Gaps: $GAPS (listed in ~/setup-gaps.md on the workstation)
+
+Open the workstation, open a terminal, start agy or claude, and paste:
+
+  Read ~/setup-gaps.md, fix each gap, then run claude-smoke-test until it passes 3 of 3.
+
+If Claude can't reach Vertex AI (404), turn on Claude Opus 5.5 for $PROJECT in Model Garden first:
   https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=$PROJECT
 
-Then $EMAIL opens the workstation and follows "Set up your agent" in agentic-coder-setup/README.md.
-
-It stops itself after $IDLE_TIMEOUT seconds without use. To stop it sooner:
+The workstation stops itself after $IDLE_TIMEOUT seconds without use. To stop it sooner:
   gcloud workstations stop $WORKSTATION --config=$CONFIG --cluster=$CLUSTER --region=$REGION --project=$PROJECT
 EOF
