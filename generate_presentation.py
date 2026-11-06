@@ -261,7 +261,7 @@ def create_agenda_slide(prs):
                  "Five phases from planning to production", font_size=16, color=GCP_MEDIUM_GRAY)
 
     phases = [
-        ("01", "Foundational Tools", "Accelerator guide, agentic coders,\nquota & reservations", GCP_BLUE),
+        ("01", "Foundational Tools", "Accelerator guide, harnesses,\nquota & reservations", GCP_BLUE),
         ("02", "Core Infrastructure", "Networking, disk images, storage,\ndata pipelines", GCP_RED),
         ("03", "Deploying Workloads", "DWS, GKE, Vertex AI, Cluster\nToolkit, XPK, Slurm", GCP_YELLOW),
         ("04", "Monitoring", "TPU observability, XProf,\nalerts & dashboards", GCP_GREEN),
@@ -539,11 +539,13 @@ def create_key_concepts_slide(prs):
     # Repository structure card
     add_card(slide, Inches(6.6), Inches(4.2), Inches(5.8), Inches(2.5),
              "📁 Repository Structure",
-             "01-foundational-tools/     → Agentic coders, accelerator guide\n"
-             "02-core-infrastructure/    → Networking, storage, disk images\n"
-             "03-deploying-workloads/    → DWS, GKE, Vertex AI, Slurm\n"
-             "04-monitoring/             → TPU health, dashboards\n"
-             "05-billing-usage/          → Cost controls, CUDs",
+             "harness-setup/     → agy and Claude Code on a workstation\n"
+             "accelerators/      → Pick, size, port to TPU\n"
+             "capacity/          → DWS, Spot, reservations\n"
+             "infrastructure/    → Networking, storage, disk images\n"
+             "workloads/         → GKE, Vertex AI, Slurm\n"
+             "monitoring/        → TPU health, dashboards\n"
+             "billing/           → Cost controls, CUDs",
              accent_color=GCP_PRIMARY)
 
 
@@ -571,7 +573,7 @@ def main():
     # SECTION 1: FOUNDATIONAL TOOLS
     # ════════════════════════════════════════════════════════
     create_section_divider(prs, "01", "Foundational Tools & Access",
-                           "Accelerator selection, agentic coders, quota management")
+                           "Accelerator selection, harnesses, quota management")
 
     # Slide: Accelerator Guide Overview
     create_content_slide(prs,
@@ -630,9 +632,9 @@ def main():
         subtitle="Never use Local SSD as your only checkpoint destination",
         accent_color=GCP_BLUE)
 
-    # Slide: Agentic Coder Setup
+    # Slide: Harness Setup
     create_two_column_slide(prs,
-        "Agentic Coder Setup",
+        "Harness Setup",
         "One script: the workstation",
         [
             "Run create_workstation.sh in Cloud Shell",
@@ -642,7 +644,7 @@ def main():
             "Failed steps go to ~/setup-gaps.md",
             "Turn on Claude Opus 5.5 in Model Garden",
         ],
-        "Two agents on the box",
+        "Two harnesses on the box",
         [
             "agy: signs in through the box's service account",
             "Claude Code: Vertex AI, Claude Opus 5.5",
