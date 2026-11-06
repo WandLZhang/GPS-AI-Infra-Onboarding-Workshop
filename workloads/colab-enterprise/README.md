@@ -64,7 +64,7 @@ Colab Enterprise is **different from** the free [Google Colaboratory](https://co
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../dws/).
+> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../../capacity/dws/).
 
 ---
 
@@ -86,10 +86,10 @@ Colab Enterprise is **different from** the free [Google Colaboratory](https://co
 |---|---|
 | Large-scale distributed training (multi-node) | [Vertex AI](../vertex-ai/) (FLEX_START), [Cluster Toolkit](../cluster-toolkit/), [Cluster Director](../cluster-director/) |
 | Production inference / serving | [Cluster Toolkit](../cluster-toolkit/) (GKE) |
-| H100 / H200 / B200 / TPU workloads | [Cluster Toolkit](../cluster-toolkit/), [XPK](../xpk/), [Compute Engine](../compute-engine-Managed%20Instance%20Groups/) |
-| Long-running training (> 18 hours) | [Vertex AI](../vertex-ai/), [Cluster Toolkit](../cluster-toolkit/), [Compute Engine](../compute-engine-Managed%20Instance%20Groups/) |
+| H100 / H200 / B200 / TPU workloads | [Cluster Toolkit](../cluster-toolkit/), [XPK](../xpk/), [Compute Engine](../../capacity/flex-start-mig/) |
+| Long-running training (> 18 hours) | [Vertex AI](../vertex-ai/), [Cluster Toolkit](../cluster-toolkit/), [Compute Engine](../../capacity/flex-start-mig/) |
 | Slurm-native HPC workloads | [Cluster Director](../cluster-director/) |
-| Guaranteed start time with DWS Calendar Mode | [Calendar Mode](../compute-engine-future-reservations/) |
+| Guaranteed start time with DWS Calendar Mode | [Calendar Mode](../../capacity/future-reservations/) |
 
 ---
 
@@ -145,7 +145,7 @@ Custom runtime templates give you full control over the machine type, accelerato
 | **A100 40GB** | ✅ | ✅ | ✅ | ✅ | a2-highgpu |
 | **A100 80GB** | ✅ | ✅ | ✅ | ✅ | a2-ultragpu |
 
-> **Not supported in Colab Enterprise:** H100, H200, B200, TPUs. For these accelerators, use [Vertex AI](../vertex-ai/), [Cluster Toolkit](../cluster-toolkit/), or [Compute Engine](../compute-engine-Managed%20Instance%20Groups/).
+> **Not supported in Colab Enterprise:** H100, H200, B200, TPUs. For these accelerators, use [Vertex AI](../vertex-ai/), [Cluster Toolkit](../cluster-toolkit/), or [Compute Engine](../../capacity/flex-start-mig/).
 
 #### Workload Sizing Guide for Colab Enterprise
 
@@ -159,7 +159,7 @@ Custom runtime templates give you full control over the machine type, accelerato
 | **Small model training (< 1B)** | L4 or T4 | 1 | Fits comfortably; L4 offers better price-performance |
 | **Medium model fine-tune (7B, full)** | A100 40GB | 2–4 | ~126 GB for full fine-tune with Adam; distribute across GPUs |
 
-> For detailed memory sizing formulas, see the [Accelerator Selection Guide](../../01-foundational-tools/accelerator-guide/).
+> For detailed memory sizing formulas, see the [Accelerator Selection Guide](../../accelerators/).
 
 ---
 
@@ -747,12 +747,12 @@ Colab Enterprise pricing has two components:
 
 ### Related Guides in This Repository
 
-- [DWS Concepts](../dws/) — Capacity acquisition models, pricing, compliance
+- [DWS Concepts](../../capacity/dws/) — Capacity acquisition models, pricing, compliance
 - [Vertex AI DWS Training](../vertex-ai/) — Serverless training with FLEX_START (deploy from Colab)
 - [Cluster Toolkit](../cluster-toolkit/) — Production GKE clusters with DWS flex-start
 - [XPK](../xpk/) — Quick PoC GKE clusters with DWS flex-start
-- [Accelerator Selection Guide](../../01-foundational-tools/accelerator-guide/) — GPU sizing, checkpointing, consumption models
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Accelerator Selection Guide](../../accelerators/) — GPU sizing, checkpointing, consumption models
+- [Storage for AI Workloads](../../infrastructure/storage/) — GCSFuse, Rapid Cache, Rapid Bucket
 - [Deployment Methods Overview](../) — Compare all deployment methods
 
 ---

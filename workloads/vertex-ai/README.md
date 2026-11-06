@@ -19,7 +19,7 @@
 
 ## 1. Overview
 
-Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../dws/) natively for **serverless training jobs**. By setting the scheduling strategy to `FLEX_START`, Vertex AI queues your training job and runs it when GPU resources become available — with zero infrastructure management.
+Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../../capacity/dws/) natively for **serverless training jobs**. By setting the scheduling strategy to `FLEX_START`, Vertex AI queues your training job and runs it when GPU resources become available — with zero infrastructure management.
 
 ### Key Points
 
@@ -42,7 +42,7 @@ Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../dws/) natively f
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../dws/).
+> For DWS concepts, pricing, and compliance guidance, see the [DWS Guide](../../capacity/dws/).
 
 ---
 
@@ -60,10 +60,10 @@ Vertex AI integrates with [Dynamic Workload Scheduler (DWS)](../dws/) natively f
 
 | Scenario | Better Alternative |
 |---|---|
-| Need raw VM control | [Compute Engine](../compute-engine-Managed%20Instance%20Groups/) |
+| Need raw VM control | [Compute Engine](../../capacity/flex-start-mig/) |
 | Need Kubernetes-native pipelines | [Cluster Toolkit](../cluster-toolkit/) or [XPK](../xpk/) |
 | Need Slurm job scheduling | [Cluster Director](../cluster-director/) |
-| Need guaranteed start time | [Calendar Mode](../compute-engine-future-reservations/) |
+| Need guaranteed start time | [Calendar Mode](../../capacity/future-reservations/) |
 | Inference / serving workloads | [Cluster Toolkit](../cluster-toolkit/) (GKE) |
 
 ---
@@ -205,9 +205,9 @@ job.run(
 
 ### Related Guides in This Repository
 
-- [DWS Concepts](../dws/) — Capacity acquisition models, pricing, compliance
+- [DWS Concepts](../../capacity/dws/) — Capacity acquisition models, pricing, compliance
 - [Deployment Methods Overview](../) — Compare all deployment methods
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
 
 ---
 

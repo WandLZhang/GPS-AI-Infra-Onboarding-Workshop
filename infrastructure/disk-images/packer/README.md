@@ -27,7 +27,7 @@ Packer boots a temporary Compute Engine VM from a base image, runs your install 
 | Download packages without an external IP | [Cloud NAT overview](https://docs.cloud.google.com/nat/docs/overview) |
 | Find the account Cloud Build runs as | [Default Cloud Build service account](https://docs.cloud.google.com/build/docs/cloud-build-service-account) |
 
-## Ask your agent
+## Ask your harness
 
 Questions for the Google developer knowledge MCP:
 

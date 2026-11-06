@@ -167,7 +167,7 @@ gcloud compute advice calendar-mode \
 
 ## 3. How DWS Integrates with GKE
 
-When DWS is used through GKE-based deployment methods ([Cluster Toolkit](../cluster-toolkit/), [XPK](../xpk/)), the integration works through **queued provisioning** and **[Kueue](https://kueue.sigs.k8s.io/)** (Kubernetes-native job queuing).
+When DWS is used through GKE-based deployment methods ([Cluster Toolkit](../../workloads/cluster-toolkit/), [XPK](../../workloads/xpk/)), the integration works through **queued provisioning** and **[Kueue](https://kueue.sigs.k8s.io/)** (Kubernetes-native job queuing).
 
 ### Architecture
 
@@ -217,7 +217,7 @@ Job submitted → Kueue tries Reservation flavor (Priority 1)
                                                     └── DWS queues and provisions when available
 ```
 
-> For step-by-step implementation of this pattern, see the [Cluster Toolkit Guide](../cluster-toolkit/) or [DWS on GKE documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest).
+> For step-by-step implementation of this pattern, see the [Cluster Toolkit Guide](../../workloads/cluster-toolkit/) or [DWS on GKE documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest).
 
 ### GKE Version Requirements
 
@@ -347,7 +347,7 @@ For FedRAMP High, DoD IL4/IL5 workloads that require US-only data residency:
 
 4. **Consider zone-specific capacity**: If your compliance requirement restricts you to specific zones (e.g., `us-east4` for DoD/IC proximity), understand that DWS will queue your request rather than redirecting it to another zone. Plan for potentially longer wait times in zones with less capacity.
 
-5. **Storage residency alignment**: Ensure your training data, model artifacts, and checkpoint storage (GCS buckets, Rapid Buckets) are in the **same region** as your DWS GPU workloads. See [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md).
+5. **Storage residency alignment**: Ensure your training data, model artifacts, and checkpoint storage (GCS buckets, Rapid Buckets) are in the **same region** as your DWS GPU workloads. See [Storage for AI Workloads](../../infrastructure/storage/README.md).
 
 ---
 
@@ -400,10 +400,10 @@ For FedRAMP High, DoD IL4/IL5 workloads that require US-only data residency:
 
 | Deployment Method | Quota Required | Notes |
 |---|---|---|
-| **[Compute Engine](../compute-engine-Managed%20Instance%20Groups/)** | Standard GPU quota (e.g., `NVIDIA_H100_GPUS`) | Request stays pending if insufficient quota |
-| **[Calendar Mode](../compute-engine-future-reservations/)** | No Compute Engine quota needed (reservation-bound model) | Only need quota for non-reservation resources (disks, IPs) |
-| **[Cluster Toolkit](../cluster-toolkit/) / [XPK](../xpk/)** | `ACTIVE_RESIZE_REQUESTS` (default: 100/project) + GPU quota | GKE uses Compute Engine quota under the hood |
-| **[Vertex AI](../vertex-ai/)** | Preemptible Vertex AI quota (e.g., `custom_model_training_preemptible_nvidia_h100_gpus`) | Despite name, resources are NOT preemptible |
+| **[Compute Engine](../flex-start-mig/)** | Standard GPU quota (e.g., `NVIDIA_H100_GPUS`) | Request stays pending if insufficient quota |
+| **[Calendar Mode](../future-reservations/)** | No Compute Engine quota needed (reservation-bound model) | Only need quota for non-reservation resources (disks, IPs) |
+| **[Cluster Toolkit](../../workloads/cluster-toolkit/) / [XPK](../../workloads/xpk/)** | `ACTIVE_RESIZE_REQUESTS` (default: 100/project) + GPU quota | GKE uses Compute Engine quota under the hood |
+| **[Vertex AI](../../workloads/vertex-ai/)** | Preemptible Vertex AI quota (e.g., `custom_model_training_preemptible_nvidia_h100_gpus`) | Despite name, resources are NOT preemptible |
 
 ### Prices by machine type
 
@@ -461,14 +461,14 @@ DWS can be consumed through multiple deployment methods. Each has its own guide 
 
 | Deployment Method | Description | Guide |
 |---|---|---|
-| **Compute Engine** | MIG resize requests for raw VMs — no K8s or Slurm needed | [→ compute-engine/](../compute-engine-Managed%20Instance%20Groups/) |
-| **Calendar Mode** | Future reservations with guaranteed start time | [→ compute-engine-future-reservations/](../compute-engine-future-reservations/) |
-| **Cluster Toolkit** | Production GKE clusters via Terraform blueprints with Kueue integration | [→ cluster-toolkit/](../cluster-toolkit/) |
-| **XPK** | Quick PoC GKE clusters with `--flex` flag | [→ xpk/](../xpk/) |
-| **Cluster Director** | Fully managed Slurm clusters with DWS flex-start and calendar mode | [→ cluster-director/](../cluster-director/) |
-| **Vertex AI** | Serverless training with FLEX_START scheduling strategy | [→ vertex-ai/](../vertex-ai/) |
+| **Compute Engine** | MIG resize requests for raw VMs — no K8s or Slurm needed | [→ flex-start-mig/](../flex-start-mig/) |
+| **Calendar Mode** | Future reservations with guaranteed start time | [→ future-reservations/](../future-reservations/) |
+| **Cluster Toolkit** | Production GKE clusters via Terraform blueprints with Kueue integration | [→ cluster-toolkit/](../../workloads/cluster-toolkit/) |
+| **XPK** | Quick PoC GKE clusters with `--flex` flag | [→ xpk/](../../workloads/xpk/) |
+| **Cluster Director** | Fully managed Slurm clusters with DWS flex-start and calendar mode | [→ cluster-director/](../../workloads/cluster-director/) |
+| **Vertex AI** | Serverless training with FLEX_START scheduling strategy | [→ vertex-ai/](../../workloads/vertex-ai/) |
 
-> For a comparison of all deployment methods, see the [Deploying Workloads Overview](../).
+> For a comparison of all deployment methods, see the [Deploying Workloads Overview](../../workloads/).
 
 ---
 
@@ -502,9 +502,9 @@ DWS can be consumed through multiple deployment methods. Each has its own guide 
 
 ### Related Guides in This Repository
 
-- [Deploying Workloads Overview](../) — Compare all deployment methods and decision framework
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
-- [Zero Trust IAP Access](../../02-core-infrastructure/zero-trust-iap-access/README.md) — Securing VM access for DWS-provisioned GPU VMs
+- [Deploying Workloads Overview](../../workloads/) — Compare all deployment methods and decision framework
+- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
+- [Zero Trust IAP Access](../../infrastructure/zero-trust-iap-access/README.md) — Securing VM access for DWS-provisioned GPU VMs
 
 ---
 

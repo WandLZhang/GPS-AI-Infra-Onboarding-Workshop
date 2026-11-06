@@ -61,10 +61,10 @@ Future Reservations in **Calendar Mode** let you reserve GPU capacity for a **sp
 
 | Scenario | Better Alternative |
 |---|---|
-| Time-flexible, cost-sensitive workloads | [Compute Engine Flex-start](../compute-engine-Managed%20Instance%20Groups/) or [Cluster Toolkit](../cluster-toolkit/) |
-| Quick PoC or experimentation | [XPK](../xpk/) with `--flex` |
-| Serverless training | [Vertex AI](../vertex-ai/) |
-| Need Slurm-based scheduling | [Cluster Director](../cluster-director/) |
+| Time-flexible, cost-sensitive workloads | [Compute Engine Flex-start](../flex-start-mig/) or [Cluster Toolkit](../../workloads/cluster-toolkit/) |
+| Quick PoC or experimentation | [XPK](../../workloads/xpk/) with `--flex` |
+| Serverless training | [Vertex AI](../../workloads/vertex-ai/) |
+| Need Slurm-based scheduling | [Cluster Director](../../workloads/cluster-director/) |
 
 ---
 
@@ -190,7 +190,7 @@ gcloud compute instances create training-vm-001 \
 | **Use Assured Workloads** | For FedRAMP High, DoD IL4/IL5 — automatically enforces resource location constraints |
 | **Document zone selection rationale** | For audit purposes, document why specific zones were chosen |
 
-> For detailed compliance guidance, see the [DWS Guide — Data Residency & Compliance](../dws/#9-data-residency--compliance-considerations).
+> For detailed compliance guidance, see the [DWS Guide — Data Residency & Compliance](../dws/#5-data-residency--compliance-considerations).
 
 ---
 
@@ -218,9 +218,9 @@ gcloud compute instances create training-vm-001 \
 ### Related Guides in This Repository
 
 - [DWS Concepts](../dws/) — Capacity acquisition models, pricing, compliance
-- [Compute Engine Flex-start](../compute-engine-Managed%20Instance%20Groups/) — Queued provisioning (no guaranteed start)
-- [Deployment Methods Overview](../) — Compare all deployment methods
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Compute Engine Flex-start](../flex-start-mig/) — Queued provisioning (no guaranteed start)
+- [Deployment Methods Overview](../../workloads/) — Compare all deployment methods
+- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
 
 ---
 

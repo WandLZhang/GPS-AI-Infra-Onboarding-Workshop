@@ -5,7 +5,7 @@ The boot image sets the OS, NVIDIA driver, CUDA, and MPI stack that a VM starts 
 ## What we'd pick
 
 - **Start GPU VMs from a Deep Learning VM image.** The `pytorch-2-9-cu129` families ship the NVIDIA 580 driver, CUDA 12.9, and PyTorch 2.9, so you skip the driver install. The `common-cu129` families leave out PyTorch for when you bring your own framework.
-- **On A3 Ultra, A4, and A4X Slurm clusters, keep the image Cluster Toolkit installs.** Its Slurm blueprints for these machines install the GPU Advanced Compute Images (Preview). [Cluster Director](../../03-deploying-workloads/cluster-director/) covers the cluster side.
+- **On A3 Ultra, A4, and A4X Slurm clusters, keep the image Cluster Toolkit installs.** Its Slurm blueprints for these machines install the GPU Advanced Compute Images (Preview). [Cluster Director](../../workloads/cluster-director/) covers the cluster side.
 - **Start CPU MPI nodes from the HPC VM image.** `hpc-rocky-linux-8` and `hpc-rocky-linux-9` carry Google's kernel and network tuning for MPI. Pick Rocky 8 for Slurm or for Cloud RDMA on H4D. The Rocky-based Advanced Compute Images add Slurm builds and are in Preview.
 - **On a plain OS image, install drivers with Google's `cuda_installer.pyz`.** Its default mode installs from NVIDIA's repository with DKMS, which rebuilds the driver after a kernel update. Its `build_image` command makes a Secure Boot image with signed drivers.
 - **Bake heavy installs into an image.** If a startup script takes more than 5 minutes, build a custom image instead. Keep startup scripts for small per-VM settings.
@@ -29,7 +29,7 @@ The boot image sets the OS, NVIDIA driver, CUDA, and MPI stack that a VM starts 
 | Run small setup steps at boot | [About startup scripts](https://docs.cloud.google.com/compute/docs/instances/startup-scripts) |
 | Plan an image pipeline | [Image management best practices](https://docs.cloud.google.com/compute/docs/images/image-management-best-practices) |
 
-## Ask your agent
+## Ask your harness
 
 Questions for the Google developer knowledge MCP:
 

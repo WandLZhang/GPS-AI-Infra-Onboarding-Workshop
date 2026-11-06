@@ -59,11 +59,11 @@ MIG resize requests are a **Compute Engine mechanism** for requesting multiple G
 
 | Scenario | Better Alternative |
 |---|---|
-| Need Kubernetes-native job orchestration | [Cluster Toolkit](../cluster-toolkit/) or [XPK](../xpk/) |
-| Want zero infrastructure management | [Vertex AI](../vertex-ai/) |
-| Need Slurm job scheduling | [Cluster Director](../cluster-director/) |
-| Need guaranteed start time | [Calendar Mode](../compute-engine-future-reservations/) |
-| Need reservation + DWS fallback | [Cluster Toolkit](../cluster-toolkit/) (Kueue pattern) |
+| Need Kubernetes-native job orchestration | [Cluster Toolkit](../../workloads/cluster-toolkit/) or [XPK](../../workloads/xpk/) |
+| Want zero infrastructure management | [Vertex AI](../../workloads/vertex-ai/) |
+| Need Slurm job scheduling | [Cluster Director](../../workloads/cluster-director/) |
+| Need guaranteed start time | [Calendar Mode](../future-reservations/) |
+| Need reservation + DWS fallback | [Cluster Toolkit](../../workloads/cluster-toolkit/) (Kueue pattern) |
 
 ---
 
@@ -190,7 +190,7 @@ gcloud compute instance-groups managed resize-requests cancel $MIG_NAME \
 
 | Best Practice | Detail |
 |---|---|
-| **Use `--no-address`** | Deploy VMs without public IPs; use [IAP for SSH access](../../02-core-infrastructure/zero-trust-iap-access/README.md) |
+| **Use `--no-address`** | Deploy VMs without public IPs; use [IAP for SSH access](../../infrastructure/zero-trust-iap-access/README.md) |
 | **Enable OS Login** | Use identity-based authentication instead of SSH keys |
 | **Multi-zone submission** | If not zone-bound, create resize requests in multiple zones to increase chances of fulfillment |
 | **Monitor and cancel** | Cancel pending requests you no longer need to free up `ACTIVE_RESIZE_REQUESTS` quota |
@@ -230,10 +230,10 @@ gcloud compute instance-groups managed resize-requests cancel $MIG_NAME \
 ### Related Guides in This Repository
 
 - [DWS Concepts](../dws/) — Capacity acquisition models, pricing, compliance
-- [Calendar Mode](../compute-engine-future-reservations/) — Guaranteed start time via future reservations
-- [Deployment Methods Overview](../) — Compare all deployment methods
-- [Zero Trust IAP Access](../../02-core-infrastructure/zero-trust-iap-access/README.md) — Securing VM access
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
+- [Calendar Mode](../future-reservations/) — Guaranteed start time via future reservations
+- [Deployment Methods Overview](../../workloads/) — Compare all deployment methods
+- [Zero Trust IAP Access](../../infrastructure/zero-trust-iap-access/README.md) — Securing VM access
+- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket
 
 ---
 

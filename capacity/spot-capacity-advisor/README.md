@@ -155,7 +155,7 @@ Spot works for training when the job can lose a node at any moment:
 - Spread across regions instead of waiting on one. With multi-region fan-out and automatic requeue, our H200 jobs have run nine days straight on Spot.
 - Read a stockout error (`ZONE_RESOURCE_POOL_EXHAUSTED`) as a statement about that moment. Retry across zones and over time. In one of our runs, a zone granted the request 38 seconds after it refused. [`spot-spray.sh`](https://github.com/WandLZhang/slurm-multi-region-gpu-public/blob/main/scripts/spot-spray.sh) retries Spot creation across every zone that carries the machine type until one lands.
 - [slurm-multi-region-gpu-public](https://github.com/WandLZhang/slurm-multi-region-gpu-public) shows the pattern on Slurm: 11 Spot nodesets across five US regions in one partition, ordered by Slurm weight, so a stockout moves the job to the next nodeset. Checkpoints go to a multi-region bucket, so a job can resume in another region.
-- On GKE, see [Spot VMs on GKE](../gke/README.md#spot-vms-for-ai-jobs) for the shutdown window and the node-pool rules.
+- On GKE, see [Spot VMs on GKE](../../workloads/gke/README.md#spot-vms-for-ai-jobs) for the shutdown window and the node-pool rules.
 
 ---
 
@@ -182,5 +182,5 @@ A common mistake is to place Spot by "how many chips look free." A zone can show
 - [`gcloud alpha compute advice capacity`](https://docs.cloud.google.com/sdk/gcloud/reference/alpha/compute/advice/capacity)
 - [Spot VMs overview](https://cloud.google.com/compute/docs/instances/spot)
 - [Using Spot VMs in GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/spot-vms) · [Create a MIG with Spot VMs](https://cloud.google.com/compute/docs/instance-groups/create-mig-with-preemptible-vms)
-- Capacity acquisition models overview: [`../dws/`](../dws/) · Accelerator selection: [`../../01-foundational-tools/accelerator-guide/`](../../01-foundational-tools/accelerator-guide/)
+- Capacity acquisition models overview: [`../dws/`](../dws/) · Accelerator selection: [`../../accelerators/`](../../accelerators/)
 - End-to-end Slurm example: [WandLZhang/slurm-multi-region-gpu-public](https://github.com/WandLZhang/slurm-multi-region-gpu-public)

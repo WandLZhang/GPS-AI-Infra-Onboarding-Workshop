@@ -9,7 +9,7 @@ Cluster Director deploys a managed Slurm cluster on Google Cloud, with login nod
 - **GKE when the group works in containers and Kubernetes, or serves models next to training.** See [GKE](../gke/).
 - **H4D with Cloud RDMA for CPU-bound MPI codes, such as CFD, climate and molecular dynamics.** H4D carries Cloud RDMA at 200 Gbps between nodes. Build the cluster from Cluster Toolkit's `hpc-slurm-h4d` blueprint, which Google's H4D Slurm guides use. It boots the HPC VM image with the Cloud RDMA drivers and installs MPI.
 - **A Falcon VPC network for RDMA traffic and a regular VPC network for everything else.** The IRDMA NIC can't be nic0. Falcon networks don't support Cloud NAT, Private Google Access or VPC Network Peering, so storage and internet traffic stay on the regular network.
-- **A4 (B200) for double-precision GPU codes.** Keep them off A4X Max, whose GB300 has a small fraction of B200's FP64 throughput. See [FP64 science codes](../../01-foundational-tools/accelerator-guide/README.md#double-precision-fp64-science-codes).
+- **A4 (B200) for double-precision GPU codes.** Keep them off A4X Max, whose GB300 has a small fraction of B200's FP64 throughput. See [FP64 science codes](../../accelerators/README.md#double-precision-fp64-science-codes).
 - **Managed Lustre for scratch and shared datasets, and Filestore for `/home`.** Lustre throughput scales with capacity, from 125 to 1,000 MBps per TiB by tier. The docs point training at 1,000 MBps per TiB and a broad range of HPC work at 250.
 - **Cloud Storage backups for Lustre results.** Managed Lustre has no undelete, and deleting an instance destroys its data. Exports are incremental, so run them on a schedule.
 - **Flex-start for runs that fit in seven days, calendar mode for planned runs up to 90 days, and Spot for jobs that survive preemption.** Flex-start and calendar mode carry discounts up to 53%, and Spot up to 91%. Cluster Director deletes VMs when a calendar-mode reservation ends, even if you set them to stop, so keep checkpoints off the nodes.
@@ -18,7 +18,7 @@ Cluster Director deploys a managed Slurm cluster on Google Cloud, with login nod
 - **Containers before custom images.** Package per-job software as a container and run it with enroot and Pyxis, which the GPU images include. Use nodeset startup scripts for a few packages. Build a Packer image only for heavy or system-level changes.
 - **Custom images from the Cluster Director family for your machine series.** Compute nodes can't run a newer Slurm than the controller, so match the image's Slurm version to the controller's. A family gets support for 12 months, then turns deprecated and later obsolete.
 - **The N2 quickstart before any GPUs.** It builds a login node and two n2-standard-2 compute nodes with no reserved capacity. You learn the create, SSH and `sbatch` flow there.
-- **IAP and OS Login for SSH, with no public IPs on login nodes.** Set `enablePublicIps=false` in `--slurm-login-node`, because the gcloud default is `true`. See [Zero Trust IAP access](../../02-core-infrastructure/zero-trust-iap-access/README.md).
+- **IAP and OS Login for SSH, with no public IPs on login nodes.** Set `enablePublicIps=false` in `--slurm-login-node`, because the gcloud default is `true`. See [Zero Trust IAP access](../../infrastructure/zero-trust-iap-access/README.md).
 
 ## Official docs
 
@@ -42,7 +42,7 @@ Cluster Director deploys a managed Slurm cluster on Google Cloud, with login nod
 | Lustre tiers | [Managed Lustre performance tiers](https://docs.cloud.google.com/managed-lustre/docs/performance-tiers) |
 | Lustre backups | [Back up Managed Lustre instance data](https://docs.cloud.google.com/managed-lustre/docs/back-up-instance-data) |
 
-## Ask your agent
+## Ask your harness
 
 Questions for the Google developer knowledge MCP:
 
@@ -139,4 +139,4 @@ build {
 }
 ```
 
-Build it with `packer init .` and `packer build -var="project_id=PROJECT_ID" .`. For Cloud Build pipelines, see the [Packer guide](../../02-core-infrastructure/disk-images/packer/README.md). For H4D images, see [HPC VM images and Advanced Compute Images](../../02-core-infrastructure/disk-images/README.md#hpc-vm-images-and-advanced-compute-images).
+Build it with `packer init .` and `packer build -var="project_id=PROJECT_ID" .`. For Cloud Build pipelines, see the [Packer guide](../../infrastructure/disk-images/packer/README.md). For H4D images, see [HPC VM images and Advanced Compute Images](../../infrastructure/disk-images/README.md#hpc-vm-images-and-advanced-compute-images).

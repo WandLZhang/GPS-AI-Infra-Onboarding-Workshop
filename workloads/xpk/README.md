@@ -863,10 +863,10 @@ kubectl logs <pod-name>
 
 ### Related Sections in This Repository
 
-- [DWS Concepts](../dws/) — Dynamic Workload Scheduler concepts, pricing, compliance
+- [DWS Concepts](../../capacity/dws/) — Dynamic Workload Scheduler concepts, pricing, compliance
 - [Deployment Methods Overview](../) — Compare all deployment methods
 - [Cluster Toolkit Guide](../cluster-toolkit/) — Production-ready GKE clusters with DWS support
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data
+- [Storage for AI Workloads](../../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data
 
 ---
 
