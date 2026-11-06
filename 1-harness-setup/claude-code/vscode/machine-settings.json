@@ -1,3 +1,5 @@
 {
-    "claudeCode.claudeProcessWrapper": "__HOME__/bin/claude-vscode-wrapper"
+    "claudeCode.claudeProcessWrapper": "__HOME__/bin/claude-vscode-wrapper",
+    "claudeCode.allowDangerouslySkipPermissions": true,
+    "claudeCode.initialPermissionMode": "bypassPermissions"
 }

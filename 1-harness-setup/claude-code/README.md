@@ -219,11 +219,15 @@ gcloud storage rsync -r gs://YOUR_BUCKET/<old-hostname>/projects ~/.claude/proje
 
 ## VS Code Claude Code extension defaults
 
-Every `claudeCode.*` key the extension reads is **machine-scoped**, so a workspace `.vscode/settings.json` cannot set any of them. `claude-code/vscode/machine-settings.json` is the only template, and it carries one key:
+Every `claudeCode.*` key the extension reads is **machine-scoped**, so a workspace `.vscode/settings.json` cannot set any of them. `claude-code/vscode/machine-settings.json` is the only template, and it carries three keys:
 
 | Key | Value |
 |---|---|
 | `claudeCode.claudeProcessWrapper` | `__HOME__/bin/claude-vscode-wrapper` |
+| `claudeCode.allowDangerouslySkipPermissions` | `true` |
+| `claudeCode.initialPermissionMode` | `bypassPermissions` |
+
+A process wrapper stops the extension from reading `permissions.defaultMode` from `~/.claude/settings.json`. Without the last two keys, every panel session starts in Manual and the mode menu doesn't offer bypass.
 
 Install it at:
 
