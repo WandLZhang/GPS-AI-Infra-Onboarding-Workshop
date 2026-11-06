@@ -35,7 +35,7 @@ How setup.sh configures Claude Code, each step, what it costs and what trips peo
 ### Quick install (one-shot)
 
 ```bash
-cd harness-setup/claude-code
+cd 1-setup/claude-code
 GOOGLE_DEV_KNOWLEDGE_API_KEY=<key> \
   GITHUB_PERSONAL_ACCESS_TOKEN=<token> \
   HF_TOKEN=<token> \
@@ -67,7 +67,7 @@ Then `source ~/.bashrc`.
 
 #### Install config files
 
-Run these from the `harness-setup` folder.
+Run these from the `1-setup` folder.
 
 ```bash
 # System prompt
@@ -163,11 +163,11 @@ Every request sends the whole conversation again, and Claude reads most of it fr
 `claude-code/hooks/accelerator_guard.py` runs as a Stop hook, when Claude is about to end a turn. It looks for these in your project:
 
 - Compute Engine VMs with GPUs or accelerator machine types
-- TPU VMs, and queued TPU requests, which bill once granted
+- TPU VMs with their health, and queued TPU requests, which bill once granted
 - GKE node pools with GPUs or TPUs that keep nodes or wait for capacity
 - Vertex AI endpoints that serve a model on GPUs or TPUs
 
-If it finds any, it sends the list back to Claude, and Claude tells you what's still running before it hands the turn back. It blocks once per turn, takes about 2 seconds, and never deletes anything.
+If it finds any, it sends the list back to Claude, and Claude tells you what's still running before it hands the turn back. It blocks once per turn, takes about 2 seconds, and never deletes anything. When it can't check at all, because no project is set or gcloud has no login, it shows a warning that nothing was checked. A clean check shows nothing. `tests/test_accelerator_guard.py` covers both cases and the health rule below.
 
 It checks the active gcloud project. List more projects, one per line, in `~/.claude/accelerator-guard-projects`. To keep a resource running on purpose, add a dated line to `~/.claude/accelerator-allowlist`:
 
@@ -175,7 +175,7 @@ It checks the active gcloud project. List more projects, one per line, in `~/.cl
 my-finetune-vm  2026-11-06  fine-tuning run for the course project
 ```
 
-That line silences resources whose names contain `my-finetune-vm` through November 6 (UTC). An undated line silences nothing.
+That line silences resources whose names contain `my-finetune-vm` through November 6 (UTC). An undated line silences nothing. An unhealthy TPU VM (health `TIMEOUT`, `UNHEALTHY_TENSORFLOW` or `UNHEALTHY_MAINTENANCE`) bills the same as a healthy one, so only a line with its full name silences it.
 
 ## Boot hook
 

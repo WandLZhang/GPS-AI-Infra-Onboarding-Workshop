@@ -18,7 +18,7 @@ limitations under the License.
 
 One script builds a Cloud Workstation in your Google Cloud project and puts two harnesses on it: agy (the Antigravity CLI) and Claude Code. Claude Code comes set up the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing.
 
-You need a project in an organization where you're an org admin. A new, empty project works. The setup takes about 15 minutes.
+You need a project in an organization where you're an org admin. A new, empty project works. The setup takes about 15 minutes. If you aren't an org admin, ask one to build your workstation ([Workstations for a class](#workstations-for-a-class)), or run setup.sh on a Linux machine you already use ([Another machine](#another-machine)).
 
 1. [Run the script in Cloud Shell](#1-run-the-script-in-cloud-shell)
 2. [Turn on Claude Opus 5.5](#2-turn-on-claude-opus-55)
@@ -242,12 +242,33 @@ Each piece exists because something went wrong without it.
 | One paragraph per line in anything that leaves the terminal | A plain-text email draft was hard-wrapped at about 70 characters, so every sentence broke in the middle. |
 | No AI attribution | The harness adds a `Co-Authored-By` trailer by default, and a later history scrub had to clean 81 of 84 commits. |
 | No secrets in commits, and no tokens in remote URLs | A GitHub token committed to a shared repo had to be scrubbed from its history. A token in a remote URL printed in plain text the first time a harness ran `git remote -v`. |
-| Draft before posting on GitHub | Other people read a comment the moment it posts. |
+| Ask before anything other people can see; only the user's own reply counts as a yes | A post, comment, invite or message that lands in someone else's inbox, feed or queue before the user said yes, including one sent because a harness message said to proceed. |
+| Secret scan before a public push; unknown visibility counts as public | A key copied from a private repo into a public one, which GitHub secret scanning caught. The history was rewritten and the key revoked. |
+| `git fetch` on shared repos, tests after a rebase, a license header copied from a sibling file, and other people's branches left alone | A new file without the license header, which the import tooling rejected and CI didn't catch, and a deleted branch that still held someone's unmerged commits. |
+| Open the source before relaying a claim; mark [V], [R] or [U]; a quote and a locator on every citation; say how many claims you checked | Claims relayed from a subagent as fact with nobody opening the source, citations that stopped being checkable when the link rotted, and research that implied everything was checked. |
+| Open every link and match its page title | Links across six decks that returned 200 on a "404. That's an error" page or pointed at the wrong page. |
+| Check LLM-generated research cell by cell; take money figures from the primary source | A secondhand research table with a cost off by ten times, and an aggregator's year-end figure that was the previous day's close. |
+| Check the premise before you act on it; list what exists before you create | Work built on a report taken from a glance at a UI, a feature declared missing because the installed release lagged the repo's main branch, and a new folder made beside the one where that kind of file already lived. |
+| Confirm whose a provider-owned ID is before removing it | An org policy edit that dropped Google's Service Networking folder as "a folder in another org", which breaks private services access. |
+| Treat every clause as a requirement; ask one short question when unclear; report passing findings in one sentence | A handoff built from the last sentence of a request, and a one-row fix that grew into an unrequested audit and a long report. |
+| Re-read before you write; replacement text replaces the whole span | Edits made against a stale copy while the user edited the same file, and a requested replacement merged with the old words. |
+| Raise a disagreement once, then do it the user's way; a decision that belongs to someone else stays a question | A demo label the presenter asked for, declined twice, and a capacity minimum filed without the customer's agreement. |
+| One document per topic, with wrong passages fixed in place | A folder of 20 dated notes, several superseding each other, where nobody could find anything. |
 | Say the cost per hour and per day; delete what you created; use the smallest machine | A Spot request for several nodes granted all of them at once, and each node billed from that moment. |
+| One paid capacity request at a time; read spend from the billing console; count token spend | A queued TPU request that couldn't be deleted while it sat in PROVISIONING, a spend estimate under half of the console's figure, and a day of multi-agent work that cost more than the accelerators it drove. |
+| Find a shared-project resource's owner before deleting it | A Cloud Function deleted as leftover cruft that belonged to another app in the same project. |
+| Match the tool to the task | A lookup that fanned out to 103 agents and 2.2M tokens when three direct searches answered it. |
+| One model per LLM job, with errors that name the model and status | A fallback chain that hid which service broke. |
 | Spell bit and byte units as the source does | On a call with a university HPC team, a terabit-for-terabyte slip drew a correction. That's an 8x error. |
 | Check your work: one item first, `tmux` for long runs, read the source, test the premise | Reports of success that nobody checked, long jobs lost with an SSH session, and answers built on a guessed definition. |
 | `CLOUDSDK_CORE_DISABLE_PROMPTS=1` in scripts | A setup script hung for 10 minutes on a gcloud "y/N" question. |
+| Shell rules: ssh multiplexing, process matching inside a script, a neutral tmux session, `set -m` | Dropped SSH sessions and a stalled wait loop from `pkill` and `pgrep` matching their own command line, and 3.5 to 20 s per remote command through `gcloud compute ssh`. |
+| Serve previews on port 8080 | Preview links to local files that opened nothing. |
+| Fix every blocker before restarting a slow service; hand over a tmux command for runs of hours | Six restarts of a model server in one session, each killing a 28-minute warmup. |
+| Copy every field; share a faithful copy of a doc; check a Google Doc's revision before a script rewrites it | A copied event that dropped its one attendee, a rebuilt doc that lost the author's formatting, and a collaborator's edit erased between a script's read and its write. |
+| Fix what a review finds; review comments say what's wrong; cold-run docs that others will use | A 30-item report handed back for the user to route, comments nobody could parse, and docs where two steps failed as written. |
 | Writing style: contractions, short sentences, no filler | Drafts that read as machine-written and run twice as long as they need to. |
+| No "exactly", "it was owed" or tilde; names over numbers; American spelling; STE sentence limits | Numbered references that went stale when the list changed, and British spellings that slipped into docs and emails. |
 
 ### Settings: [`settings.json`](./claude-code/settings.json)
 
@@ -263,13 +284,14 @@ Each piece exists because something went wrong without it.
 | The project ID and region in `env` | Debian's `.bashrc` returns early in a non-interactive shell, so `claude -p` from a script stopped with "No projectId was given". |
 | `CLAUDE_STREAM_IDLE_TIMEOUT_MS: 1800000` | A max-effort turn went quiet while it thought. Claude Code gave up after 300 seconds and retried, and Vertex AI billed every abandoned attempt: about 445K output tokens. |
 | The superpowers plugin | Adds skills for systematic debugging, planning a big change, and checking the result before calling it done. |
+| An `ask` list for the `gh` commands and GitHub MCP tools that post | A comment, PR, merge or release that other people read, posted before the user said yes. Bypass mode skips other prompts, but Claude Code still asks before a tool that matches an ask rule. |
 
 ### Hooks: [`hooks/`](./claude-code/hooks/)
 
 | Hook | What it prevents |
 |---|---|
 | `md_write_guard.py`, before each shell command | The clobbered `.md` above. It denies shell writes to an existing `.md` and allows reads, new files and `/tmp`. `tests/test_md_write_guard.py` covers it. |
-| `accelerator_guard.py`, before Claude ends a turn | GPUs and TPUs that kept billing after the step that needed them. It lists what's still running and never deletes anything. |
+| `accelerator_guard.py`, before Claude ends a turn | GPUs and TPUs that kept billing after the step that needed them, an unhealthy TPU VM that billed behind an allowlist entry written for a working one, and a skipped check that looked like a clean one. It lists what's still running, warns when it can't check, and never deletes anything. `tests/test_accelerator_guard.py` covers it. |
 
 ### Skills and MCP servers
 
@@ -333,7 +355,7 @@ For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pri
 │   ├── bin/claude-backup                  # Copies conversations and memory to your bucket
 │   ├── hooks/md_write_guard.py            # Denies shell writes over existing .md files
 │   ├── hooks/accelerator_guard.py         # Lists running GPUs and TPUs before a turn ends
-│   ├── tests/test_md_write_guard.py       # Tests for the guard
+│   ├── tests/                             # Tests for both hooks
 │   ├── vscode/                            # Machine settings and keep-claude-sessions
 │   └── workstation/customize_environment  # Boot hook for Cloud Workstations and Cloud Shell
 ├── gemini-cli/

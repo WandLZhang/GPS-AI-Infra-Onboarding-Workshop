@@ -22,7 +22,7 @@ turn back.
 
 What it checks, with one access token and a few REST calls in parallel:
   Compute Engine  running VMs with a GPU or an accelerator machine type
-  Cloud TPU       TPU VMs and queued TPU requests, all zones
+  Cloud TPU       TPU VMs and queued TPU requests, all zones, with each VM's health
   GKE             GPU and TPU node pools that keep nodes, or wait for capacity
   Vertex AI       endpoints that serve a model on GPUs or TPUs, in REGIONS
 
@@ -36,9 +36,15 @@ To keep something running on purpose, add a line to ~/.claude/accelerator-allowl
 A line silences matching resources through that date (UTC). An undated line
 silences nothing, so a silence can't outlive the reason for it.
 
+An unhealthy TPU VM bills the same as a healthy one and may serve nothing. A
+line with part of its name doesn't silence it, because that line was written
+for a VM that worked. Only a line with its full name does.
+
 It never deletes anything. It blocks once per turn: when Claude tries to stop again
-right after a block, the turn ends. Any error, such as no gcloud login or an API
-that isn't enabled, lets the turn end too.
+right after a block, the turn ends. When it can't check at all, because no project
+is set or gcloud has no login, it shows a warning and lets the turn end. A skipped
+check and a clean one both end the turn, so the warning tells them apart. An API
+that isn't enabled counts as nothing found.
 
 Exit 0 lets Claude stop. Exit 2 sends stderr back to Claude and keeps it working.
 """
@@ -65,6 +71,9 @@ ACCEL_MACHINES = ("a2-", "a3-", "a4-", "a4x-", "g2-", "g4-", "ct5", "ct6", "ct7"
 TPU_MACHINES = ("ct5", "ct6", "ct7")
 LIVE_TPU_NODE = {"CREATING", "READY", "RESTARTING", "REIMAGING", "REPAIRING", "STARTING"}
 QUEUED_TPU = {"CREATING", "ACCEPTED", "PROVISIONING", "WAITING_FOR_RESOURCES"}
+# Node.health in the TPU v2 API. TIMEOUT, UNHEALTHY_TENSORFLOW and
+# UNHEALTHY_MAINTENANCE are the unhealthy values.
+HEALTHY_TPU = {"", "HEALTHY", "HEALTH_UNSPECIFIED"}
 
 BUDGET = 12          # seconds for the whole check; a slow API must not hold the turn
 HTTP_TIMEOUT = 8
@@ -147,6 +156,25 @@ def allowlist():
     return keep
 
 
+def silenced(name, full_name_only, keep):
+    """True when an allowlist entry covers this resource.
+
+    A part of the name covers most resources. An unhealthy TPU VM needs its full
+    name, so an entry written for a working VM doesn't hide a broken one.
+    """
+    if full_name_only:
+        return name in keep
+    return any(k in name for k in keep)
+
+
+def skipped(why):
+    """Warn the user that nothing was checked, then let the turn end."""
+    print(json.dumps({"systemMessage":
+                      f"accelerator_guard: {why}, so nothing was checked. "
+                      "Check your GPUs and TPUs by hand before you walk away."}))
+    sys.exit(0)
+
+
 def sweep_compute(p, tok):
     hits = []
     d = get(f"https://compute.googleapis.com/compute/v1/projects/{p}"
@@ -158,8 +186,21 @@ def sweep_compute(p, tok):
                     for a in i.get("guestAccelerators", [])]
             if i.get("status") == "RUNNING" and (gpus or mt.startswith(ACCEL_MACHINES)):
                 hits.append((i["name"], f"Compute VM   {p}  {scope.split('/')[-1]}  "
-                                        f"{i['name']}  {mt}  {', '.join(gpus) or '-'}"))
+                                        f"{i['name']}  {mt}  {', '.join(gpus) or '-'}", False))
     return hits
+
+
+def tpu_node_hit(p, n):
+    """(name, line, full_name_only) for a TPU VM that bills, or None."""
+    name, loc = n["name"].split("/")[-1], n["name"].split("/")[3]
+    state = n.get("state", "")
+    if state not in LIVE_TPU_NODE:
+        return None
+    line = f"TPU VM       {p}  {loc}  {name}  {n.get('acceleratorType', '?')}  {state}"
+    health = n.get("health", "")
+    if health in HEALTHY_TPU:
+        return (name, line, False)
+    return (name, f"{line}  health {health}, bills the same as a healthy VM", True)
 
 
 def sweep_tpu(p, tok):
@@ -170,13 +211,12 @@ def sweep_tpu(p, tok):
         state = q.get("state", {}).get("state", "")
         if state in QUEUED_TPU:
             hits.append((name, f"TPU request  {p}  {loc}  {name}  {state}  "
-                               f"(free while it waits; bills once granted)"))
+                               f"(free while it waits; bills once granted)", False))
     d = get(f"https://tpu.googleapis.com/v2/projects/{p}/locations/-/nodes", tok)
     for n in d.get("nodes", []):
-        name, loc = n["name"].split("/")[-1], n["name"].split("/")[3]
-        if n.get("state", "") in LIVE_TPU_NODE:
-            hits.append((name, f"TPU VM       {p}  {loc}  {name}  "
-                               f"{n.get('acceleratorType', '?')}  {n.get('state')}"))
+        hit = tpu_node_hit(p, n)
+        if hit:
+            hits.append(hit)
     return hits
 
 
@@ -199,10 +239,11 @@ def sweep_gke(p, tok):
             # it has some, show up as Compute VMs above.
             if status == "PROVISIONING":
                 hits.append((label, f"GKE pool     {p}  {c.get('location', '?')}  {label}  "
-                                    f"{mt}  waiting for capacity"))
+                                    f"{mt}  waiting for capacity", False))
             elif status == "RUNNING" and floor > 0:
                 hits.append((label, f"GKE pool     {p}  {c.get('location', '?')}  {label}  "
-                                    f"{mt} {', '.join(gpus)}  keeps at least {floor} node(s)"))
+                                    f"{mt} {', '.join(gpus)}  keeps at least {floor} node(s)",
+                             False))
     return hits
 
 
@@ -217,7 +258,7 @@ def sweep_vertex(p, tok, region):
             if acc or mt.startswith(ACCEL_MACHINES):
                 name = e.get("displayName") or e["name"].split("/")[-1]
                 hits.append((name, f"Vertex AI    {p}  {region}  endpoint {name}  {mt}  "
-                                   f"{acc} x{spec.get('acceleratorCount', 0)}"))
+                                   f"{acc} x{spec.get('acceleratorCount', 0)}", False))
     return hits
 
 
@@ -230,9 +271,11 @@ def main():
         sys.exit(0)
 
     projs = projects()
-    tok = access_token() if projs else ""
+    if not projs:
+        skipped("no gcloud project is set")
+    tok = access_token()
     if not tok:
-        sys.exit(0)
+        skipped("gcloud returned no access token")
 
     keep = allowlist()
     hits = []
@@ -242,8 +285,8 @@ def main():
         futs += [ex.submit(sweep_vertex, p, tok, r) for p in projs for r in REGIONS]
         for f in cf.as_completed(futs):
             try:
-                hits.extend(line for name, line in f.result()
-                            if not any(k in name for k in keep))
+                hits.extend(line for name, line, full_name_only in f.result()
+                            if not silenced(name, full_name_only, keep))
             except Exception:
                 pass
     if not hits:
@@ -260,6 +303,7 @@ def main():
         "Delete only what the user says they're done with.",
         "To keep one running on purpose, add a dated line to ~/.claude/accelerator-allowlist:",
         "  <part of the resource name>  <YYYY-MM-DD>  <reason>",
+        "An unhealthy TPU VM needs its full name on that line.",
     ]), file=sys.stderr)
     sys.exit(2)
 
