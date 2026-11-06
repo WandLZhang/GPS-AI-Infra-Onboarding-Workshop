@@ -1,6 +1,6 @@
 # Deploying Workloads — GPU & TPU on Google Cloud
 
-> Choose the right deployment method for your AI/ML workloads on Google Cloud. This section covers capacity acquisition concepts (DWS), and all deployment surfaces — from raw Compute Engine VMs to fully managed Slurm and serverless Vertex AI.
+> Choose where to run your AI/ML workloads on Google Cloud, from raw Compute Engine VMs to fully managed Slurm and serverless Vertex AI. Capacity options (DWS, Spot and reservations) are in [capacity](../capacity/).
 
 ---
 
@@ -11,6 +11,7 @@
 3. [Deployment Methods at a Glance](#deployment-methods-at-a-glance)
 4. [Decision Framework](#decision-framework)
 5. [Workload × Deployment Method Matrix](#workload--deployment-method-matrix)
+6. [Start from a recipe](#start-from-a-recipe)
 
 ---
 
@@ -18,7 +19,7 @@
 
 Deploying GPU/TPU workloads on Google Cloud involves two independent decisions:
 
-1. **How do you acquire capacity?** — This is the domain of [Dynamic Workload Scheduler (DWS)](dws/), reservations, on-demand, and [Spot](spot-capacity-advisor/). DWS is a scheduling service that queues your request and provisions resources when available, at up to 53% discount.
+1. **How do you acquire capacity?** — This is the domain of [Dynamic Workload Scheduler (DWS)](../capacity/dws/), reservations, on-demand, and [Spot](../capacity/spot-capacity-advisor/). DWS is a scheduling service that queues your request and provisions resources when available, at up to 53% discount. [Capacity](../capacity/) compares the options.
 
 2. **Where do you deploy?** — This is the deployment method — the platform and tooling you use to run your workload. Each method integrates with DWS and other capacity models differently.
 
@@ -39,7 +40,7 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 │   • Calendar Mode      — Guaranteed start time, committed cost             │
 │   • Spot               — Cheapest, preemptible, no guarantee              │
 │                                                                             │
-│   See: dws/README.md for full DWS concepts                                │
+│   See: ../capacity/README.md                                              │
 │                                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -58,7 +59,7 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> **Picking the best Spot zone / region / machine?** See [spot-capacity-advisor/](spot-capacity-advisor/) — use the Capacity Advisor for Spot API to place Spot workloads on live obtainability instead of guesswork.
+> **Picking the best Spot zone / region / machine?** See [capacity/spot-capacity-advisor/](../capacity/spot-capacity-advisor/) — use the Capacity Advisor for Spot API to place Spot workloads on live obtainability instead of guesswork.
 
 ---
 
@@ -66,11 +67,11 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 
 | Method | Platform | Best For | DWS Support | Guide |
 |---|---|---|---|---|
-| **[DWS Concepts](dws/)** | — | Understanding capacity acquisition models, pricing, compliance | — | [→ dws/](dws/) |
-| **[Spot Capacity Advisor](spot-capacity-advisor/)** | Compute Engine API (beta) | Picking the best zone/region/machine for Spot via live obtainability + estimated uptime | — (Spot) | [→ spot-capacity-advisor/](spot-capacity-advisor/) |
+| **[DWS Concepts](../capacity/dws/)** | — | Understanding capacity acquisition models, pricing, compliance | — | [→ capacity/dws/](../capacity/dws/) |
+| **[Spot Capacity Advisor](../capacity/spot-capacity-advisor/)** | Compute Engine API (beta) | Picking the best zone/region/machine for Spot via live obtainability + estimated uptime | — (Spot) | [→ capacity/spot-capacity-advisor/](../capacity/spot-capacity-advisor/) |
 | **[GKE (Autopilot & Standard)](gke/)** | GKE (gcloud / Terraform) | Understanding GKE modes, direct GPU deployment, DWS flex-start | Flex-start, Queued Provisioning | [→ gke/](gke/) |
-| **[Compute Engine](compute-engine-Managed%20Instance%20Groups/)** | Compute Engine (MIGs) | Raw VM control, no K8s overhead, batch training | Flex-start | [→ compute-engine/](compute-engine-Managed%20Instance%20Groups/) |
-| **[Calendar Mode](compute-engine-future-reservations/)** | Compute Engine (Future Reservations) | Planned training with hard deadlines, guaranteed start | Calendar Mode | [→ compute-engine-future-reservations/](compute-engine-future-reservations/) |
+| **[Compute Engine](../capacity/flex-start-mig/)** | Compute Engine (MIGs) | Raw VM control, no K8s overhead, batch training | Flex-start | [→ capacity/flex-start-mig/](../capacity/flex-start-mig/) |
+| **[Calendar Mode](../capacity/future-reservations/)** | Compute Engine (Future Reservations) | Planned training with hard deadlines, guaranteed start | Calendar Mode | [→ capacity/future-reservations/](../capacity/future-reservations/) |
 | **[Cluster Toolkit](cluster-toolkit/)** | GKE (Terraform) | Production GKE clusters, full infra control, IaC | Flex-start, Reservation fallback | [→ cluster-toolkit/](cluster-toolkit/) |
 | **[XPK](xpk/)** | GKE (Python CLI) | Rapid PoC, testing, experimentation | Flex-start | [→ xpk/](xpk/) |
 | **[Cluster Director](cluster-director/)** | Managed Slurm | Slurm-native teams, HPC workloads, console-first | Flex-start, Calendar Mode | [→ cluster-director/](cluster-director/) |
@@ -83,30 +84,7 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 
 ### Step 1: Choose Your Capacity Model
 
-```
-                    Do you need guaranteed capacity
-                    at a specific start time?
-                               │
-                    ┌──────────┴──────────┐
-                   Yes                    No
-                    │                      │
-              Calendar Mode           Is your workload
-              (guaranteed start,      fault-tolerant with
-              committed cost)         checkpointing?
-                                          │
-                                ┌─────────┴─────────┐
-                               Yes                   No
-                                │                     │
-                          Can you tolerate        DWS Flex-start
-                          preemption?             (up to 53% discount,
-                                │                  7-day max)
-                         ┌──────┴──────┐
-                        Yes            No
-                         │              │
-                       Spot          DWS Flex-start
-                       (up to 91%
-                        discount)
-```
+Follow [Choose an option](../capacity/README.md#choose-an-option) in capacity.
 
 ### Step 2: Choose Your Deployment Method
 
@@ -172,4 +150,17 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 
 ---
 
-> **Next steps**: Choose a [capacity model](dws/) and a deployment method from the guides linked above.
+## Start from a recipe
+
+Copy a working recipe before you write anything new:
+
+- [AI-Hypercomputer/tpu-recipes](https://github.com/AI-Hypercomputer/tpu-recipes): training and inference recipes for TPUs, including vLLM-TorchTPU serving on [Ironwood](https://github.com/AI-Hypercomputer/tpu-recipes/tree/main/inference/ironwood/vLLM/vLLM-TorchTPU) and [Trillium](https://github.com/AI-Hypercomputer/tpu-recipes/tree/main/inference/trillium/vLLM/vLLM-TorchTPU/Gemma4-26B).
+- [AI-Hypercomputer/gpu-recipes](https://github.com/AI-Hypercomputer/gpu-recipes): the same for GPUs.
+- [GoogleCloudPlatform/accelerated-platforms](https://github.com/GoogleCloudPlatform/accelerated-platforms): GKE reference architectures for inference and training.
+- [MaxText](https://maxtext.readthedocs.io/en/latest/): LLM training in JAX on TPUs and GPUs.
+
+To bring your own model up on TPU, see [Port a model to TPU](../accelerators/port-to-tpu.md).
+
+---
+
+> **Next steps**: Choose a [capacity model](../capacity/) and a deployment method from the guides linked above.

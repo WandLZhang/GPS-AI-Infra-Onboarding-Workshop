@@ -45,7 +45,7 @@ Click **Authorize** when Cloud Shell asks. The script turns on the Vertex AI API
 | Creates the default network, the workstation's service account and a Developer Knowledge API key | 1 min 6 s |
 | Creates the workstation cluster | 3 min 16 s |
 | Creates the workstation config and the workstation, and starts it | 2 min 25 s |
-| On the workstation: installs agy and Claude Code, checks Opus 5.5 again, runs [setup.sh](./cli-agent/claude-code/setup.sh) and the smoke test | 1 min 54 s |
+| On the workstation: installs agy and Claude Code, checks Opus 5.5 again, runs [setup.sh](./claude-code/setup.sh) and the smoke test | 1 min 54 s |
 | Total | 10 min 30 s |
 
 Once agy and Claude Code are on the workstation, a failed step doesn't stop the script. It goes into `~/setup-gaps.md` on the workstation.

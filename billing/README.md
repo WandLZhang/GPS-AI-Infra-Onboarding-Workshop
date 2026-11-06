@@ -863,11 +863,12 @@ gcloud compute project-info describe --project=$PROJECT_ID \
 
 ### Related Sections in This Repository
 
-- [Accelerator Guide](../01-foundational-tools/accelerator-guide/README.md) — GPU selection and sizing (impacts cost)
-- [DWS Guide](../03-deploying-workloads/dws/README.md) — DWS Flex-Start for up to 53% discount
-- [Cluster Toolkit](../03-deploying-workloads/cluster-toolkit/README.md) — Reservation-bound and Spot GKE clusters
-- [Storage Guide](../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, storage tiering
-- [Monitoring & Observability](../04-monitoring-observability/README.md) — Monitoring cost optimization strategies
+- [Accelerator Guide](../accelerators/README.md) — GPU selection and sizing (impacts cost)
+- [DWS Guide](../capacity/dws/README.md) — DWS Flex-Start for up to 53% discount
+- [Cluster Toolkit](../workloads/cluster-toolkit/README.md) — Reservation-bound and Spot GKE clusters
+- [Storage Guide](../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, storage tiering
+- [Monitoring & Observability](../monitoring/README.md) — Monitoring cost optimization strategies
+- [Get help](../SUPPORT.md) — Support cases, forums, quota increases and compute for academic research
 
 ---
 

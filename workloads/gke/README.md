@@ -31,13 +31,15 @@ From the [GKE Spot VMs page](https://docs.cloud.google.com/kubernetes-engine/doc
 - Stateful workloads should finish shutting down within 25 seconds to avoid persistent volume corruption.
 - Spot VMs don't expire. The older preemptible VMs stop after 24 hours.
 
-For training, finish a checkpoint inside the shutdown window. Otherwise, checkpoint on a timer and accept losing the steps since the last one. More in [Keep a training job alive on Spot](../spot-capacity-advisor/README.md#keep-a-training-job-alive-on-spot).
+For training, finish a checkpoint inside the shutdown window. Otherwise, checkpoint on a timer and accept losing the steps since the last one. More in [Keep a training job alive on Spot](../../capacity/spot-capacity-advisor/README.md#keep-a-training-job-alive-on-spot).
 
 ### Fall back across capacity types with custom ComputeClasses
 
 Pick a custom [ComputeClass](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes) when one workload can run on more than one kind of capacity. It lists node configurations in priority order, for example a reservation, then flex-start, then Spot, then on-demand. When GKE can't create the first configuration, it tries the next one. With active migration, GKE moves workloads back to a preferred configuration when that configuration becomes available. ComputeClasses work on Autopilot, and on Standard from GKE 1.30.3-gke.1451000.
 
 ComputeClasses don't support queued provisioning. For a reservation that falls back to queued provisioning, use the Kueue setup on the [queued provisioning page](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest). It attaches the provisioning check to the DWS flavor only, with `admissionChecksStrategy` and `onFlavors`.
+
+For how Kueue admits a whole job at once and places it by topology, read [Kueue for AI: atomic admission and topology awareness](https://medium.com/google-cloud/kueue-for-ai-the-power-of-atomic-admission-topology-awareness-59c2fd1f86ed).
 
 ### RL post-training on GKE
 
@@ -66,7 +68,16 @@ ComputeClasses don't support queued provisioning. For a reservation that falls b
 | Bucket access from Pods | [Workload Identity Federation for GKE](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/workload-identity) |
 | Prices | [Google Kubernetes Engine pricing](https://cloud.google.com/kubernetes-engine/pricing) |
 
-## Ask your agent
+## Talks
+
+From Google Cloud Next '26:
+
+- [What's new for AI on GKE: training, serving and agents](https://www.youtube.com/watch?v=XI726xo0a98)
+- [The GKE inference playbook](https://www.youtube.com/watch?v=WQlKo0D3Ofg), for serving LLMs
+- [Beyond fine-tuning: training and RL on GKE](https://www.youtube.com/watch?v=GjQJepOZP7o)
+- [Stop wasting GPU FLOPs on cold starts](https://www.youtube.com/watch?v=EXQ3AksFXcM)
+
+## Ask your harness
 
 Questions for the Google developer knowledge MCP:
 
@@ -96,7 +107,7 @@ kubectl get provisioningrequests -A
 
 ### Related pages in this repo
 
-- [DWS](../dws/) compares Flex-start and calendar mode across products, lists prices, and covers [data residency](../dws/README.md#5-data-residency--compliance-considerations).
-- [Spot Capacity Advisor](../spot-capacity-advisor/) ranks zones for Spot.
-- [Storage](../../02-core-infrastructure/storage/README.md) compares Cloud Storage FUSE, Rapid Cache, Rapid Bucket and Managed Lustre for training data.
-- [Monitoring](../../04-monitoring-observability/) covers the GKE AI/ML dashboards.
+- [DWS](../../capacity/dws/) compares Flex-start and calendar mode across products, lists prices, and covers [data residency](../../capacity/dws/README.md#5-data-residency--compliance-considerations).
+- [Spot Capacity Advisor](../../capacity/spot-capacity-advisor/) ranks zones for Spot.
+- [Storage](../../infrastructure/storage/README.md) compares Cloud Storage FUSE, Rapid Cache, Rapid Bucket and Managed Lustre for training data.
+- [Monitoring](../../monitoring/) covers the GKE AI/ML dashboards.

@@ -12,9 +12,9 @@
 4. [Sizing Your Accelerator — Memory, Shapes & Node Count](#4-sizing-your-accelerator--memory-shapes--node-count)
 5. [Reservation Affinity & Topology](#5-reservation-affinity--topology)
 6. [Checkpointing](#6-checkpointing)
-7. [Consumption Model Summary](#7-consumption-model-summary)
-8. [Port a model to TPU](#8-port-a-model-to-tpu)
-9. [References](#9-references)
+7. [References](#7-references)
+
+Which capacity options each machine type takes is in [capacity](../capacity/README.md#which-machine-types-take-which-option). Porting a model to TPU has its own page: [port-to-tpu.md](./port-to-tpu.md).
 
 ---
 
@@ -27,7 +27,13 @@ Choosing the right accelerator is the **single most impactful decision** you mak
 - **Availability** — newer/larger accelerators are harder to obtain; your consumption model (reservation, DWS, Spot) depends on the machine type
 - **Time-to-result** — an undersized cluster doubles your wall-clock time; an oversized cluster wastes budget
 
-This guide helps you make that decision systematically. Use it **before** requesting quota, making reservations, or deploying workloads via [Cluster Toolkit](../../03-deploying-workloads/cluster-toolkit/README.md) or [DWS](../../03-deploying-workloads/dws/README.md).
+This guide helps you make that decision systematically. Use it **before** requesting quota, making reservations, or deploying workloads via [Cluster Toolkit](../workloads/cluster-toolkit/README.md) or [DWS](../capacity/dws/README.md).
+
+### Learn how accelerators behave
+
+- Read [How to Scale Your Model](https://jax-ml.github.io/scaling-book): the parts on rooflines, TPUs, sharded matmuls and transformers. GPU users add the GPU part.
+- For an overview of Google Cloud's AI infrastructure, watch [The future of AI infrastructure](https://www.youtube.com/watch?v=PJQPMv8TqLA) and [AI Hypercomputer: resilient AI infrastructure at scale](https://www.youtube.com/watch?v=cvpasuzUB0Q) (Google Cloud Next '26).
+- For what's new in TPUs, see [Cloud TPU generations](#cloud-tpu-generations).
 
 ### Where This Guide Fits
 
@@ -41,15 +47,15 @@ This guide helps you make that decision systematically. Use it **before** reques
 │  │    ├── Size memory & shape      ◄── This guide, Section 4     │  │
 │  │    ├── Plan checkpointing       ◄── This guide, Section 6     │  │
 │  │    ├── Request quota            ◄── DWS: Quota & Pricing      │  │
-│  │    └── Make reservations        ◄── Future reservations       │  │
+│  │    └── Make reservations        ◄── capacity/                 │  │
 │  ├───────────────────────────────────────────────────────────────┤  │
 │  │ 2. BUILD                                                      │  │
 │  │    ├── Set up networking, storage, disk images                │  │
-│  │    └── core-infrastructure/                                   │  │
+│  │    └── infrastructure/                                        │  │
 │  ├───────────────────────────────────────────────────────────────┤  │
 │  │ 3. DEPLOY                                                     │  │
 │  │    ├── Cluster Toolkit / XPK / Vertex AI / DWS               │  │
-│  │    └── deploying-workloads/                                   │  │
+│  │    └── workloads/                                             │  │
 │  ├───────────────────────────────────────────────────────────────┤  │
 │  │ 4. OPERATE                                                    │  │
 │  │    └── Monitoring, dashboards, TPU observability              │  │
@@ -121,6 +127,8 @@ This guide helps you make that decision systematically. Use it **before** reques
 
 Sources: the [TPU7x](https://docs.cloud.google.com/tpu/docs/tpu7x), [v6e](https://docs.cloud.google.com/tpu/docs/v6e), [v5p](https://docs.cloud.google.com/tpu/docs/v5p) and [v5e](https://docs.cloud.google.com/tpu/docs/v5e) pages and [TPU system architecture](https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm), all last updated 2026-10-13. Units follow each page. Google engineers walk through the 9,216-chip Ironwood pod in their [Hot Chips 2025 talk](https://www.youtube.com/watch?v=Zy3LfsAxc64).
 
+What's new in TPUs: [Inside the 8th-generation TPU](https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive) and [Unlock high-performance AI with the new Cloud TPU experience](https://www.youtube.com/watch?v=fUELeEaTLVs) (Google Cloud Next '26).
+
 ### Key Takeaways from the Catalog
 
 | Question | Answer |
@@ -191,7 +199,7 @@ When the recommendation matrix doesn't give a clear answer, use these criteria t
 | **Budget sensitivity** | Smaller / older GPUs | G2 (L4) or A2 Standard (A100 40 GB) offer best price-per-FLOP for moderate workloads |
 | **Availability urgency** | Widely available types | G2, A2 Standard are most available. A4X Max/A4X are newest and most constrained |
 | **Multi-node scaling** | High-bandwidth networking | A4X Max (3,600 Gbps), A4/A3 Ultra (3,600 Gbps) for strong scaling. A3 High (1,000 Gbps) for modest scaling |
-| **Data residency** | US zones with GPU availability | See [DWS guide: data residency](../../03-deploying-workloads/dws/README.md#5-data-residency--compliance-considerations) for zone availability by GPU type |
+| **Data residency** | US zones with GPU availability | See [DWS guide: data residency](../capacity/dws/README.md#5-data-residency--compliance-considerations) for zone availability by GPU type |
 | **Fractional GPU needs** | G4 or A3 High | G4 offers ⅛, ¼, ½ GPU shapes. A3 High offers 1, 2, 4, 8 GPU shapes |
 
 ### Double-precision (FP64) science codes
@@ -427,7 +435,7 @@ GPU workloads are **always at risk of interruption**. Without checkpointing, you
 
 | Storage | Write Throughput | Latency | Append Support | Best For | Cost Tier |
 |---|---|---|---|---|---|
-| **[Rapid Bucket](../../02-core-infrastructure/storage/README.md)** | Up to 15 TB/s | Sub-ms | ✅ Appendable objects | Largest-scale training, streaming checkpoint writes | $$ |
+| **[Rapid Bucket](../infrastructure/storage/README.md)** | Up to 15 TB/s | Sub-ms | ✅ Appendable objects | Largest-scale training, streaming checkpoint writes | $$ |
 | **GCS (standard)** | High | Low ms | ❌ Full rewrite | Most workloads — simple, durable, widely supported | $ |
 | **GCS + GCSFuse** | High (with tuning) | Low ms | ❌ Full rewrite | K8s-native workloads via CSI driver | $ |
 | **HyperDisk** | Tunable IOPS/throughput | Sub-ms | N/A (block) | Single-node checkpoint to persistent block storage | $$ |
@@ -556,80 +564,11 @@ export JAX_COMPILATION_CACHE_DIR=gs://my-bucket/xla-cache
 pip install gcsfs
 ```
 
-> This is separate from model checkpointing — it caches compiled XLA programs. See [Storage README](../../02-core-infrastructure/storage/README.md) for details.
+> This is separate from model checkpointing — it caches compiled XLA programs. See [Storage README](../infrastructure/storage/README.md) for details.
 
 ---
 
-## 7. Consumption Model Summary
-
-Your choice of accelerator constrains which consumption models are available:
-
-| Machine Type | Reservation (AI Hypercomputer) | Reservation (Calendar Mode, ≤90 days) | Flex-Start (DWS) | Spot |
-|---|:---:|:---:|:---:|:---:|
-| **A4X Max / A4X** | ✅ (required) | ❌ | ❌ | ❌ |
-| **A4** | ✅ | ✅ | ✅ | ✅ |
-| **A3 Ultra** | ✅ | ✅ | ✅ | ✅ |
-| **A3 Mega** | ✅ | ✅ | ✅ | ✅ |
-| **A3 High (8 GPU)** | ✅ | ✅ | ✅ | ✅ |
-| **A3 High (1/2/4 GPU)** | ❌ | ❌ | ✅ | ✅ |
-| **A3 Edge** | ✅ | ❌ | ✅ | ✅ |
-| **A2** | ✅ | ✅ | ✅ | ✅ |
-| **G4** | ✅ | ✅ | ✅ | ✅ |
-| **G2** | ✅ | ❌ | ✅ | ✅ |
-
-### Quick Decision Guide
-
-```
-               Do you need GPUs for more than 90 days?
-                              │
-                   ┌──────────┴──────────┐
-                  Yes                    No
-                   │                      │
-            Reservation           Do you want guaranteed
-            (AI Hypercomputer)    capacity at a specific time?
-            Contact account team        │
-                              ┌─────────┴─────────┐
-                             Yes                   No
-                              │                     │
-                        Calendar Mode         Is your workload
-                        (≤90 days)            fault-tolerant?
-                                                    │
-                                         ┌──────────┴──────────┐
-                                        Yes                    No
-                                         │                      │
-                                    Can you tolerate       Flex-Start (DWS)
-                                    preemption?            Up to 53% discount
-                                         │                 7-day max
-                                  ┌──────┴──────┐
-                                 Yes            No
-                                  │              │
-                                Spot         Flex-Start
-                                Up to 91%    Up to 53%
-                                discount     discount
-```
-
-> For the full DWS guide with all consumption options, decision frameworks, and implementation details, see the [DWS Guide](../../03-deploying-workloads/dws/README.md).
-
----
-
-## 8. Port a model to TPU
-
-For PyTorch, start with TorchTPU. Google's [PyTorch on TPU](https://docs.cloud.google.com/tpu/docs/pytorch-on-tpu) page covers it, plus vLLM-TorchTPU and SGLang-TorchTPU for serving and TorchTitan for training, and the [TorchTPU docs](https://torchtpu.readthedocs.io/en/latest/) cover install and APIs. To run TorchTPU with Ray on GKE, start from Google's [fine-tuning](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/train-models-tpu-ray-torchtpu) and [serving](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/serve-llm-tpu-ray-torchtpu) tutorials.
-
-What worked on our ports, in order:
-
-1. Get it running before you make it fast. Expect the first number to lose to the GPU; that's normal for an untuned port.
-2. Name the baseline you got. If you compared against a different GPU than planned, say so in every readout.
-3. Sweep architecture choices before tuning flags. In vLLM's TPU backend, switching the MoE kernel backend moved throughput more than any command-line flag did.
-4. When summary numbers stop helping, switch to profiles, which show where the time goes. tpu-inference ships [`tpu_profiling.py`](https://github.com/vllm-project/tpu-inference/blob/bec31b7cce132ed995daed8d39321b943d15be73/examples/tpu_profiling.py).
-5. Profile prefill and decode separately. They have different bottlenecks, and averaging hides both.
-6. Treat correctness, quantization and upstreaming as part of the port. For correctness, run several dozen prompts at temperature 0 against the GPU implementation and check every prompt where the tokens differ.
-
-For a custom Pallas kernel, try [MaxKernel](https://github.com/AI-Hypercomputer/accelerator-agents/tree/main/maxkernel) before you write one by hand. It's an open-source agent that turns a JAX, CUDA or PyTorch kernel into a Pallas kernel, then compiles, tests, tunes and profiles it on a real TPU. It runs as a [Claude Code plugin](https://github.com/AI-Hypercomputer/accelerator-agents/blob/main/maxkernel/claude-code/README.md), and the method is in [the paper](https://arxiv.org/abs/2609.04523).
-
----
-
-## 9. References
+## 7. References
 
 ### Google Cloud Documentation
 
@@ -651,10 +590,12 @@ For a custom Pallas kernel, try [MaxKernel](https://github.com/AI-Hypercomputer/
 
 ### Related Sections in This Repository
 
-- [DWS Guide](../../03-deploying-workloads/dws/README.md) — Dynamic Workload Scheduler comprehensive guide
-- [Cluster Toolkit](../../03-deploying-workloads/cluster-toolkit/README.md) — Deploy AI-optimized GKE clusters
-- [Storage for AI Workloads](../../02-core-infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
-- [XPK](../../03-deploying-workloads/xpk/README.md) — Accelerated Processing Kit for quick PoCs
+- [Port a model to TPU](./port-to-tpu.md) — TorchTPU, what worked on our ports, MaxKernel and the TPU agent suite
+- [Capacity](../capacity/README.md) — Which capacity options each machine type takes, and how to choose one
+- [DWS Guide](../capacity/dws/README.md) — Dynamic Workload Scheduler comprehensive guide
+- [Cluster Toolkit](../workloads/cluster-toolkit/README.md) — Deploy AI-optimized GKE clusters
+- [Storage for AI Workloads](../infrastructure/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
+- [XPK](../workloads/xpk/README.md) — Accelerated Processing Kit for quick PoCs
 
 ---
 

@@ -8,8 +8,8 @@ Watch GPU and TPU jobs with dashboards and alerts, read their logs, and profile 
 - Leave GKE system metrics on and set `containerPort: 8431` in TPU pod specs. The duty cycle and HBM charts need both. Cloud Monitoring doesn't charge to ingest GKE system metrics.
 - Set alerts before a long run. A hung job keeps billing until someone notices. Start with [our five](#alerts-we-set-first).
 - When a TPU job dies, check [hardware health](#tpu-hardware-health) before you debug code. The ICI link, HBM and PCIe metrics show whether the hardware failed.
-- For a hung or failed TPU job on GKE, run the [ML Workload Debugging Wiki](https://github.com/google/ml-workload-debugging-wiki) in your coding agent. It matches the job's logs against known failure modes and names the culprit hosts.
-- Read logs through the Cloud Logging remote MCP server. The [agentic coder setup](../01-foundational-tools/agentic-coder-setup/) connects it, so your agent queries a job's logs itself.
+- For a hung or failed TPU job on GKE, run the [ML Workload Debugging Wiki](https://github.com/google/ml-workload-debugging-wiki) in your harness. It matches the job's logs against known failure modes and names the culprit hosts.
+- Read logs through the Cloud Logging remote MCP server. The [harness setup](../harness-setup/) connects it, so your harness queries a job's logs itself.
 - Profile early with XProf. Its collection overhead on TPU is under 1%, so profile during development too.
 - Write profiles to Cloud Storage. Local profiles go away when the run ends. XProfiler reads from the bucket.
 - Open large profiles on an XProfiler VM, then delete the VM. It loads big profiles faster than a local TensorBoard. It bills while it runs.
@@ -32,13 +32,13 @@ Watch GPU and TPU jobs with dashboards and alerts, read their logs, and profile 
 | TPU metrics and core state from a shell | [Monitor with tpu-info CLI](https://docs.cloud.google.com/tpu/docs/tpu-info-cli) |
 | Alerts written in PromQL | [Create PromQL-based alerting policies (Console)](https://docs.cloud.google.com/monitoring/promql/create-promql-alerts-console) |
 | Log queries for GKE and TPU jobs | [Sample queries](https://docs.cloud.google.com/logging/docs/view/query-library) |
-| Logs in your coding agent | [Use the Cloud Logging remote MCP server](https://docs.cloud.google.com/logging/docs/use-logging-mcp) |
-| Debug a TPU job with a coding agent | [Troubleshoot with the ML Workload Debugging Wiki](https://docs.cloud.google.com/tpu/docs/agent-wiki) |
+| Logs in your harness | [Use the Cloud Logging remote MCP server](https://docs.cloud.google.com/logging/docs/use-logging-mcp) |
+| Debug a TPU job with a harness | [Troubleshoot with the ML Workload Debugging Wiki](https://docs.cloud.google.com/tpu/docs/agent-wiki) |
 | Automatic hang and slowdown detection for JAX on TPU | [Workload monitoring with ML Diagnostics](https://docs.cloud.google.com/tpu/docs/ml-diagnostics/workload-monitoring) |
 | TPU errors and log queries on GKE | [Troubleshoot TPUs in GKE](https://docs.cloud.google.com/kubernetes-engine/docs/troubleshooting/tpus) |
 | Profile with XProf and XProfiler | [Profile your model on Cloud TPU VMs](https://docs.cloud.google.com/tpu/docs/profile-tpu-vm) |
 
-## Ask your agent
+## Ask your harness
 
 Questions for the Google developer knowledge MCP:
 
@@ -52,8 +52,8 @@ Questions for the Google developer knowledge MCP:
 - "Why is a TPU instance marked UNHEALTHY, and what does each cause mean?"
 - "How do I create a PromQL-based alerting policy in Cloud Monitoring?"
 - "Which Cloud Logging query shows the error logs for one GKE JobSet?"
-- "How do I connect a coding agent to the Cloud Logging remote MCP server?"
-- "How do I use the ML Workload Debugging Wiki with a coding agent to debug a hung TPU job?"
+- "How do I connect a harness to the Cloud Logging remote MCP server?"
+- "How do I use the ML Workload Debugging Wiki with a harness to debug a hung TPU job?"
 - "How do I detect and diagnose a hang or slowdown in a TPU training job on GKE with ML Diagnostics?"
 - "How do I find which TPU core is stuck when a multi-host TPU job hangs?"
 - "How do I read TPU metrics with the TPU Monitoring Library in libtpu?"
@@ -102,7 +102,7 @@ To check by hand, work in this order:
 
 1. Chart the [TPU hardware health](#tpu-hardware-health) metrics for the failure window.
 2. On GKE, chart `kubernetes.io/node/interruption_count` for the same window. Its `interruption_type` and `interruption_reason` labels name the cause, such as `PreemptionEvent` or `HostError`.
-3. Ask your coding agent for the job's ERROR logs. It reads them through the Cloud Logging remote MCP server.
+3. Ask your harness for the job's ERROR logs. It reads them through the Cloud Logging remote MCP server.
 4. If a multi-host TPU job hangs, run `tpu-info --metric sequencer_state_detailed` on every host. Look for a core whose program counter, HLO location or run ID differs from the rest. That core's host is the suspect.
 
 ### Profile with XProf
@@ -117,7 +117,7 @@ loss.block_until_ready()
 jax.profiler.stop_trace()
 ```
 
-In MaxText, set `profiler=xplane`. For PyTorch, follow the TorchTPU [XProf guide](https://torchtpu.readthedocs.io/en/latest/performance_profiling_with_xprof/).
+In MaxText, set `profiler=xplane`. For PyTorch, follow the TorchTPU [XProf guide](https://torchtpu.readthedocs.io/en/latest/performance_profiling_with_xprof/). To profile vLLM serving on TPU, use [`tpu_profiling.py`](https://github.com/vllm-project/tpu-inference/blob/bec31b7cce132ed995daed8d39321b943d15be73/examples/tpu_profiling.py) in tpu-inference.
 
 View the profiles with XProfiler. Point it at the bucket root to compare runs and sessions.
 
