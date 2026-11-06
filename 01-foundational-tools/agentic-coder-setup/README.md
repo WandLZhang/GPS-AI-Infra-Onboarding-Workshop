@@ -72,7 +72,7 @@ The script ends with the workstation's link, a count of gaps and this prompt:
 Read ~/setup-gaps.md, fix each gap, then run claude-smoke-test until it passes 3 of 3.
 ```
 
-Open the link, then open a terminal (**Terminal > New Terminal**). If there are gaps, run `agy` and paste the prompt. The first time, agy asks for a color scheme, the terms and whether you trust the folder. Then it asks before each command it runs. With no gaps, start Claude Code with `claude-start`.
+Open the link, then open a terminal (**Terminal > New Terminal**). If there are gaps, run `agy` and paste the prompt. The first time, agy asks for a color scheme, the terms and whether you trust the folder. Then it asks before each command it runs. With no gaps, start Claude Code with `claude-start`. The first time, it asks for a text style, shows security notes and asks whether you trust the folder. Choose **Yes, I trust this folder**, because the default, No, exits.
 
 Both agents sign in as the workstation's service account, so neither asks you to sign in.
 
@@ -120,9 +120,10 @@ Paste the prompt from [step 3](#3-open-the-workstation) into agy, or fix it by h
 1. Create a project in your Argolis org, with billing: [New project](https://console.cloud.google.com/projectcreate).
 2. Turn on Claude Opus 5.5 in Model Garden ([step 1](#1-turn-on-claude-opus-55)).
 3. In Cloud Shell, click **Authorize** when the script first calls gcloud.
-4. Open the workstation link the script prints.
-5. If the script reports gaps, run `agy`, get through its three first-run screens, paste the prompt and approve its commands.
-6. Optional: for the GitHub and Hugging Face MCP servers, run setup.sh again with your tokens:
+4. Open the workstation link the script prints, and open a terminal.
+5. If the script reports gaps, run `agy`. Pick a color scheme, accept the terms, trust the folder, paste the prompt and approve each command.
+6. Run `claude-start`. Pick a text style, read the security notes and choose **Yes, I trust this folder**. The default, No, exits.
+7. Optional: for the GitHub and Hugging Face MCP servers, run setup.sh again with your tokens:
 
    ```bash
    GITHUB_PERSONAL_ACCESS_TOKEN=<token> HF_TOKEN=<token> \
@@ -196,7 +197,7 @@ Each student gets a workstation, config and service account named from their ema
 | Each running workstation (e2-standard-8 in us-east4) | $0.70 an hour |
 | Each workstation's 200 GB disk, running or stopped | about $0.03 an hour |
 | The cluster, shared by its workstations | $0.20 an hour |
-| Claude | Per token. The smoke test costs $0.60 to $1.25. |
+| Claude | Per token. The smoke test costs $0.25 to $1.25. |
 
 Seven workstations for an 8-hour day cost $39.31, plus $4.80 for the cluster's day and about $5 for a day of disks. A workstation stops after 2 hours without use. Deleting the project stops every charge.
 
