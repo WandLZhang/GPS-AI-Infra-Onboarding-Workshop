@@ -32,7 +32,7 @@ Also: [Manual steps](#manual-steps) · [Org policies](#org-policies) · [Worksta
 Open [Cloud Shell](https://shell.cloud.google.com/?show=terminal) and paste:
 
 ```bash
-git clone -b ambassador-day2 https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
+git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
 GPS-AI-Infra-Onboarding-Workshop/harness-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
 ```
 
@@ -206,7 +206,7 @@ gcloud auth login
 gcloud auth application-default login
 gcloud config set project <PROJECT_ID>
 gcloud services enable aiplatform.googleapis.com
-git clone -b ambassador-day2 https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
+git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
 cd GPS-AI-Infra-Onboarding-Workshop/harness-setup/claude-code
 NO_VSCODE=1 ./setup.sh <PROJECT_ID>
 source ~/.bashrc
