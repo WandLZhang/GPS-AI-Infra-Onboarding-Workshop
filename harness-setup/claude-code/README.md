@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# CLI Agentic Coding — Claude Code & Gemini CLI
+# Claude Code
 
-Terminal-based AI coding assistants. Both support MCP servers and can read/write/execute across your project.
+How setup.sh configures Claude Code, each step, what it costs and what trips people up. Gemini CLI has its own page: [gemini-cli](../gemini-cli/README.md).
 
-## Claude Code
+## Defaults and install
 
 **Defaults provisioned by this setup:**
 - Model: `claude-opus-5-5[1m]` (Claude Opus 5.5 with 1M context window)
@@ -35,7 +35,7 @@ Terminal-based AI coding assistants. Both support MCP servers and can read/write
 ### Quick install (one-shot)
 
 ```bash
-cd 01-foundational-tools/agentic-coder-setup/cli-agent/claude-code
+cd harness-setup/claude-code
 GOOGLE_DEV_KNOWLEDGE_API_KEY=<key> \
   GITHUB_PERSONAL_ACCESS_TOKEN=<token> \
   HF_TOKEN=<token> \
@@ -66,6 +66,8 @@ export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 Then `source ~/.bashrc`.
 
 #### Install config files
+
+Run these from the `harness-setup` folder.
 
 ```bash
 # System prompt
@@ -235,65 +237,3 @@ Install it at:
 Model and env vars are not set here. Both come from `~/.claude/settings.json` (`model` and `env`), which the extension reads through the CLI. `claudeCode.selectedModel` and `claudeCode.effortLevel` no longer exist — the extension dropped them — and `claudeCode.environmentVariables` now takes `{name, value}` objects rather than `"KEY=value"` strings.
 
 The `CLAUDE_CODE_USE_VERTEX=1` and `ANTHROPIC_VERTEX_PROJECT_ID=<...>` env vars come from your `~/.bashrc` and are inherited by the `claude` process the extension spawns.
-
----
-
-## Gemini CLI
-
-### Install
-
-```bash
-npm install -g @google/gemini-cli
-```
-
-### Configure
-
-Gemini CLI uses your `gcloud` credentials by default. Ensure you're authenticated:
-
-```bash
-gcloud auth login
-gcloud auth application-default login
-```
-
-### Install Config Files
-
-```bash
-mkdir -p ~/.gemini
-cp gemini-cli/GEMINI.md ~/.gemini/GEMINI.md
-```
-
-### Register MCP Servers
-
-Gemini CLI supports MCP via its settings file (`~/.gemini/settings.json`):
-
-```json
-{
-  "mcpServers": {
-    "google-dev-knowledge": {
-      "httpUrl": "https://developerknowledge.googleapis.com/mcp",
-      "headers": {
-        "X-Goog-Api-Key": "<YOUR_API_KEY>"
-      }
-    },
-    "google-cloud-logging": {
-      "command": "node",
-      "args": ["~/mcp/google-cloud-logging/proxy.mjs"]
-    },
-    "github-mcp": {
-      "command": "~/mcp/github-mcp-server/github-mcp-server",
-      "args": ["stdio"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_PAT>"
-      }
-    }
-  }
-}
-```
-
-### Launch
-
-```bash
-gemini --model gemini-4-argon
-```
-
-`gemini-4-argon` is the GA Gemini model as of November 2026. Check Model Garden for the current one before you pin it.

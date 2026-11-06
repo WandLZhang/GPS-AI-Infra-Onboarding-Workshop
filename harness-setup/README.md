@@ -14,44 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Agentic Coder Setup
+# Harness Setup
 
-One script builds a Cloud Workstation in your Google Cloud project and puts two coding agents on it: agy (the Antigravity CLI) and Claude Code. Claude Code comes set up the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing.
+One script builds a Cloud Workstation in your Google Cloud project and puts two harnesses on it: agy (the Antigravity CLI) and Claude Code. Claude Code comes set up the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing.
 
 You need a project in an organization where you're an org admin. A new, empty project works. The setup takes about 15 minutes.
 
-1. [Turn on Claude Opus 5.5](#1-turn-on-claude-opus-55)
-2. [Run the script in Cloud Shell](#2-run-the-script-in-cloud-shell)
+1. [Run the script in Cloud Shell](#1-run-the-script-in-cloud-shell)
+2. [Turn on Claude Opus 5.5](#2-turn-on-claude-opus-55)
 3. [Open the workstation](#3-open-the-workstation)
 4. [Run the smoke test](#4-run-the-smoke-test)
 
-Also: [Manual steps](#manual-steps) · [Org policies](#org-policies) · [Workstations for a class](#workstations-for-a-class) · [Another machine](#another-machine) · [What the setup gives you](#what-the-setup-gives-you)
+Also: [Manual steps](#manual-steps) · [Org policies](#org-policies) · [Workstations for a class](#workstations-for-a-class) · [Another machine](#another-machine) · [What the setup gives you](#what-the-setup-gives-you) · [Ask your harness](#ask-your-harness) · [Other harnesses](#other-harnesses)
 
-## 1. Turn on Claude Opus 5.5
-
-Put your project ID in this link, open it and click **Enable**:
-
-```
-https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=<PROJECT_ID>
-```
-
-Do this first. gcloud can't do it, and a new enablement takes a while to answer, so it settles while the script runs. If the console asks you to enable the Vertex AI API, enable it. Claude bills per token, and a budget alert doesn't stop spending: see [Cost](./cli-agent/README.md#cost).
-
-## 2. Run the script in Cloud Shell
+## 1. Run the script in Cloud Shell
 
 Open [Cloud Shell](https://shell.cloud.google.com/?show=terminal) and paste:
 
 ```bash
 git clone -b ambassador-day2 https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
-GPS-AI-Infra-Onboarding-Workshop/01-foundational-tools/agentic-coder-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
+GPS-AI-Infra-Onboarding-Workshop/harness-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
 ```
 
-Click **Authorize** when Cloud Shell asks. To run the script again, paste the second line. Each step checks what exists first.
+Click **Authorize** when Cloud Shell asks. The script turns on the Vertex AI API first, then prints the Model Garden link for [step 2](#2-turn-on-claude-opus-55). To run the script again, run `git -C GPS-AI-Infra-Onboarding-Workshop pull`, then paste the second line. Each step checks what exists first.
 
 | What the script does | Time on a new project |
 |---|---|
-| Turns on the APIs and resets the restrictive [org policies](#org-policies) a new project inherits | 1 min 47 s |
-| Asks Claude Opus 5.5 for a reply, and prints the Model Garden link if it doesn't answer | 2 s |
+| Turns on the Vertex AI API and prints the Model Garden link, then turns on the other APIs and resets the restrictive [org policies](#org-policies) a new project inherits | 1 min 47 s |
+| Asks Claude Opus 5.5 for a reply, and prints the Model Garden link again if it doesn't answer | 2 s |
 | Creates the default network, the workstation's service account and a Developer Knowledge API key | 1 min 6 s |
 | Creates the workstation cluster | 3 min 16 s |
 | Creates the workstation config and the workstation, and starts it | 2 min 25 s |
@@ -59,6 +49,16 @@ Click **Authorize** when Cloud Shell asks. To run the script again, paste the se
 | Total | 10 min 30 s |
 
 Once agy and Claude Code are on the workstation, a failed step doesn't stop the script. It goes into `~/setup-gaps.md` on the workstation.
+
+## 2. Turn on Claude Opus 5.5
+
+The script prints this link right after it turns on the Vertex AI API. Open it, click **Enable** and leave the script running:
+
+```
+https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=<PROJECT_ID>
+```
+
+gcloud can't turn on a partner model, and a new enablement takes a while to answer, so it settles while the script builds the workstation. Claude bills per token, and a budget alert doesn't stop spending. See [Cost](./claude-code/README.md#cost).
 
 ## 3. Open the workstation
 
@@ -70,12 +70,12 @@ Read ~/setup-gaps.md, fix each gap, then run claude-smoke-test until it passes 3
 
 Open the link, then open a terminal (**Terminal > New Terminal**). If there are gaps, run `agy` and paste the prompt. The first time, agy asks for a color scheme, the terms and whether you trust the folder. Then it asks before each command it runs. With no gaps, start Claude Code with `claude-start`. The first time, it asks for a text style, shows security notes and asks whether you trust the folder. Choose **Yes, I trust this folder**, because the default, No, exits.
 
-Both agents sign in as the workstation's service account, so neither asks you to sign in.
+Both harnesses sign in as the workstation's service account, so neither asks you to sign in.
 
 | | agy | Claude Code |
 |---|---|---|
 | Model | Gemini 4 Argon | Claude Opus 5.5 |
-| Before step 1 settles | Works | Every request returns 404 |
+| Before step 2 settles | Works | Every request returns 404 |
 | Settings, in the workstation's environment | `AGY_ADC_AUTH=true` | `CLAUDE_CODE_USE_VERTEX=1`, `ANTHROPIC_VERTEX_PROJECT_ID`, `CLOUD_ML_REGION=global` |
 | Rules | `~/.gemini/GEMINI.md` | `~/.claude/CLAUDE.md` |
 | Install | `curl -fsSL https://antigravity.google/cli/install.sh \| bash` | `curl -fsSL https://claude.ai/install.sh \| bash -s stable` |
@@ -95,7 +95,7 @@ Smoke test in project my-project
   pricing  ok    ($0.12; tools: Bash)
   logging  ok    ($0.15; tools: ToolSearch, mcp__google-cloud-logging__list_log_entries)
   total cost $0.64
-  All 3 checks passed. Your agent can read the docs, price a machine and read your logs.
+  All 3 checks passed. Claude Code can read the docs, price a machine and read your logs.
 ```
 
 ### If a check fails
@@ -114,16 +114,16 @@ Paste the prompt from [step 3](#3-open-the-workstation) into agy, or fix it by h
 ### Student
 
 1. Create a project in your organization, with billing: [New project](https://console.cloud.google.com/projectcreate).
-2. Turn on Claude Opus 5.5 in Model Garden ([step 1](#1-turn-on-claude-opus-55)).
-3. In Cloud Shell, click **Authorize** when the script first calls gcloud.
-4. Open the workstation link the script prints, and open a terminal.
+2. In Cloud Shell, click **Authorize** when the script first calls gcloud.
+3. Open the Model Garden link the script prints first, and click **Enable** ([step 2](#2-turn-on-claude-opus-55)).
+4. Open the workstation link the script prints last, and open a terminal.
 5. If the script reports gaps, run `agy`. Pick a color scheme, accept the terms, trust the folder, paste the prompt and approve each command.
 6. Run `claude-start`. Pick a text style, read the security notes and choose **Yes, I trust this folder**. The default, No, exits.
 7. Optional: for the GitHub and Hugging Face MCP servers, run setup.sh again with your tokens:
 
    ```bash
    GITHUB_PERSONAL_ACCESS_TOKEN=<token> HF_TOKEN=<token> \
-     ~/GPS-AI-Infra-Onboarding-Workshop/01-foundational-tools/agentic-coder-setup/cli-agent/claude-code/setup.sh <PROJECT_ID>
+     ~/GPS-AI-Infra-Onboarding-Workshop/harness-setup/claude-code/setup.sh <PROJECT_ID>
    ```
 
 Nothing on the workstation asks for a sign-in code. The exception is `ws-login`, which runs gcloud as you instead of the service account.
@@ -136,7 +136,7 @@ Nothing on the workstation asks for a sign-in code. The exception is `ws-login`,
 
 ## Org policies
 
-A new project in our test organization inherited the 33 restrictive constraints below. The script resets each one to Google's default, then allows Anthropic's partner model features. Neither agent hit any other policy on the test projects. The script also resets five constraints we've met on other projects: `compute.managed.disableGuestAttributesAccess`, `compute.disableSshInBrowser`, `iam.workloadIdentityPoolProviders`, `run.allowedVPCEgress` and `cloudfunctions.requireVPCConnector`.
+A new project in our test organization inherited the 33 restrictive constraints below. The script resets each one to Google's default, then allows Anthropic's partner model features. Neither harness hit any other policy on the test projects. The script also resets five constraints we've met on other projects: `compute.managed.disableGuestAttributesAccess`, `compute.disableSshInBrowser`, `iam.workloadIdentityPoolProviders`, `run.allowedVPCEgress` and `cloudfunctions.requireVPCConnector`.
 
 | Constraint | On a new project | What it stops |
 |---|---|---|
@@ -180,7 +180,7 @@ A new project in our test organization inherited the 33 restrictive constraints 
 When a student's org isn't ready, build their workstation in your own project. Run the loop in tmux, so a closed tab doesn't stop it:
 
 ```bash
-cd GPS-AI-Infra-Onboarding-Workshop/01-foundational-tools/agentic-coder-setup/cloud-workstation
+cd GPS-AI-Infra-Onboarding-Workshop/harness-setup/cloud-workstation
 for EMAIL in student1@example.com student2@example.com student3@example.com; do
   ./create_workstation.sh <PROJECT_ID> "$EMAIL"
 done
@@ -205,14 +205,15 @@ On a cloudtop, a GCE VM or a Linux laptop, run setup.sh by hand. On a Mac, use a
 gcloud auth login
 gcloud auth application-default login
 gcloud config set project <PROJECT_ID>
+gcloud services enable aiplatform.googleapis.com
 git clone -b ambassador-day2 https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
-cd GPS-AI-Infra-Onboarding-Workshop/01-foundational-tools/agentic-coder-setup/cli-agent/claude-code
+cd GPS-AI-Infra-Onboarding-Workshop/harness-setup/claude-code
 NO_VSCODE=1 ./setup.sh <PROJECT_ID>
 source ~/.bashrc
 claude-smoke-test
 ```
 
-Turn on Claude Opus 5.5 first ([step 1](#1-turn-on-claude-opus-55)). The account Claude runs as needs Vertex AI User (`roles/aiplatform.user`), Logs Viewer (`roles/logging.viewer`) and Logs Writer (`roles/logging.logWriter`) on the project. setup.sh uses the project's Developer Knowledge API key and makes one if there's none. To use your own key, set `GOOGLE_DEV_KNOWLEDGE_API_KEY`. `GITHUB_PERSONAL_ACCESS_TOKEN` and `HF_TOKEN` add the GitHub and Hugging Face MCP servers. On a machine with Code OSS, leave out `NO_VSCODE=1`. [cli-agent/README.md](./cli-agent/README.md) explains each step.
+After the Vertex AI API goes on, turn on Claude Opus 5.5 ([step 2](#2-turn-on-claude-opus-55)). The account Claude runs as needs Vertex AI User (`roles/aiplatform.user`), Logs Viewer (`roles/logging.viewer`) and Logs Writer (`roles/logging.logWriter`) on the project. setup.sh uses the project's Developer Knowledge API key and makes one if there's none. To use your own key, set `GOOGLE_DEV_KNOWLEDGE_API_KEY`. `GITHUB_PERSONAL_ACCESS_TOKEN` and `HF_TOKEN` add the GitHub and Hugging Face MCP servers. On a machine with Code OSS, leave out `NO_VSCODE=1`. [claude-code/README.md](./claude-code/README.md) explains each step.
 
 Keep keys and tokens in environment variables. Never paste them into a file you commit.
 
@@ -220,13 +221,13 @@ Keep keys and tokens in environment variables. Never paste them into a file you 
 
 Each piece exists because something went wrong without it.
 
-### Rules: [`CLAUDE.md`](./cli-agent/claude-code/CLAUDE.md)
+### Rules: [`CLAUDE.md`](./claude-code/CLAUDE.md)
 
 | Rule | What it prevents |
 |---|---|
 | Change an existing `.md` file with the Edit tool, never a shell write | A shell rewrite skipped the staleness check and destroyed hand edits made in the editor, and nobody noticed. |
-| Fix the broken script; no `enhanced_` or `v2_` copies | Agents added copies beside broken scripts instead of fixing them. |
-| Run the steps instead of writing instructions for you | Agents wrote how-to files instead of doing the deployment. |
+| Fix the broken script; no `enhanced_` or `v2_` copies | Harnesses added copies beside broken scripts instead of fixing them. |
+| Run the steps instead of writing instructions for you | Harnesses wrote how-to files instead of doing the deployment. |
 | Test real systems; no mock data | Mock data makes a broken pipeline look like it works. |
 | Log the full payload between functions | Debugging blind when one function hands another a bad payload. |
 | Never truncate output | A `head` or `tail` hides the line that explains the failure. |
@@ -235,12 +236,12 @@ Each piece exists because something went wrong without it.
 | Let an LLM parse natural language, not regex | A regex parser misses the next phrasing a person types. |
 | Put the answer in the final message | An answer written between tool calls was missed during fast slide edits, and the question came back. |
 | A short OK covers only what it names | A one-line OK was read as approval for two other open questions. |
-| A deletion is an instruction | An agent put the same deleted sentence back into a draft three times. |
-| Show wording changes before writing them | An agent rewrote four slides before the author had read the new copy. |
-| Check what's installed before saying "can't" | An agent said a chat app was unreachable while its client ran in a local container. |
+| A deletion is an instruction | A harness put the same deleted sentence back into a draft three times. |
+| Show wording changes before writing them | A harness rewrote four slides before the author had read the new copy. |
+| Check what's installed before saying "can't" | A harness said a chat app was unreachable while its client ran in a local container. |
 | One paragraph per line in anything that leaves the terminal | A plain-text email draft was hard-wrapped at about 70 characters, so every sentence broke in the middle. |
 | No AI attribution | The harness adds a `Co-Authored-By` trailer by default, and a later history scrub had to clean 81 of 84 commits. |
-| No secrets in commits, and no tokens in remote URLs | A GitHub token committed to a shared repo had to be scrubbed from its history. A token in a remote URL printed in plain text the first time an agent ran `git remote -v`. |
+| No secrets in commits, and no tokens in remote URLs | A GitHub token committed to a shared repo had to be scrubbed from its history. A token in a remote URL printed in plain text the first time a harness ran `git remote -v`. |
 | Draft before posting on GitHub | Other people read a comment the moment it posts. |
 | Say the cost per hour and per day; delete what you created; use the smallest machine | A Spot request for several nodes granted all of them at once, and each node billed from that moment. |
 | Spell bit and byte units as the source does | On a call with a university HPC team, a terabit-for-terabyte slip drew a correction. That's an 8x error. |
@@ -248,7 +249,7 @@ Each piece exists because something went wrong without it.
 | `CLOUDSDK_CORE_DISABLE_PROMPTS=1` in scripts | A setup script hung for 10 minutes on a gcloud "y/N" question. |
 | Writing style: contractions, short sentences, no filler | Drafts that read as machine-written and run twice as long as they need to. |
 
-### Settings: [`settings.json`](./cli-agent/claude-code/settings.json)
+### Settings: [`settings.json`](./claude-code/settings.json)
 
 | Setting | What it prevents |
 |---|---|
@@ -263,7 +264,7 @@ Each piece exists because something went wrong without it.
 | `CLAUDE_STREAM_IDLE_TIMEOUT_MS: 1800000` | A max-effort turn went quiet while it thought. Claude Code gave up after 300 seconds and retried, and Vertex AI billed every abandoned attempt: about 445K output tokens. |
 | The superpowers plugin | Adds skills for systematic debugging, planning a big change, and checking the result before calling it done. |
 
-### Hooks: [`hooks/`](./cli-agent/claude-code/hooks/)
+### Hooks: [`hooks/`](./claude-code/hooks/)
 
 | Hook | What it prevents |
 |---|---|
@@ -275,13 +276,13 @@ Each piece exists because something went wrong without it.
 | Tool | What it prevents |
 |---|---|
 | Google Developer Knowledge MCP | Answers from stale training data. A support matrix we kept as a spreadsheet still called TPU7x "preview" while the docs page listed its flex-start and calendar mode support. |
-| `gcp-pricing` skill and CLI | An agent quoted an on-demand B200 rate that doesn't exist. The pricing page lists A4 on-demand as N/A, and a page fetched by URL comes back as an empty JavaScript shell. |
+| `gcp-pricing` skill and CLI | A harness quoted an on-demand B200 rate that doesn't exist. The pricing page lists A4 on-demand as N/A, and a page fetched by URL comes back as an empty JavaScript shell. |
 | Cloud Logging MCP | Pasting a failed job's logs into the chat by hand. |
 | GitHub MCP | Guessing at a library's behavior instead of reading its source and issues. |
 | Hugging Face MCP, over native HTTP | An `npx mcp-remote` bridge left orphaned processes that stalled tool discovery for about 300 seconds per session. |
 | `no-ai-slop` skill | Run `/no-ai-slop` on a draft for a full editing pass. |
 
-### Commands: [`bin/`](./cli-agent/claude-code/bin/)
+### Commands: [`bin/`](./claude-code/bin/)
 
 | Command | What it prevents |
 |---|---|
@@ -292,9 +293,9 @@ Each piece exists because something went wrong without it.
 | The boot hook, `workstation/customize_environment` | A restart removed `gh`, and every `git push` then failed with what looked like an auth error. |
 | The `keep-claude-sessions` extension | The Claude Code panel archives conversations idle for 14 days. |
 
-## Ask your agent
+## Ask your harness
 
-With the Developer Knowledge MCP set up, your agent answers questions like these from the current docs:
+With the Developer Knowledge MCP set up, your harness answers questions like these from the current docs:
 
 - "Which GPU and TPU machine types support Dynamic Workload Scheduler flex-start and calendar mode?"
 - "How do I request a calendar mode future reservation for GPUs, and what does reservation-bound provisioning mean?"
@@ -305,40 +306,40 @@ With the Developer Knowledge MCP set up, your agent answers questions like these
 - "How do I serve an LLM with vLLM on TPUs in GKE?"
 - "What tensor dimensions and batch sizes does the Cloud TPU performance guide recommend?"
 
-For a price, ask it to run `gcp-pricing`, for example `gcp-pricing tpu --filter Trillium`. Pricing pages render in JavaScript, so a plain fetch returns an empty page. The CLI captures every table and region to a file the agent can search.
+For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pricing-scraper): `gcp-pricing accelerator --filter <machine-type>` or `gcp-pricing tpu --filter <generation>`, for example `gcp-pricing tpu --filter Trillium`. Pricing pages render in JavaScript, so a plain fetch returns an empty page. The CLI captures every table and region to a file the harness can search. For zones, capacity options and the other facts that change, see [Look up facts that change](../capacity/README.md#look-up-facts-that-change).
 
-## Other agents
+## Other harnesses
 
 - **Antigravity.** In the Agent panel, open MCP Servers, search for Google Developer Knowledge and install it; it uses your Google credentials, so it needs no key. It reads the same rules as agy, from `~/.gemini/GEMINI.md`, which setup.sh installs.
-- **Gemini CLI.** Install it with `npm install -g @google/gemini-cli` and start it with `gemini --model gemini-4-argon`. [cli-agent/README.md](./cli-agent/README.md#gemini-cli) has the rules and MCP config.
+- **Gemini CLI.** Install it with `npm install -g @google/gemini-cli` and start it with `gemini --model gemini-4-argon`. [gemini-cli/README.md](./gemini-cli/README.md) has the rules and MCP config.
 
 ## What's in this folder
 
 ```
-agentic-coder-setup/
+harness-setup/
 ├── README.md                              # This file
-├── slides/                                # An earlier deck: VS Code and agy on your own machine
-├── cli-agent/                             # Claude Code and Gemini CLI
+├── cloud-workstation/
+│   ├── create_workstation.sh              # Builds the workstation and sets it up, in one run
+│   └── box_setup.sh                       # The part that runs on the workstation
+├── claude-code/
 │   ├── README.md                          # Each setup step, cost, gotchas
-│   ├── claude-code/
-│   │   ├── setup.sh                       # One-shot install, ends with a check
-│   │   ├── CLAUDE.md                      # Global rules
-│   │   ├── settings.json                  # Permissions, model, hooks, plugin
-│   │   ├── bin/claude-start               # Terminal launcher (max effort)
-│   │   ├── bin/claude-vscode-wrapper      # VS Code launch wrapper (max effort)
-│   │   ├── bin/claude-smoke-test          # Checks the docs MCP, gcp-pricing and logging
-│   │   ├── bin/ws-login                   # Runs gcloud as you instead of the service account
-│   │   ├── bin/claude-backup              # Copies conversations and memory to your bucket
-│   │   ├── hooks/md_write_guard.py        # Denies shell writes over existing .md files
-│   │   ├── hooks/accelerator_guard.py     # Lists running GPUs and TPUs before a turn ends
-│   │   ├── tests/test_md_write_guard.py   # Tests for the guard
-│   │   ├── vscode/                        # Machine settings and keep-claude-sessions
-│   │   └── workstation/customize_environment  # Boot hook for Cloud Workstations and Cloud Shell
-│   ├── gemini-cli/
-│   │   └── GEMINI.md                      # Rules for Gemini CLI, agy and Antigravity
-│   └── shared/
-│       └── google-cloud-logging/proxy.mjs # Cloud Logging MCP proxy
-└── cloud-workstation/
-    ├── create_workstation.sh              # Builds the workstation and sets it up, in one run
-    └── box_setup.sh                       # The part that runs on the workstation
+│   ├── setup.sh                           # One-shot install, ends with a check
+│   ├── CLAUDE.md                          # Global rules
+│   ├── settings.json                      # Permissions, model, hooks, plugin
+│   ├── bin/claude-start                   # Terminal launcher (max effort)
+│   ├── bin/claude-vscode-wrapper          # VS Code launch wrapper (max effort)
+│   ├── bin/claude-smoke-test              # Checks the docs MCP, gcp-pricing and logging
+│   ├── bin/ws-login                       # Runs gcloud as you instead of the service account
+│   ├── bin/claude-backup                  # Copies conversations and memory to your bucket
+│   ├── hooks/md_write_guard.py            # Denies shell writes over existing .md files
+│   ├── hooks/accelerator_guard.py         # Lists running GPUs and TPUs before a turn ends
+│   ├── tests/test_md_write_guard.py       # Tests for the guard
+│   ├── vscode/                            # Machine settings and keep-claude-sessions
+│   └── workstation/customize_environment  # Boot hook for Cloud Workstations and Cloud Shell
+├── gemini-cli/
+│   ├── README.md                          # Install, rules and MCP config for Gemini CLI
+│   └── GEMINI.md                          # Rules for Gemini CLI, agy and Antigravity
+├── shared/
+│   └── google-cloud-logging/proxy.mjs     # Cloud Logging MCP proxy
+└── slides/                                # An earlier deck: VS Code and agy on your own machine
 ```
