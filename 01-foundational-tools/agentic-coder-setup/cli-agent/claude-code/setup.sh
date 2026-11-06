@@ -48,6 +48,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SHARED_DIR="$(cd "$SCRIPT_DIR/../shared" && pwd)"
 HOME_DIR="$HOME"
 
+# On a fresh Cloud Workstation, gcloud can cache a failed GCE check in ~/.config/gcloud/gce and then
+# report "no credentialed accounts" while the metadata server is up. Clear it so gcloud checks again.
+[ -d /etc/workstation-startup.d ] && rm -f "$HOME_DIR/.config/gcloud/gce"
+
 echo "============================================"
 echo "  Claude Code Setup - Vertex AI + MCPs"
 echo "  Project: $PROJECT_ID"
@@ -119,6 +123,25 @@ export CLAUDE_CODE_USE_VERTEX=1
 export ANTHROPIC_VERTEX_PROJECT_ID="$PROJECT_ID"
 export CLOUD_ML_REGION="$REGION"
 export PATH="$HOME_DIR/bin:$PATH"
+
+# Debian's stock .bashrc returns early in a non-interactive shell, so the exports above reach only
+# an interactive terminal. ~/.claude_vertex_env holds the same settings and is sourced from the
+# first line of .bashrc, before that early return, so `ssh host cmd`, cron and scripts get them too.
+# The sonnet alias points at Opus 5.5: a project with only Opus 5.5 turned on in Model Garden would
+# otherwise print "Sonnet 4.5 not available" at every launch.
+cat > "$HOME_DIR/.claude_vertex_env" <<EOF
+export CLAUDE_CODE_USE_VERTEX=1
+export ANTHROPIC_VERTEX_PROJECT_ID="$PROJECT_ID"
+export GOOGLE_CLOUD_PROJECT="$PROJECT_ID"
+export CLOUD_ML_REGION="$REGION"
+export ANTHROPIC_SMALL_FAST_MODEL="claude-opus-5-5[1m]"
+export CLAUDE_CODE_SUBAGENT_MODEL="claude-opus-5-5[1m]"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-opus-5-5[1m]"
+export PATH="\$HOME/.local/bin:\$HOME/bin:\$HOME/.npm-global/bin:\$PATH"
+EOF
+grep -q claude_vertex_env "$HOME_DIR/.bashrc" 2>/dev/null \
+    || sed -i '1i [ -f "$HOME/.claude_vertex_env" ] && . "$HOME/.claude_vertex_env"' "$HOME_DIR/.bashrc"
+echo "  ✓ ~/.claude_vertex_env written and sourced from the top of .bashrc"
 
 # ------------------------------------------------------------------
 # 4. claude-start launcher + VS Code effort wrapper
@@ -263,6 +286,10 @@ elif [ -x "$CODE_CLI" ]; then
         && echo "  ✓ keep-claude-sessions installed (Claude conversations stay out of the Archived list)" \
         || echo "  ⚠ keep-claude-sessions install failed (non-fatal)"
     rm -rf "$KCS_DIR"
+    # Code OSS on a workstation doesn't ship the Claude Code panel, so install it from Open VSX.
+    "$CODE_CLI" --install-extension anthropic.claude-code --force >/dev/null 2>&1 \
+        && echo "  ✓ Claude Code VS Code extension installed" \
+        || echo "  ⚠ Claude Code VS Code extension install failed (non-fatal)"
 else
     echo "  - no Code OSS CLI here, so no extension. Set claudeCode.archiveInactiveSessions to 0 in your VS Code user settings."
 fi
@@ -295,6 +322,36 @@ echo ""
 echo "[8/8] Registering MCP servers..."
 
 GOOGLE_DEV_KEY="${GOOGLE_DEV_KNOWLEDGE_API_KEY:-}"
+if [ -z "$GOOGLE_DEV_KEY" ] && command -v gcloud &>/dev/null; then
+    # No key passed in, so take one from the project: a key restricted to the Developer Knowledge
+    # API, or a new one if the project has none. On a workstation gcloud runs as the workstation's
+    # service account, which needs roles/serviceusage.apiKeysViewer to read a key and
+    # roles/serviceusage.apiKeysAdmin to make one.
+    DK_NAME="$(gcloud services api-keys list --project="$PROJECT_ID" --format=json 2>/dev/null | python3 -c '
+import json, sys
+try:
+    keys = json.load(sys.stdin)
+except ValueError:
+    keys = []
+for k in keys:
+    targets = (k.get("restrictions") or {}).get("apiTargets") or []
+    if any(t.get("service") == "developerknowledge.googleapis.com" for t in targets):
+        print(k["name"])
+        break
+')"
+    if [ -z "$DK_NAME" ]; then
+        gcloud services enable developerknowledge.googleapis.com apikeys.googleapis.com \
+            --project="$PROJECT_ID" >/dev/null 2>&1 || true
+        DK_NAME="$(gcloud services api-keys create --project="$PROJECT_ID" \
+            --display-name="google-dev-knowledge" \
+            --api-target=service=developerknowledge.googleapis.com \
+            --format="value(response.name)" 2>/dev/null)"
+    fi
+    if [ -n "$DK_NAME" ]; then
+        GOOGLE_DEV_KEY="$(gcloud services api-keys get-key-string "$DK_NAME" \
+            --format="value(keyString)" 2>/dev/null)"
+    fi
+fi
 if [ -n "$GOOGLE_DEV_KEY" ]; then
     claude mcp add -s user --transport http \
         google-dev-knowledge \
@@ -347,6 +404,23 @@ fi
 # ------------------------------------------------------------------
 # gcp-pricing CLI (raw GCP pricing scraper)
 # ------------------------------------------------------------------
+# ------------------------------------------------------------------
+# Gemini rules (GEMINI.md)
+# ------------------------------------------------------------------
+# Antigravity (agy) and Gemini CLI read ~/.gemini/GEMINI.md, so the same rules reach them. This
+# runs before the gcp-pricing installer, which adds its section to whichever rule files exist.
+# A GEMINI.md this script didn't write is kept as GEMINI.md.bak-<date>.
+echo ""
+echo "[+] Installing Gemini rules..."
+mkdir -p "$HOME_DIR/.gemini"
+GEMINI_SRC="$SCRIPT_DIR/../gemini-cli/GEMINI.md"
+if [ -f "$HOME_DIR/.gemini/GEMINI.md" ] \
+    && [ "$(head -1 "$HOME_DIR/.gemini/GEMINI.md")" != "$(head -1 "$GEMINI_SRC")" ]; then
+    cp "$HOME_DIR/.gemini/GEMINI.md" "$HOME_DIR/.gemini/GEMINI.md.bak-$(date +%Y%m%d-%H%M%S)"
+fi
+cp "$GEMINI_SRC" "$HOME_DIR/.gemini/GEMINI.md"
+echo "  ✓ ~/.gemini/GEMINI.md installed"
+
 echo ""
 echo "[+] Installing gcp-pricing CLI (raw GCP pricing scraper)..."
 curl -fsSL https://raw.githubusercontent.com/WandLZhang/gcp-pricing-scraper/main/install.sh | bash \
