@@ -457,6 +457,14 @@ if [ -f "$SELF_DIR/box_setup.sh" ]; then
     mkdir -p "$HOME/.ssh"
     ssh-keygen -q -t rsa -b 3072 -N "" -f "$HOME/.ssh/google_compute_engine" < /dev/null
   fi
+  # A workstation that just started can refuse SSH for a minute: "does not have a server running on
+  # port 22". Wait until a no-op command gets through.
+  for i in $(seq 1 18); do
+    gcloud workstations ssh "$WORKSTATION" --config="$CONFIG" --cluster="$CLUSTER" --region="$REGION" \
+      --project="$PROJECT" --command=true </dev/null >/dev/null 2>&1 && break
+    [ "$i" = 18 ] && say "  ** the workstation still refuses SSH after 3 minutes; trying anyway **"
+    sleep 10
+  done
   B64="$(base64 -w0 "$SELF_DIR/box_setup.sh")"
   KEYVAR=""
   [ -n "${GOOGLE_DEV_KNOWLEDGE_API_KEY:-}" ] && KEYVAR="GOOGLE_DEV_KNOWLEDGE_API_KEY='$GOOGLE_DEV_KNOWLEDGE_API_KEY' "
