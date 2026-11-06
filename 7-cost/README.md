@@ -22,7 +22,7 @@ Today's prices, and how to look them up, are on [prices](./prices.md). Quota is 
 
 ## 1. Overview
 
-AI infrastructure workloads on Google Cloud — especially GPU and TPU training jobs — can generate significant costs. A single 256-chip TPU v5p pod costs over **$100/hour on-demand**, and a multi-node A3 Ultra cluster can exceed **$10,000/day**. Without proactive cost monitoring, a misconfigured job or forgotten cluster can result in tens of thousands of dollars in unplanned spend.
+AI infrastructure workloads on Google Cloud — especially GPU and TPU training jobs — can generate significant costs. At the list prices on 2026-11-06, a 256-chip TPU v5p slice costs **$1,075.20 an hour** on demand in us-east5, at $4.20 per chip-hour. Five `a3-ultragpu-8g` VMs cost **$10,176.83 a day** on demand in us-central1, at $84.81 an hour each. Get today's price from [prices](./prices.md#get-todays-price). Without proactive cost monitoring, a misconfigured job or forgotten cluster can result in tens of thousands of dollars in unplanned spend.
 
 Google Cloud provides a layered cost management stack to monitor, alert, and control spending:
 
@@ -337,6 +337,8 @@ gcloud storage buckets update gs://$BUCKET_NAME \
 Budgets are the primary mechanism to monitor spending and receive alerts when costs approach or exceed thresholds. **Every project running AI workloads should have at least one budget.**
 
 > **Important:** Budgets trigger alerts — they do **not** automatically cap usage or spending. To automatically control spending, see [Section 5: Programmatic Cost Controls](#5-programmatic-cost-controls).
+
+> **A budget alert doesn't stop a forgotten VM.** The Idle VM recommender in [FinOps Hub](#22-finops-hub) flags GPU and TPU VMs with no activity. In Claude Code, the [accelerator guard](../1-harness-setup/claude-code/README.md#accelerator-guard) lists the GPUs and TPUs still running at the end of each turn.
 
 ### 4.1 Create a Per-Project Budget (Console)
 

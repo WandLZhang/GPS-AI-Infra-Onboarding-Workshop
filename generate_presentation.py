@@ -539,7 +539,7 @@ def create_key_concepts_slide(prs):
     # Repository structure card
     add_card(slide, Inches(6.6), Inches(4.2), Inches(5.8), Inches(2.5),
              "📁 Repository Structure",
-             "1-setup/                → agy and Claude Code on a workstation\n"
+             "1-harness-setup/        → agy and Claude Code on a workstation\n"
              "2-choose-hardware/      → Pick, size, port to TPU\n"
              "3-get-capacity/         → Flex-start, Calendar, Spot, quota\n"
              "4-storage-and-network/  → Storage, private VMs, images\n"

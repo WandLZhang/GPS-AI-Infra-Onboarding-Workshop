@@ -35,7 +35,7 @@ How setup.sh configures Claude Code, each step, what it costs and what trips peo
 ### Quick install (one-shot)
 
 ```bash
-cd 1-setup/claude-code
+cd 1-harness-setup/claude-code
 GOOGLE_DEV_KNOWLEDGE_API_KEY=<key> \
   GITHUB_PERSONAL_ACCESS_TOKEN=<token> \
   HF_TOKEN=<token> \

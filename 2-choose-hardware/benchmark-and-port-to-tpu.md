@@ -1,6 +1,6 @@
-# Port a model to TPU
+# Benchmark and port a model to TPU
 
-Bring a PyTorch or JAX model up on Cloud TPU, then make it beat the GPU baseline. Size the job first with [Size a job before you ask for chips](./README.md#size-a-job-before-you-ask-for-chips) and [Fit matmuls to the MXU](../6-debug-and-profile/README.md#tpu-fit-matmuls-to-the-mxu).
+Bring a PyTorch or JAX model up on Cloud TPU, benchmark it against the GPU baseline, then make it faster. Size the job first with [Size a job before you ask for chips](./README.md#size-a-job-before-you-ask-for-chips) and [Fit matmuls to the MXU](../6-debug-and-profile/README.md#tpu-fit-matmuls-to-the-mxu).
 
 ## Start with TorchTPU
 

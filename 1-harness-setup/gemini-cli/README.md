@@ -35,7 +35,7 @@ gcloud auth application-default login
 
 ## Install Config Files
 
-Run this from the `1-setup` folder.
+Run this from the `1-harness-setup` folder.
 
 ```bash
 mkdir -p ~/.gemini

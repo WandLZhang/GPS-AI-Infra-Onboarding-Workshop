@@ -1,6 +1,6 @@
-# Reservations: Affinity, Topology & Dense Allocation
+# Reservation Placement: Affinity, Topology & Dense Allocation
 
-How VMs and node pools consume reserved capacity, and how to place them close together for distributed training. For when a reservation is the right option, see [Choose an option](./README.md#choose-an-option).
+How VMs and node pools consume reserved capacity, and how to place them close together for distributed training. To book capacity, see [Calendar mode](./calendar-mode/) for fixed dates and [Choose an option](./README.md#choose-an-option) for when a reservation fits.
 
 ## Understanding Reservation Affinity
 

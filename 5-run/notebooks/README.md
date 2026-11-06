@@ -84,10 +84,10 @@ Colab Enterprise is **different from** the free [Google Colaboratory](https://co
 
 | Scenario | Better Alternative |
 |---|---|
-| Large-scale distributed training (multi-node) | [Vertex AI](../vertex-ai/) (FLEX_START), [Cluster Toolkit](../kubernetes/cluster-toolkit/), [Cluster Director](../slurm/) |
+| Large-scale distributed training (multi-node) | [Vertex AI](../managed-training-vertex-ai/) (FLEX_START), [Cluster Toolkit](../kubernetes/cluster-toolkit/), [Cluster Director](../slurm/) |
 | Production inference / serving | [Cluster Toolkit](../kubernetes/cluster-toolkit/) (GKE) |
 | H100 / H200 / B200 / TPU workloads | [Cluster Toolkit](../kubernetes/cluster-toolkit/), [XPK](../kubernetes/xpk/), [Compute Engine](../vms/) |
-| Long-running training (> 18 hours) | [Vertex AI](../vertex-ai/), [Cluster Toolkit](../kubernetes/cluster-toolkit/), [Compute Engine](../vms/) |
+| Long-running training (> 18 hours) | [Vertex AI](../managed-training-vertex-ai/), [Cluster Toolkit](../kubernetes/cluster-toolkit/), [Compute Engine](../vms/) |
 | Slurm-native HPC workloads | [Cluster Director](../slurm/) |
 | Guaranteed start time with DWS Calendar Mode | [Calendar Mode](../../3-get-capacity/calendar-mode/) |
 
@@ -145,7 +145,7 @@ Custom runtime templates give you full control over the machine type, accelerato
 | **A100 40GB** | ✅ | ✅ | ✅ | ✅ | a2-highgpu |
 | **A100 80GB** | ✅ | ✅ | ✅ | ✅ | a2-ultragpu |
 
-> **Not supported in Colab Enterprise:** H100, H200, B200, TPUs. For these accelerators, use [Vertex AI](../vertex-ai/), [Cluster Toolkit](../kubernetes/cluster-toolkit/), or [Compute Engine](../vms/).
+> **Not supported in Colab Enterprise:** H100, H200, B200, TPUs. For these accelerators, use [Vertex AI](../managed-training-vertex-ai/), [Cluster Toolkit](../kubernetes/cluster-toolkit/), or [Compute Engine](../vms/).
 
 #### Workload Sizing Guide for Colab Enterprise
 
@@ -457,7 +457,7 @@ print(f"Job resource: {job.resource_name}")
 
 **Best for:** Teams that want interactive notebook development on smaller GPUs (L4/T4/A100) and production training on larger GPUs (H100, H200, B200) with DWS discounts.
 
-> For full Vertex AI DWS details, see the [Vertex AI Guide](../vertex-ai/).
+> For full Vertex AI DWS details, see the [Vertex AI Guide](../managed-training-vertex-ai/).
 
 ### Pattern 3: Develop in Colab → Deploy to GKE with DWS
 
@@ -748,7 +748,7 @@ Colab Enterprise pricing has two components:
 ### Related Guides in This Repository
 
 - [DWS Concepts](../../3-get-capacity/flex-start/) — Capacity acquisition models, pricing, compliance
-- [Vertex AI DWS Training](../vertex-ai/) — Serverless training with FLEX_START (deploy from Colab)
+- [Vertex AI DWS Training](../managed-training-vertex-ai/) — Serverless training with FLEX_START (deploy from Colab)
 - [Cluster Toolkit](../kubernetes/cluster-toolkit/) — Production GKE clusters with DWS flex-start
 - [XPK](../kubernetes/xpk/) — Quick PoC GKE clusters with DWS flex-start
 - [Accelerator Selection Guide](../../2-choose-hardware/) — GPU sizing, checkpointing, consumption models

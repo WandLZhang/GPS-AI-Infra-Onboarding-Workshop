@@ -1,11 +1,11 @@
-# Cluster Director
+# Slurm: Cluster Director and Cluster Toolkit
 
-Cluster Director deploys a managed Slurm cluster on Google Cloud, with login nodes, a controller that Google runs, GPU, CPU or TPU (Preview) partitions, and shared storage. Reach for it when your group already works in Slurm and wants to run `sbatch` jobs without building the cluster.
+Cluster Director deploys a managed Slurm cluster on Google Cloud, with login nodes, a controller that Google runs, GPU, CPU or TPU (Preview) partitions, and shared storage. Reach for it when your group already works in Slurm and wants to run `sbatch` jobs without building the cluster. For CPU-only MPI codes, such as an HPC center's overflow work, run Slurm on H4D VMs, which carry Cloud RDMA at 200 Gbps.
 
 ## What we'd pick
 
 - **Cluster Director for groups that already use Slurm.** Google runs the controller in a fault-tolerant setup. You keep `sbatch`, `srun`, `salloc` and SSH to the login nodes.
-- **Cluster Toolkit when you need full control of `slurm.conf`.** Cluster Director exposes a fixed list of cluster, partition and nodeset settings.
+- **Cluster Toolkit when you need full control of `slurm.conf`.** Cluster Director exposes a fixed list of cluster, partition and nodeset settings. A Cluster Toolkit Slurm blueprint builds the cluster in your project; start from [Create a Cloud RDMA-enabled Slurm cluster with H4D](https://docs.cloud.google.com/cluster-toolkit/docs/quickstarts/create-a-slurm-cluster-h4d). The workshop's [Cluster Toolkit page](../kubernetes/cluster-toolkit/) covers its GKE blueprints.
 - **GKE when the group works in containers and Kubernetes, or serves models next to training.** See [GKE](../kubernetes/).
 - **H4D with Cloud RDMA for CPU-bound MPI codes, such as CFD, climate and molecular dynamics.** H4D carries Cloud RDMA at 200 Gbps between nodes. Build the cluster from Cluster Toolkit's `hpc-slurm-h4d` blueprint, which Google's H4D Slurm guides use. It boots the HPC VM image with the Cloud RDMA drivers and installs MPI.
 - **A Falcon VPC network for RDMA traffic and a regular VPC network for everything else.** The IRDMA NIC can't be nic0. Falcon networks don't support Cloud NAT, Private Google Access or VPC Network Peering, so storage and internet traffic stay on the regular network.

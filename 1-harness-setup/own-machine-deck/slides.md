@@ -156,7 +156,7 @@ Licensed under the Apache License, Version 2.0
     <div style="font-size:24px;font-weight:500;text-align:center;margin-bottom:12px;">Configure Claude Code</div>
     <div style="background:#fff;border-radius:8px;padding:14px 18px;border:1px solid #e8eaed;font-size:15px;line-height:1.7;">
       <strong>Paste into agy:</strong><br/>
-      Please install the MCPs and Claude Code according to <a href="https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop/tree/main/1-setup" style="color:#1a73e8;">https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop/tree/main/1-setup</a>. You may have to install <code>gh</code> and ask the user to <code>gh auth</code> in the terminal.
+      Please install the MCPs and Claude Code according to <a href="https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop/tree/main/1-harness-setup" style="color:#1a73e8;">https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop/tree/main/1-harness-setup</a>. You may have to install <code>gh</code> and ask the user to <code>gh auth</code> in the terminal.
     </div>
   </div>
 </div>

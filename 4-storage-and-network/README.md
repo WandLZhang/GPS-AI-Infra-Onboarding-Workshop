@@ -9,4 +9,4 @@ Where your data, model weights and checkpoints live, how VMs reach the network w
 | [vm-images](./vm-images/) | Disk images for GPU and HPC VMs, and [Packer](./vm-images/packer/) templates to build your own |
 | [data-prep](./data-prep/) | BigQuery, Dataflow and BigQuery DataFrames for preparing ML data |
 
-How often to checkpoint, and where to write checkpoints, is in [checkpointing](../5-run/checkpointing.md).
+[storage](./storage/) covers where checkpoints live. How often to save one, and the code that saves it, is in [checkpointing](../5-run/checkpointing.md).

@@ -132,7 +132,7 @@ for name, (passed, wanted) in checks.items():
 
 print(f"  total cost ${total:.2f}")
 if failed:
-    print(f"  {failed} of 3 checks failed. See 'If a check fails' in 1-setup/README.md.")
+    print(f"  {failed} of 3 checks failed. See 'If a check fails' in 1-harness-setup/README.md.")
     sys.exit(1)
 print("  All 3 checks passed. Claude Code can read the docs, price a machine and read your logs.")
 PY

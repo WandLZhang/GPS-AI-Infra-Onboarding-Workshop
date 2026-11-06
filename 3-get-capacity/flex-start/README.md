@@ -398,7 +398,7 @@ DWS can be consumed through multiple deployment methods. Each has its own guide 
 | **Cluster Toolkit** | Production GKE clusters via Terraform blueprints with Kueue integration | [→ cluster-toolkit/](../../5-run/kubernetes/cluster-toolkit/) |
 | **XPK** | Quick PoC GKE clusters with `--flex` flag | [→ xpk/](../../5-run/kubernetes/xpk/) |
 | **Cluster Director** | Fully managed Slurm clusters with DWS flex-start and calendar mode | [→ slurm/](../../5-run/slurm/) |
-| **Vertex AI** | Serverless training with FLEX_START scheduling strategy | [→ vertex-ai/](../../5-run/vertex-ai/) |
+| **Vertex AI** | Serverless training with FLEX_START scheduling strategy | [→ managed-training-vertex-ai/](../../5-run/managed-training-vertex-ai/) |
 
 > For a comparison of all deployment methods, see the [Deploying Workloads Overview](../../5-run/).
 

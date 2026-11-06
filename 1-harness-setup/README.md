@@ -18,6 +18,8 @@ limitations under the License.
 
 One script builds a Cloud Workstation in your Google Cloud project and puts two harnesses on it: agy (the Antigravity CLI) and Claude Code. Claude Code comes set up the way we run it for AI infrastructure work. It reads the current Google Cloud docs, prices machines from the live pricing pages and reads your Cloud Logging entries. It also stops before it clobbers a file or leaves a GPU billing.
 
+> **Use a dedicated sandbox project that holds no sensitive data.** The script resets 38 org policy constraints to Google's default on that project only ([Org policies](#org-policies)). The organization and its other projects keep theirs. After the reset, VMs in the project can get external IPs and buckets there can be made public. Each class workstation's service account is an owner of the project, and Claude Code runs in bypass permissions mode ([Settings](#settings-settingsjson)).
+
 You need a project in an organization where you're an org admin. A new, empty project works. The setup takes about 15 minutes. If you aren't an org admin, ask one to build your workstation ([Workstations for a class](#workstations-for-a-class)), or run setup.sh on a Linux machine you already use ([Another machine](#another-machine)).
 
 1. [Run the script in Cloud Shell](#1-run-the-script-in-cloud-shell)
@@ -33,7 +35,7 @@ Open [Cloud Shell](https://shell.cloud.google.com/?show=terminal) and paste:
 
 ```bash
 git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
-GPS-AI-Infra-Onboarding-Workshop/1-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
+GPS-AI-Infra-Onboarding-Workshop/1-harness-setup/cloud-workstation/create_workstation.sh <PROJECT_ID>
 ```
 
 Click **Authorize** when Cloud Shell asks. The script turns on the Vertex AI API first, then prints the Model Garden link for [step 2](#2-turn-on-claude-opus-55). To run the script again, run `git -C GPS-AI-Infra-Onboarding-Workshop pull`, then paste the second line. Each step checks what exists first.
@@ -123,7 +125,7 @@ Paste the prompt from [step 3](#3-open-the-workstation) into agy, or fix it by h
 
    ```bash
    GITHUB_PERSONAL_ACCESS_TOKEN=<token> HF_TOKEN=<token> \
-     ~/GPS-AI-Infra-Onboarding-Workshop/1-setup/claude-code/setup.sh <PROJECT_ID>
+     ~/GPS-AI-Infra-Onboarding-Workshop/1-harness-setup/claude-code/setup.sh <PROJECT_ID>
    ```
 
 Nothing on the workstation asks for a sign-in code. The exception is `ws-login`, which runs gcloud as you instead of the service account.
@@ -180,13 +182,15 @@ A new project in our test organization inherited the 33 restrictive constraints 
 When a student's org isn't ready, build their workstation in your own project. Run the loop in tmux, so a closed tab doesn't stop it:
 
 ```bash
-cd GPS-AI-Infra-Onboarding-Workshop/1-setup/cloud-workstation
+cd GPS-AI-Infra-Onboarding-Workshop/1-harness-setup/cloud-workstation
 for EMAIL in student1@example.com student2@example.com student3@example.com; do
   ./create_workstation.sh <PROJECT_ID> "$EMAIL"
 done
 ```
 
 Each student gets a workstation, config and service account named from their email, and only that student can open the workstation. The first run builds the cluster and takes about 10 minutes. Each run after that takes about 5. Each workstation's service account is an owner of the project, so this doesn't isolate students from each other.
+
+This gives each student a harness workstation for the workshop. To let a class share a pool of TPUs through a queue, see [classroom](../5-run/classroom/).
 
 | Item | Cost |
 |---|---|
@@ -199,7 +203,7 @@ Seven workstations for an 8-hour day cost $39.31, plus $4.80 for the cluster's d
 
 ## Another machine
 
-On a cloudtop, a GCE VM or a Linux laptop, run setup.sh by hand. On a Mac, use a workstation: setup.sh and the smoke test target Linux.
+On a GCE VM or a Linux laptop, run setup.sh by hand. On a Mac, use a workstation: setup.sh and the smoke test target Linux.
 
 ```bash
 gcloud auth login
@@ -207,7 +211,7 @@ gcloud auth application-default login
 gcloud config set project <PROJECT_ID>
 gcloud services enable aiplatform.googleapis.com
 git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
-cd GPS-AI-Infra-Onboarding-Workshop/1-setup/claude-code
+cd GPS-AI-Infra-Onboarding-Workshop/1-harness-setup/claude-code
 NO_VSCODE=1 ./setup.sh <PROJECT_ID>
 source ~/.bashrc
 claude-smoke-test
@@ -338,7 +342,7 @@ For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pri
 ## What's in this folder
 
 ```
-1-setup/
+1-harness-setup/
 ├── README.md                              # This file
 ├── cloud-workstation/
 │   ├── create_workstation.sh              # Builds the workstation and sets it up, in one run
@@ -361,7 +365,7 @@ For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pri
 ├── gemini-cli/
 │   ├── README.md                          # Install, rules and MCP config for Gemini CLI
 │   └── GEMINI.md                          # Rules for Gemini CLI, agy and Antigravity
-├── shared/
-│   └── google-cloud-logging/proxy.mjs     # Cloud Logging MCP proxy
-└── slides/                                # An earlier deck: VS Code and agy on your own machine
+├── logging-mcp-proxy/
+│   └── proxy.mjs                          # Cloud Logging MCP proxy
+└── own-machine-deck/                      # An earlier deck: VS Code and agy on your own machine
 ```

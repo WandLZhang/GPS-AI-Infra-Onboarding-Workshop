@@ -7,9 +7,9 @@ How you get GPUs and TPUs is a separate choice from where you run them. Pick a c
 | Option | What you get | Page |
 |---|---|---|
 | On-demand | Immediate, full price, if available | [Prices](../7-cost/prices.md) |
-| Reservations | Guaranteed, committed, long-term | [reservations.md](./reservations.md) for affinity and dense placement |
-| Flex-start | Queued, up to 53% discount, up to 7 days | [flex-start](./flex-start/), and [VMs](../5-run/vms/) for Flex-start VMs through managed instance groups |
-| Calendar mode | Guaranteed start time, committed cost, 1 to 90 days | [calendar-mode](./calendar-mode/), with its [availability check](./calendar-mode/README.md#check-calendar-availability-before-you-book) |
+| Calendar mode | Book fixed dates: guaranteed start time, committed cost, 1 to 90 days | [calendar-mode](./calendar-mode/), with its [availability check](./calendar-mode/README.md#check-calendar-availability-before-you-book) |
+| Flex-start | Queued, no fixed start, up to 53% discount, up to 7 days | [flex-start](./flex-start/), and [VMs](../5-run/vms/) for Flex-start VMs through managed instance groups |
+| Reservations | Guaranteed, committed, long-term, through your account team | [reservation-placement.md](./reservation-placement.md) for how VMs use a reservation and dense placement |
 | Spot | Cheapest, preemptible, no guarantee | [spot](./spot/), which ranks zones for Spot |
 
 [quota.md](./quota.md) lists the quota each option uses, and how to raise it.
@@ -48,22 +48,31 @@ How you get GPUs and TPUs is a separate choice from where you run them. Pick a c
 
 ## Which machine types take which option
 
-Your choice of accelerator constrains which consumption models are available:
+Your choice of accelerator constrains which consumption models are available. From the consumption tables on [Accelerator-optimized machine family](https://docs.cloud.google.com/compute/docs/accelerator-optimized-machines) and [Plan your Cloud TPU resources](https://docs.cloud.google.com/tpu/docs/plan-tpus), read 2026-11-06:
 
-| Machine Type | Reservation (AI Hypercomputer) | Reservation (Calendar Mode, ≤90 days) | Flex-Start (DWS) | Spot |
-|---|:---:|:---:|:---:|:---:|
-| **A4X Max / A4X** | ✅ (required) | ❌ | ❌ | ❌ |
-| **A4** | ✅ | ✅ | ✅ | ✅ |
-| **A3 Ultra** | ✅ | ✅ | ✅ | ✅ |
-| **A3 Mega** | ✅ | ✅ | ✅ | ✅ |
-| **A3 High (8 GPU)** | ✅ | ✅ | ✅ | ✅ |
-| **A3 High (1/2/4 GPU)** | ❌ | ❌ | ✅ | ✅ |
-| **A3 Edge** | ✅ | ❌ | ✅ | ✅ |
-| **A2** | ✅ | ✅ | ✅ | ✅ |
-| **G4** | ✅ | ✅ | ✅ | ✅ |
-| **G2** | ✅ | ❌ | ✅ | ✅ |
+| Machine type (GPU) | On-demand | Spot | Flex-start | Calendar mode | Reservations | Capacity blocks |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **A4X Max** (GB300), **A4X** (GB200) | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **A4** (B200) | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| **A3 Ultra** (H200) | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| **A3 Mega** (H100) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **A3 High**, 8 GPUs (H100) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **A3 High**, 1, 2 or 4 GPUs (H100) | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **A3 Edge** (H100) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **A2** (A100) | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| **G4** (RTX PRO 6000) | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
+| **G2** (L4) | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
 
-For TPUs, Calendar mode takes TPU7x, v6e and v5p ([Calendar mode](./calendar-mode/README.md#sizes-durations-and-machine-types)). For the current list, ask your harness the Flex-start question below.
+Reservations covers on-demand and future reservations, which the page marks the same way for every machine type. Before you request a future reservation for these GPUs, talk to your account team. The page says Google Cloud is likely to decline the request otherwise.
+
+| TPU version | On-demand | Spot | Flex-start (Preview) | Calendar mode | Reservation for 1 year or longer |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **TPU7x** (Ironwood) | ✅ | ✅ allowlist | ✅ allowlist | ✅ allowlist | ✅ allowlist |
+| **v6e** (Trillium) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **v5p** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **v5e** | ✅ | ✅ | ❌ | ❌ | ✅ |
+
+TPU7x Spot, Flex-start, Calendar mode and capacity blocks need an allowlist from your account team.
 
 ## Look up facts that change
 
@@ -78,7 +87,7 @@ Zones and support change. This repo dates the numbers it prints. Get the current
 | GPU zones | [GPU regions and zones](https://cloud.google.com/compute/docs/regions-zones/gpu-regions-zones) |
 | TPU zones | [TPU regions and zones](https://docs.cloud.google.com/tpu/docs/regions-zones) |
 
-[Ask your harness](../1-setup/README.md#ask-your-harness) lists more questions the docs MCP answers. Scripts that spray requests across zones and poll for capacity are in [examples](../8-examples/README.md#spray-requests-across-zones-and-poll-for-capacity).
+[Ask your harness](../1-harness-setup/README.md#ask-your-harness) lists more questions the docs MCP answers. Scripts that spray requests across zones and poll for capacity are in [examples](../8-examples/README.md#spray-requests-across-zones-and-poll-for-capacity).
 
 ## Keep a training job alive on Spot
 
@@ -92,4 +101,4 @@ See [Keep a training job alive on Spot](./spot/README.md#keep-a-training-job-ali
 | [calendar-mode](./calendar-mode/) | Calendar mode future reservations: sizes, lead times, the availability check and Calendar zone discovery |
 | [spot](./spot/) | Spot VMs: the Capacity Advisor for Spot API and keeping training alive through preemption |
 | [quota.md](./quota.md) | The quota each option uses, how to view it, raise it and alert on it |
-| [reservations.md](./reservations.md) | Reservation affinity, machine topology, dense allocation and topology-aware scheduling |
+| [reservation-placement.md](./reservation-placement.md) | How VMs use a reservation: affinity, machine topology, dense allocation and topology-aware scheduling |

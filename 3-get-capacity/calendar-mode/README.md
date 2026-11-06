@@ -63,7 +63,7 @@ Future Reservations in **Calendar Mode** let you reserve GPU capacity for a **sp
 |---|---|
 | Time-flexible, cost-sensitive workloads | [Compute Engine Flex-start](../../5-run/vms/) or [Cluster Toolkit](../../5-run/kubernetes/cluster-toolkit/) |
 | Quick PoC or experimentation | [XPK](../../5-run/kubernetes/xpk/) with `--flex` |
-| Serverless training | [Vertex AI](../../5-run/vertex-ai/) |
+| Serverless training | [Vertex AI](../../5-run/managed-training-vertex-ai/) |
 | Need Slurm-based scheduling | [Cluster Director](../../5-run/slurm/) |
 
 ---

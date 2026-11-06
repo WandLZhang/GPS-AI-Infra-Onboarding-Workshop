@@ -1,4 +1,4 @@
-# Vertex AI — Serverless DWS Training (FLEX_START)
+# Managed Training on Vertex AI — Serverless DWS Training (FLEX_START)
 
 > Submit GPU training jobs with zero infrastructure management. Vertex AI integrates DWS natively — set the scheduling strategy to `FLEX_START` and Vertex AI handles queuing, provisioning, and resource lifecycle automatically.
 

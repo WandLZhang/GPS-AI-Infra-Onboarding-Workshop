@@ -45,7 +45,7 @@ if [ -z "$PROJECT_ID" ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SHARED_DIR="$(cd "$SCRIPT_DIR/../shared" && pwd)"
+PROXY_DIR="$(cd "$SCRIPT_DIR/../logging-mcp-proxy" && pwd)"
 HOME_DIR="$HOME"
 
 # On a fresh Cloud Workstation, gcloud can cache a failed GCE check in ~/.config/gcloud/gce and then
@@ -300,7 +300,7 @@ fi
 echo ""
 echo "[7/8] Installing MCP proxy scripts..."
 mkdir -p "$HOME_DIR/mcp/google-cloud-logging"
-cp "$SHARED_DIR/google-cloud-logging/proxy.mjs" "$HOME_DIR/mcp/google-cloud-logging/proxy.mjs"
+cp "$PROXY_DIR/proxy.mjs" "$HOME_DIR/mcp/google-cloud-logging/proxy.mjs"
 echo "  ✓ Cloud Logging proxy installed"
 
 mkdir -p "$HOME_DIR/mcp/github-mcp-server"

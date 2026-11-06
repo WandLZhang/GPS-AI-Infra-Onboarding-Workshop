@@ -11,7 +11,7 @@ Copy a working recipe before you write anything new:
 - [GoogleCloudPlatform/accelerated-platforms](https://github.com/GoogleCloudPlatform/accelerated-platforms): GKE reference architectures for inference and training.
 - [MaxText](https://maxtext.readthedocs.io/en/latest/): LLM training in JAX on TPUs and GPUs.
 
-To bring your own model up on TPU, see [Port a model to TPU](../2-choose-hardware/port-to-tpu.md).
+To bring your own model up on TPU, see [Benchmark and port a model to TPU](../2-choose-hardware/benchmark-and-port-to-tpu.md).
 
 ## Full projects
 

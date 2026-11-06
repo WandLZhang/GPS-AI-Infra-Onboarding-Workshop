@@ -12,7 +12,7 @@
 4. [Sizing Your Accelerator — Memory, Shapes & Node Count](#4-sizing-your-accelerator--memory-shapes--node-count)
 5. [References](#5-references)
 
-Porting a model to TPU, and benchmarking it against a GPU, has its own page: [port-to-tpu.md](./port-to-tpu.md). Which capacity options each machine type takes is in [get capacity](../3-get-capacity/README.md#which-machine-types-take-which-option). Reservation affinity and dense placement are in [reservations](../3-get-capacity/reservations.md). Checkpointing is in [run](../5-run/checkpointing.md).
+Benchmarking a model on GPU and TPU, and porting it to TPU, has its own page: [benchmark-and-port-to-tpu.md](./benchmark-and-port-to-tpu.md). Which capacity options each machine type takes is in [get capacity](../3-get-capacity/README.md#which-machine-types-take-which-option). Reservation affinity and dense placement are in [reservation placement](../3-get-capacity/reservation-placement.md). Checkpointing is in [run](../5-run/checkpointing.md).
 
 ---
 
@@ -30,10 +30,9 @@ This guide helps you make that decision systematically. Use it **before** reques
 ### Learn how accelerators behave
 
 - Read [How to Scale Your Model](https://jax-ml.github.io/scaling-book): the parts on rooflines, TPUs, sharded matmuls and transformers. GPU users add the GPU part.
-- For an overview of Google Cloud's AI infrastructure, watch [The future of AI infrastructure](https://www.youtube.com/watch?v=PJQPMv8TqLA) and [AI Hypercomputer: resilient AI infrastructure at scale](https://www.youtube.com/watch?v=cvpasuzUB0Q) (Google Cloud Next '26).
 - For what's new in TPUs, see [Cloud TPU generations](#cloud-tpu-generations).
 
-The steps around this one are in the [journey map](../README.md#the-journey).
+The overview talks and the steps around this one are on the [front page](../README.md#overview).
 
 ---
 
@@ -83,6 +82,8 @@ The steps around this one are in the [journey map](../README.md#the-journey).
 | **G2** (`4 GPU`) | NVIDIA L4 | 4 | 24 GB GDDR6 | 96 GB | 48 | 192 | 50 |
 | **G2** (`2 GPU`) | NVIDIA L4 | 2 | 24 GB GDDR6 | 48 GB | 24 | 96 | 32 |
 | **G2** (`1 GPU`) | NVIDIA L4 | 1 | 24 GB GDDR6 | 24 GB | 4–32 | 16–128 | 10–32 |
+
+Source: [Accelerator-optimized machine family](https://docs.cloud.google.com/compute/docs/accelerator-optimized-machines). On 2026-11-06 the GPU model for each machine series matched that page. Check the page for the other columns before you quote them.
 
 ### Cloud TPU generations
 
@@ -157,7 +158,7 @@ What's new in TPUs: [Inside the 8th-generation TPU](https://cloud.google.com/blo
 | **Multi-host inference** (frontier/large models) | A4X Max, A4X, A4, A3 Ultra, A3 Mega | Model sharded across multiple nodes — need high inter-node bandwidth. |
 | **Single-host inference** (models that fit on one node) | A4, A3 Ultra, A3 High, G4, G2 | Optimize for GPU memory to fit the model and cost-per-query. G4 offers 96 GB/GPU at lower cost than A-series. G2 (L4, 24 GB) is cheapest for small models. |
 | **Small/medium ML** (CV, NLP < 10B params) | G4, G2 | Best price-performance. G4 with FP4 support and 96 GB memory handles most use cases. G2 (L4) for budget-conscious workloads. |
-| **HPC** (simulation, molecular dynamics, CFD) | Any A-series or G-series | Depends on GPU compute intensity. Use A-series for heavy GPU compute, G-series for lighter GPU + strong CPU. |
+| **HPC** (simulation, molecular dynamics, CFD) | A4 for double-precision GPU codes; H4D CPUs for MPI codes | Keep double-precision codes off A4X Max, whose GB300 has a small fraction of B200's FP64 throughput. See [FP64 science codes](#double-precision-fp64-science-codes). |
 | **Graphics / rendering / virtual desktops** | G4, G2, N1+T4 | G4 has RTX PRO 6000 with RT cores and DLSS 4. G2 has L4 with RT cores. Both support NVIDIA vWS. |
 
 ### Detailed Selection Criteria
@@ -167,7 +168,7 @@ When the recommendation matrix doesn't give a clear answer, use these criteria t
 | Criterion | Favors | Details |
 |---|---|---|
 | **Model parameter count** | Larger GPU memory | See [Section 4](#4-sizing-your-accelerator--memory-shapes--node-count) for sizing formulas |
-| **Training duration** | More stable accelerators | Jobs > 7 days need reservations (DWS max is 7 days). A4X Max/A4X require reservations. |
+| **Training duration** | More stable accelerators | Flex-start runs 7 days at most, so a longer job needs Calendar mode (up to 90 days) or a reservation. A4X Max/A4X require reservations. |
 | **Budget sensitivity** | Smaller / older GPUs | G2 (L4) or A2 Standard (A100 40 GB) offer best price-per-FLOP for moderate workloads |
 | **Availability urgency** | Widely available types | G2, A2 Standard are most available. A4X Max/A4X are newest and most constrained |
 | **Multi-node scaling** | High-bandwidth networking | A4X Max (3,600 Gbps), A4/A3 Ultra (3,600 Gbps) for strong scaling. A3 High (1,000 Gbps) for modest scaling |
@@ -306,9 +307,9 @@ Not every workload needs 8 GPUs. Google Cloud offers **fractional shapes** to ri
 
 ### Related Sections in This Repository
 
-- [Port a model to TPU](./port-to-tpu.md) — TorchTPU, what worked on our ports, MaxKernel and the TPU agent suite
+- [Benchmark and port a model to TPU](./benchmark-and-port-to-tpu.md) — TorchTPU, what worked on our ports, MaxKernel and the TPU agent suite
 - [Get capacity](../3-get-capacity/README.md) — Which capacity options each machine type takes, and how to choose one
-- [Reservations](../3-get-capacity/reservations.md) — Reservation affinity, topology and dense allocation
+- [Reservation placement](../3-get-capacity/reservation-placement.md) — Reservation affinity, topology and dense allocation
 - [Checkpointing](../5-run/checkpointing.md) — Strategies, storage options and frequency for checkpoints
 - [Storage for AI Workloads](../4-storage-and-network/storage/README.md) — GCSFuse, Rapid Cache, Rapid Bucket for training data and checkpointing
 - [Debug and profile](../6-debug-and-profile/README.md) — Profile with XProf, and fit matmuls to the MXU

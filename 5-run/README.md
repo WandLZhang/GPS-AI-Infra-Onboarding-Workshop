@@ -30,12 +30,12 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 
 | Folder | Platform | Best For |
 |---|---|---|
-| [slurm](./slurm/) | Cluster Director (managed Slurm), and Cluster Toolkit Slurm blueprints | Teams that already submit work with `sbatch`, HPC and MPI codes |
+| [slurm](./slurm/) | Cluster Director (managed Slurm), or a Slurm cluster you build from a Cluster Toolkit blueprint | Teams that already submit work with `sbatch`, and HPC and MPI codes, including CPU-only MPI on H4D VMs with Cloud RDMA |
 | [kubernetes](./kubernetes/) | GKE Autopilot and Standard, with [Cluster Toolkit](./kubernetes/cluster-toolkit/) and [XPK](./kubernetes/xpk/) to build clusters | Containers, queued batch jobs and model serving on one cluster |
 | [vms](./vms/) | Compute Engine VMs, with Flex-start through managed instance group (MIG) resize requests | Plain VMs with no orchestrator |
-| [vertex-ai](./vertex-ai/) | Vertex AI custom training | A managed training job with no cluster |
+| [managed-training-vertex-ai](./managed-training-vertex-ai/) | Vertex AI custom training | Managed training, no cluster to run |
 | [notebooks](./notebooks/) | Colab Enterprise | Interactive GPU notebooks, prototyping |
-| [classroom](./classroom/) | GKE Autopilot with a Kueue queue, or workstations built for a class | A class or team that shares accelerators |
+| [classroom](./classroom/) | GKE Autopilot with a Kueue queue for TPU jobs | A class that shares a pool of TPUs. For a harness workstation per student, see [Workstations for a class](../1-harness-setup/README.md#workstations-for-a-class) |
 
 [checkpointing.md](./checkpointing.md) applies to all of them: save training state so an interruption costs minutes, not days.
 
@@ -50,7 +50,7 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 | **[Cluster Toolkit](kubernetes/cluster-toolkit/)** | GKE (Terraform) | Production GKE clusters, full infra control, IaC | Flex-start, Reservation fallback | [→ kubernetes/cluster-toolkit/](kubernetes/cluster-toolkit/) |
 | **[XPK](kubernetes/xpk/)** | GKE (Python CLI) | Rapid PoC, testing, experimentation | Flex-start | [→ kubernetes/xpk/](kubernetes/xpk/) |
 | **[Cluster Director](slurm/)** | Managed Slurm | Slurm-native teams, HPC workloads, console-first | Flex-start, Calendar Mode | [→ slurm/](slurm/) |
-| **[Vertex AI](vertex-ai/)** | Vertex AI (Managed) | Serverless training, zero infra management | FLEX_START | [→ vertex-ai/](vertex-ai/) |
+| **[Vertex AI](managed-training-vertex-ai/)** | Vertex AI (Managed) | Managed training, no cluster to run | FLEX_START | [→ managed-training-vertex-ai/](managed-training-vertex-ai/) |
 | **[Colab Enterprise](notebooks/)** | Vertex AI (Notebooks) | Interactive GPU notebooks, prototyping, develop→deploy | Via Reservations | [→ notebooks/](notebooks/) |
 
 ---
@@ -79,7 +79,7 @@ Follow [Choose an option](../3-get-capacity/README.md#choose-an-option) in get c
                 Yes            No
                  │              │
            Cluster Toolkit    XPK
-           (Terraform IaC)    (Quick PoC CLI)
+           (GKE blueprint)    (Quick PoC CLI)
 
               Want raw VMs
               without any
@@ -88,6 +88,8 @@ Follow [Choose an option](../3-get-capacity/README.md#choose-an-option) in get c
             Compute Engine
             (MIG Resize Requests)
 ```
+
+On the Slurm branch, Cluster Director runs a managed cluster, and a Cluster Toolkit blueprint, such as `hpc-slurm-h4d`, builds one you control. Both are in [slurm](./slurm/).
 
 ---
 

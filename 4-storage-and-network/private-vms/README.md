@@ -4,6 +4,8 @@
 
 This guide covers how to configure GCP VMs with **no public (external) IP addresses** and use **Identity-Aware Proxy (IAP)** to enable secure, zero trust access for SSH and RDP. This approach eliminates direct internet exposure while providing authenticated, authorized, and audited access to every VM.
 
+> The [harness setup](../../1-harness-setup/README.md#org-policies) resets `compute.vmExternalIpAccess` to Google's default in its project, so VMs there can get external IPs. Build private VMs in a project that keeps the constraint.
+
 ---
 
 ## Benefits of Configuring VMs with No Public IPs

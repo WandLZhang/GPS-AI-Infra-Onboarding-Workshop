@@ -60,7 +60,7 @@ MIG resize requests are a **Compute Engine mechanism** for requesting multiple G
 | Scenario | Better Alternative |
 |---|---|
 | Need Kubernetes-native job orchestration | [Cluster Toolkit](../kubernetes/cluster-toolkit/) or [XPK](../kubernetes/xpk/) |
-| Want zero infrastructure management | [Vertex AI](../vertex-ai/) |
+| Want zero infrastructure management | [Vertex AI](../managed-training-vertex-ai/) |
 | Need Slurm job scheduling | [Cluster Director](../slurm/) |
 | Need guaranteed start time | [Calendar Mode](../../3-get-capacity/calendar-mode/) |
 | Need reservation + DWS fallback | [Cluster Toolkit](../kubernetes/cluster-toolkit/) (Kueue pattern) |

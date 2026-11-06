@@ -9,7 +9,7 @@ Quota caps how many GPUs, TPUs and requests a project can use in each region or 
 | **[Compute Engine](../5-run/vms/)** | Standard GPU quota (e.g., `NVIDIA_H100_GPUS`) | Request stays pending if insufficient quota |
 | **[Calendar Mode](./calendar-mode/)** | No Compute Engine quota needed (reservation-bound model) | Only need quota for non-reservation resources (disks, IPs) |
 | **[Cluster Toolkit](../5-run/kubernetes/cluster-toolkit/) / [XPK](../5-run/kubernetes/xpk/)** | `ACTIVE_RESIZE_REQUESTS` (default: 100/project) + GPU quota | GKE uses Compute Engine quota under the hood |
-| **[Vertex AI](../5-run/vertex-ai/)** | Preemptible Vertex AI quota (e.g., `custom_model_training_preemptible_nvidia_h100_gpus`) | Despite name, resources are NOT preemptible |
+| **[Vertex AI](../5-run/managed-training-vertex-ai/)** | Preemptible Vertex AI quota (e.g., `custom_model_training_preemptible_nvidia_h100_gpus`) | Despite name, resources are NOT preemptible |
 
 ## View Current Quotas
 

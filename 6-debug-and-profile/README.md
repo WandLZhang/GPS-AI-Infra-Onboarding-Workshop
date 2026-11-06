@@ -4,12 +4,13 @@ Watch GPU and TPU jobs with dashboards and alerts, read their logs, profile them
 
 ## What we'd pick
 
-- Start at the **AI/ML** section of Kubernetes Engine in the Google Cloud console. Its JobSet dashboard shows status, replica readiness, goodput and GPU or TPU metrics in one place.
+- On Compute Engine VMs and Slurm clusters, watch GPUs with the Ops Agent. When a GPU job dies, read the kernel log for NVIDIA Xid codes. See [GPU jobs](#gpu-jobs) and [Slurm jobs](#slurm-jobs).
+- On GKE, start at the **AI/ML** section of Kubernetes Engine in the Google Cloud console. Its JobSet dashboard shows status, replica readiness, goodput and GPU or TPU metrics in one place.
 - Leave GKE system metrics on and set `containerPort: 8431` in TPU pod specs. The duty cycle and HBM charts need both. Cloud Monitoring doesn't charge to ingest GKE system metrics.
 - Set alerts before a long run. A hung job keeps billing until someone notices. Start with [our five](#alerts-we-set-first).
 - When a TPU job dies, check [hardware health](#tpu-hardware-health) before you debug code. The ICI link, HBM and PCIe metrics show whether the hardware failed.
 - For a hung or failed TPU job on GKE, run the [ML Workload Debugging Wiki](https://github.com/google/ml-workload-debugging-wiki) in your harness. It matches the job's logs against known failure modes and names the culprit hosts.
-- Read logs through the Cloud Logging remote MCP server. The [harness setup](../1-setup/) connects it, so your harness queries a job's logs itself.
+- Read logs through the Cloud Logging remote MCP server. The [harness setup](../1-harness-setup/) connects it, so your harness queries a job's logs itself.
 - Profile early with XProf. Its collection overhead on TPU is under 1%, so profile during development too.
 - Write profiles to Cloud Storage. Local profiles go away when the run ends. XProfiler reads from the bucket.
 - Open large profiles on an XProfiler VM, then delete the VM. It loads big profiles faster than a local TensorBoard. It bills while it runs.
@@ -141,7 +142,21 @@ Pick the tool by the question you have:
 
 The MXU is 256 x 256 on v6e and TPU7x, and 128 x 128 on earlier TPUs. For peak FLOPs, matrix-multiply dimensions should be larger than the MXU ([TPU performance guide](https://docs.cloud.google.com/tpu/docs/performance-guide)). A smaller dimension, such as an attention head_dim of 64 on a 256-wide unit, leaves most of the MXU idle.
 
-For a port that runs but runs slow, [What worked on our ports](../2-choose-hardware/port-to-tpu.md#what-worked-on-our-ports-in-order) lists the order we tune in.
+For a port that runs but runs slow, [What worked on our ports](../2-choose-hardware/benchmark-and-port-to-tpu.md#what-worked-on-our-ports-in-order) lists the order we tune in.
+
+### GPU jobs
+
+- Watch GPU utilization and memory on Compute Engine VMs with the Ops Agent ([Monitor GPU performance](https://docs.cloud.google.com/compute/docs/gpus/monitor-gpus)). Its NVIDIA DCGM integration adds SM occupancy, PCIe traffic and NVLink traffic.
+- On GKE, DCGM metrics are on by default for new clusters on 1.32.1-gke.1357000 or later ([Collect DCGM metrics](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/dcgm-metrics)).
+- When a GPU job fails, hangs or slows down, read the kernel log (`dmesg` or `/var/log/kern.log`) for NVIDIA Xid codes. Google's [GPU troubleshooting page](https://docs.cloud.google.com/compute/docs/troubleshooting/troubleshooting-gpus) says which Xids need a GPU reset, a reboot or a new host.
+- For an illegal memory access in your own code, run it under `cuda-gdb` or the Compute Sanitizer memcheck tool.
+- When a multi-GPU job hangs in a collective, set `NCCL_DEBUG=INFO` to print NCCL's debug information ([NCCL environment variables](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html)).
+- Profile PyTorch code with [PyTorch Profiler](https://docs.pytorch.org/tutorials/recipes/recipes/profiler_recipe.html), which measures time and memory per operator. [Nsight Systems](https://developer.nvidia.com/nsight-systems) shows a timeline across the CPUs and GPUs.
+
+### Slurm jobs
+
+- `sacct` shows accounting data for jobs and job steps, and `sacct -b` lists each job's state and exit code ([sacct](https://slurm.schedmd.com/sacct.html)).
+- For A4 and A3 Ultra clusters built with AI Hypercomputer, see [Monitor Compute Engine instances and Slurm clusters](https://docs.cloud.google.com/ai-hypercomputer/docs/monitor).
 
 ### Traps and fixes
 
