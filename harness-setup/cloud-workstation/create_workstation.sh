@@ -21,22 +21,23 @@
 # USER_EMAIL is the person who uses the workstation. It defaults to the account gcloud runs as.
 # Run it in Cloud Shell, or anywhere gcloud runs, as an owner of the project.
 #
-# Before you run it, turn on Claude Opus 5.5 for the project in Model Garden. gcloud can't, and a
-# new enablement takes a while to answer, so it settles while this runs:
-#   https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=PROJECT_ID
+# Only a person in the console can turn on Claude Opus 5.5, so the run turns on the Vertex AI API
+# first and prints the Model Garden link for it. Open the link and click Enable while the rest runs.
+# A new enablement takes a while to answer, so it settles while the workstation builds.
 #
-#   1. Turns on the APIs a workstation and Claude Code on Vertex AI need.
-#   2. Resets the restrictive org policies a new project inherits, and allows
+#   1. Turns on the Vertex AI API and prints the Model Garden link for Claude Opus 5.5.
+#   2. Turns on the other APIs a workstation and Claude Code on Vertex AI need.
+#   3. Resets the restrictive org policies a new project inherits, and allows
 #      Anthropic's partner model features on Vertex AI, which Claude Code's web search needs.
-#   3. Asks Claude Opus 5.5 for a reply. If it doesn't answer, prints the Model Garden link and
+#   4. Asks Claude Opus 5.5 for a reply. If it doesn't answer, prints the Model Garden link again and
 #      keeps going: the cluster takes minutes, which is time to turn it on.
-#   4. Creates the default network, a cluster, a workstation config with the Vertex AI settings in
+#   5. Creates the default network, a cluster, a workstation config with the Vertex AI settings in
 #      the workstation's environment, and the workstation.
-#   5. Gives USER_EMAIL access, and makes the Developer Knowledge API key that setup.sh picks up.
-#   6. On the workstation, runs box_setup.sh: installs agy and Claude Code, checks Opus 5.5 again,
-#      and runs Claude Code's setup.sh and the smoke test. Once the two agents are in, a failed step
-#      doesn't stop the run. It goes into ~/setup-gaps.md, and the last lines print a prompt that
-#      has either agent fix it.
+#   6. Gives USER_EMAIL access, and makes the Developer Knowledge API key that setup.sh picks up.
+#   7. On the workstation, runs box_setup.sh: installs agy and Claude Code, checks Opus 5.5 again,
+#      and runs Claude Code's setup.sh and the smoke test. Once the two harnesses are in, a failed
+#      step doesn't stop the run. It goes into ~/setup-gaps.md, and the last lines print a prompt
+#      that has either harness fix it.
 #
 # Run --dry-run first on any project you didn't create for this. It lists each policy it would
 # reset and marks the ones someone set by hand, which a reset would erase.
@@ -86,6 +87,8 @@ SA="$SA_NAME@$PROJECT.iam.gserviceaccount.com"
 MODEL="claude-opus-5-5[1m]"
 
 OPUS_URL="https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=$PROJECT"
+# Claude on Vertex AI and its Model Garden page need the Vertex AI API.
+VERTEX_API="aiplatform.googleapis.com"
 
 ts() { date "+%H:%M:%S"; }
 say() { echo "$(ts) $*"; }
@@ -216,6 +219,19 @@ if spec.get("rules") and not spec.get("reset"):
   exit 0
 fi
 
+say "== Vertex AI API, then the Model Garden link =="
+# The Model Garden page asks for the Vertex AI API before it shows Enable. Turn the API on first,
+# so the only console step left is the Enable click, done while the rest of this run builds.
+for attempt in 1 2 3 4 5; do
+  if gcloud services enable "$VERTEX_API" --project="$PROJECT" >/dev/null 2>&1; then
+    say "  enabled $VERTEX_API"; break
+  fi
+  [ "$attempt" = 5 ] && say "  ** couldn't enable it yet; the next step tries again **"
+  sleep 20
+done
+say "  Turn on Claude Opus 5.5 now. Open this link, click Enable, and leave this run going:"
+say "    $OPUS_URL"
+
 say "== APIs =="
 gcloud services enable orgpolicy.googleapis.com --project="$PROJECT" >/dev/null 2>&1
 # On a new project the Organization Policy API answers SERVICE_DISABLED for a minute or more after
@@ -280,7 +296,7 @@ gcloud org-policies set-policy "$POLICY" --project="$PROJECT" >/dev/null 2>&1 \
 rm -f "$POLICY"
 
 say "== Claude Opus 5.5 on Vertex AI =="
-# Only a person in the console can turn the model on. Ask now, so there's time to do it while the
+# The link went out at the start. Ask now, so a missed click still has time to land while the
 # cluster builds. The workstation asks again before it needs Claude, and records a gap if it must.
 # Right after the Vertex AI API goes on, calls can fail with SERVICE_DISABLED for a minute.
 for attempt in 1 2 3 4 5 6; do
@@ -291,7 +307,7 @@ if [ "${OPUS%% *}" = 200 ]; then
   say "  answers"
 else
   say "  ** not answering yet (HTTP $OPUS) **"
-  say "  Turn it on now. This run keeps going and checks again on the workstation:"
+  say "  If you haven't clicked Enable yet, do it now. This run keeps going and checks again on the workstation:"
   say "    $OPUS_URL"
 fi
 
@@ -314,8 +330,8 @@ if ! gcloud iam service-accounts describe "$SA" --project="$PROJECT" >/dev/null 
     sleep 5
   done
 fi
-# The workstation runs as this account, and so does everything Claude runs there. Owner lets an
-# agent turn on the API it needs; the narrower roles document what the box uses day to day.
+# The workstation runs as this account, and so does everything Claude runs there. Owner lets a
+# harness turn on the API it needs; the narrower roles document what the box uses day to day.
 for ROLE in roles/owner roles/aiplatform.user roles/logging.viewer roles/logging.logWriter \
             roles/serviceusage.serviceUsageConsumer roles/serviceusage.apiKeysViewer \
             roles/storage.objectAdmin; do
@@ -432,7 +448,7 @@ HOST="$(gcloud workstations describe "$WORKSTATION" --config="$CONFIG" --cluster
   --region="$REGION" --project="$PROJECT" --format='value(host)' 2>/dev/null)"
 T_WS=$(date +%s)
 
-say "== on the workstation: agents, Claude Code setup, smoke test =="
+say "== on the workstation: harnesses, Claude Code setup, smoke test =="
 GAPS="unknown"
 BOX_OPUS=""
 if [ -f "$SELF_DIR/box_setup.sh" ]; then
