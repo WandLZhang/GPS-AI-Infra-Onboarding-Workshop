@@ -168,7 +168,7 @@ When the recommendation matrix doesn't give a clear answer, use these criteria t
 | Criterion | Favors | Details |
 |---|---|---|
 | **Model parameter count** | Larger GPU memory | See [Section 4](#4-sizing-your-accelerator--memory-shapes--node-count) for sizing formulas |
-| **Training duration** | More stable accelerators | Flex-start runs 7 days at most, so a longer job needs Calendar mode (up to 90 days) or a reservation. A4X Max/A4X require reservations. |
+| **Training duration** | More stable accelerators | Flex-start runs 7 days at most, so a longer job needs Calendar mode (up to 90 days) or a reservation. A4X Max and A4X take only [capacity blocks](../3-get-capacity/README.md#which-machine-types-take-which-option), which you request through your account team. |
 | **Budget sensitivity** | Smaller / older GPUs | G2 (L4) or A2 Standard (A100 40 GB) offer best price-per-FLOP for moderate workloads |
 | **Availability urgency** | Widely available types | G2, A2 Standard are most available. A4X Max/A4X are newest and most constrained |
 | **Multi-node scaling** | High-bandwidth networking | A4X Max (3,600 Gbps), A4/A3 Ultra (3,600 Gbps) for strong scaling. A3 High (1,000 Gbps) for modest scaling |

@@ -103,8 +103,9 @@ To check by hand, work in this order:
 
 1. Chart the [TPU hardware health](#tpu-hardware-health) metrics for the failure window.
 2. On GKE, chart `kubernetes.io/node/interruption_count` for the same window. Its `interruption_type` and `interruption_reason` labels name the cause, such as `PreemptionEvent` or `HostError`.
-3. Ask your harness for the job's ERROR logs. It reads them through the Cloud Logging remote MCP server.
-4. If a multi-host TPU job hangs, run `tpu-info --metric sequencer_state_detailed` on every host. Look for a core whose program counter, HLO location or run ID differs from the rest. That core's host is the suspect.
+3. Outside GKE, the preemption check depends on how you made the TPU VM. For one made with `gcloud compute instances create`, run `gcloud compute operations list --filter="operationType=compute.instances.preempted"`, which lists [Compute Engine preemptions](https://docs.cloud.google.com/compute/docs/instances/create-use-spot#view-preemption-operations). For one made with `gcloud compute tpus tpu-vm create`, run `gcloud compute tpus tpu-vm list --zone=ZONE`. A preempted TPU shows `PREEMPTED` in the STATUS column ([Preemptible TPUs](https://docs.cloud.google.com/tpu/docs/preemptible)).
+4. Ask your harness for the job's ERROR logs. It reads them through the Cloud Logging remote MCP server.
+5. If a multi-host TPU job hangs, run `tpu-info --metric sequencer_state_detailed` on every host. Look for a core whose program counter, HLO location or run ID differs from the rest. That core's host is the suspect.
 
 ### Profile with XProf
 

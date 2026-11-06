@@ -203,16 +203,19 @@ Seven workstations for an 8-hour day cost $39.31, plus $4.80 for the cluster's d
 
 ## Another machine
 
-On a GCE VM or a Linux laptop, run setup.sh by hand. On a Mac, use a workstation: setup.sh and the smoke test target Linux.
+To put both harnesses on your own Linux machine or a GCE VM, run the commands below. On a Mac, use a workstation: setup.sh and the smoke test target Linux.
+
+setup.sh installs Claude Code with Anthropic's installer, `curl -fsSL https://claude.ai/install.sh | bash -s stable`, then adds its rules, hooks, MCP servers and `gcp-pricing`. It copies the agy rules to `~/.gemini/GEMINI.md`, but it doesn't install agy, so the block runs the agy installer before setup.sh.
 
 ```bash
 gcloud auth login
 gcloud auth application-default login
 gcloud config set project <PROJECT_ID>
 gcloud services enable aiplatform.googleapis.com
+curl -fsSL https://antigravity.google/cli/install.sh | bash    # installs agy in ~/.local/bin
 git clone https://github.com/WandLZhang/GPS-AI-Infra-Onboarding-Workshop.git
 cd GPS-AI-Infra-Onboarding-Workshop/1-harness-setup/claude-code
-NO_VSCODE=1 ./setup.sh <PROJECT_ID>
+NO_VSCODE=1 ./setup.sh <PROJECT_ID>                             # installs Claude Code and its tools
 source ~/.bashrc
 claude-smoke-test
 ```
@@ -367,5 +370,5 @@ For a price, ask it to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pri
 │   └── GEMINI.md                          # Rules for Gemini CLI, agy and Antigravity
 ├── logging-mcp-proxy/
 │   └── proxy.mjs                          # Cloud Logging MCP proxy
-└── own-machine-deck/                      # An earlier deck: VS Code and agy on your own machine
+└── legacy-slides/                         # An earlier Marp deck, "Fast Science Setup"
 ```

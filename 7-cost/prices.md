@@ -8,10 +8,10 @@ Ask your harness to run [`gcp-pricing`](https://github.com/WandLZhang/gcp-pricin
 
 ```bash
 gcp-pricing accelerator --filter a3-megagpu-8g   # a GPU machine type
-gcp-pricing tpu --filter Trillium                 # a TPU generation
+gcp-pricing tpu --filter Trillium                 # a TPU generation name
 ```
 
-The TPU filter takes the name the TPU pricing page uses: `Ironwood` for TPU7x, `Trillium` for v6e, and `v5p` or `v5e` for those. On 2026-11-06, `--filter v6e` matched nothing and `--filter Trillium` returned the v6e row. Pricing pages render in JavaScript, so a plain fetch of the page comes back empty. The CLI captures every table and region to a file you can search.
+For TPUs, `gcp-pricing` takes the generation name from the TPU pricing page: `Ironwood` for TPU7x, `Trillium` for v6e, `v5p` and `v5e`. On 2026-11-06, `--filter v6e` matched nothing and `--filter Trillium` returned the v6e row. Pricing pages render in JavaScript, so a plain fetch of the page comes back empty. The CLI captures every table and region to a file you can search.
 
 Official pages:
 
@@ -34,6 +34,7 @@ DWS prices are well below on-demand, but the discount depends on the machine typ
 
 - On H100 and H200, Flex-start costs less per hour than Spot, and Flex-start VMs aren't preempted during their run of up to 7 days.
 - On B200, Spot is the cheapest option, and there's no on-demand price.
+- A3 Ultra VMs don't run on demand, per the [machine family page](https://docs.cloud.google.com/compute/docs/accelerator-optimized-machines). The pricing page still lists the $84.81 rate.
 - Spot prices change. Re-pull any row before you quote it with the commands above.
 
 ## DWS Pricing

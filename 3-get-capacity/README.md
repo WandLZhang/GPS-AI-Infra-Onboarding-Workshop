@@ -63,7 +63,9 @@ Your choice of accelerator constrains which consumption models are available. Fr
 | **G4** (RTX PRO 6000) | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
 | **G2** (L4) | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
 
-Reservations covers on-demand and future reservations, which the page marks the same way for every machine type. Before you request a future reservation for these GPUs, talk to your account team. The page says Google Cloud is likely to decline the request otherwise.
+Capacity blocks are future reservations that your [account team](../README.md#glossary) drafts for you, for a start date you pick and with no maximum length. You review and submit the draft ([Choose a reservation type](https://docs.cloud.google.com/compute/docs/instances/choose-reservation-type)). Calendar mode is the self-service kind: you check availability and book 1 to 90 days yourself. An AWS Capacity Block for ML works like Calendar mode.
+
+Reservations covers on-demand reservations and the future reservations you request yourself, which the page marks the same way for every machine type. Before you request a future reservation for these GPUs, talk to your account team. The page says Google Cloud is likely to decline the request otherwise.
 
 | TPU version | On-demand | Spot | Flex-start (Preview) | Calendar mode | Reservation for 1 year or longer |
 |---|:---:|:---:|:---:|:---:|:---:|
@@ -72,7 +74,7 @@ Reservations covers on-demand and future reservations, which the page marks the 
 | **v5p** | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **v5e** | ✅ | ✅ | ❌ | ❌ | ✅ |
 
-TPU7x Spot, Flex-start, Calendar mode and capacity blocks need an allowlist from your account team.
+For TPUs, a capacity block is the reservation for 1 year or longer ([TPU machine types](https://docs.cloud.google.com/compute/docs/tpus/tpu-machines)). TPU7x Spot, Flex-start, Calendar mode and capacity blocks need an allowlist from your account team.
 
 ## Look up facts that change
 

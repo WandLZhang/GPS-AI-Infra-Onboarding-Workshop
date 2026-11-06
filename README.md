@@ -43,6 +43,8 @@ Each folder is one step, in the order you'll work.
 | agy | The Antigravity CLI, Google's harness that runs in a terminal |
 | AI Hypercomputer | Google Cloud's name for its AI infrastructure as a whole: GPUs and TPUs, networking, storage, software and consumption options |
 | DWS | Dynamic Workload Scheduler, the service behind two capacity options: Flex-start (queued, up to 7 days) and Calendar mode (fixed dates, 1 to 90 days) |
+| Capacity blocks | A future reservation that your account team drafts for you, for a start date you pick and with no maximum length. You review and submit the draft. Calendar mode is the self-service kind: you check availability and book 1 to 90 days yourself. An AWS Capacity Block for ML works like Calendar mode |
+| Account team | Your organization's contacts at Google Cloud. Capacity blocks, TPU7x access and GPU future reservations start with them. Without one, the docs send you to the [sales team](https://cloud.google.com/contact) |
 | MIG | Managed instance group: a set of Compute Engine VMs made from one template. Not NVIDIA's Multi-Instance GPU |
 | IAP | Identity-Aware Proxy, which lets you SSH to a VM that has no public IP address |
 | XPK | Accelerated Processing Kit, a command-line tool that creates GKE clusters for TPUs and GPUs and submits jobs to them |
@@ -53,6 +55,7 @@ Each folder is one step, in the order you'll work.
 |---|---|
 | What does Google Cloud offer for AI and HPC? | [Overview](#overview) |
 | How do I set up a harness, and what can it look up for me? | [1-harness-setup](./1-harness-setup/) |
+| Can I run the harness on my own Linux machine? | [1-harness-setup: Another machine](./1-harness-setup/README.md#another-machine) |
 | Which GPU or TPU fits my job, and how many do I need? | [2-choose-hardware](./2-choose-hardware/) |
 | How do I benchmark a model on GPU and TPU, and port it to TPU? | [2-choose-hardware/benchmark-and-port-to-tpu.md](./2-choose-hardware/benchmark-and-port-to-tpu.md) |
 | How do I get GPUs or TPUs for a run, and raise my quota? | [3-get-capacity](./3-get-capacity/) |

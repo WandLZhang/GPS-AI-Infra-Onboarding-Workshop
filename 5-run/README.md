@@ -45,12 +45,12 @@ These are **orthogonal concerns**. You can use DWS flex-start through Compute En
 
 | Method | Platform | Best For | DWS Support | Guide |
 |---|---|---|---|---|
-| **[GKE (Autopilot & Standard)](kubernetes/)** | GKE (gcloud / Terraform) | Understanding GKE modes, direct GPU deployment, DWS flex-start | Flex-start, Queued Provisioning | [→ kubernetes/](kubernetes/) |
-| **[Compute Engine](vms/)** | Compute Engine (MIGs) | Raw VM control, no K8s overhead, batch training | Flex-start | [→ vms/](vms/) |
-| **[Cluster Toolkit](kubernetes/cluster-toolkit/)** | GKE (Terraform) | Production GKE clusters, full infra control, IaC | Flex-start, Reservation fallback | [→ kubernetes/cluster-toolkit/](kubernetes/cluster-toolkit/) |
-| **[XPK](kubernetes/xpk/)** | GKE (Python CLI) | Rapid PoC, testing, experimentation | Flex-start | [→ kubernetes/xpk/](kubernetes/xpk/) |
-| **[Cluster Director](slurm/)** | Managed Slurm | Slurm-native teams, HPC workloads, console-first | Flex-start, Calendar Mode | [→ slurm/](slurm/) |
-| **[Vertex AI](managed-training-vertex-ai/)** | Vertex AI (Managed) | Managed training, no cluster to run | FLEX_START | [→ managed-training-vertex-ai/](managed-training-vertex-ai/) |
+| **[GKE (Autopilot & Standard)](kubernetes/)** | GKE (gcloud / Terraform) | Understanding GKE modes, direct GPU deployment, DWS flex-start | Flex-start, Queued Provisioning, Calendar mode | [→ kubernetes/](kubernetes/) |
+| **[Compute Engine](vms/)** | Compute Engine (MIGs) | Raw VM control, no K8s overhead, batch training | Flex-start, Calendar mode | [→ vms/](vms/) |
+| **[Cluster Toolkit](kubernetes/cluster-toolkit/)** | GKE (Terraform) | Production GKE clusters, full infra control, IaC | Flex-start, Calendar mode, reservation fallback | [→ kubernetes/cluster-toolkit/](kubernetes/cluster-toolkit/) |
+| **[XPK](kubernetes/xpk/)** | GKE (Python CLI) | Rapid PoC, testing, experimentation | Flex-start, Calendar mode | [→ kubernetes/xpk/](kubernetes/xpk/) |
+| **[Cluster Director](slurm/)** | Managed Slurm | Slurm-native teams, HPC workloads, console-first | Flex-start, Calendar mode | [→ slurm/](slurm/) |
+| **[Vertex AI](managed-training-vertex-ai/)** | Vertex AI (Managed) | Managed training, no cluster to run | FLEX_START, Calendar mode | [→ managed-training-vertex-ai/](managed-training-vertex-ai/) |
 | **[Colab Enterprise](notebooks/)** | Vertex AI (Notebooks) | Interactive GPU notebooks, prototyping, develop→deploy | Via Reservations | [→ notebooks/](notebooks/) |
 
 ---
@@ -110,7 +110,7 @@ On the Slurm branch, Cluster Director runs a managed cluster, and a Cluster Tool
 
 > **Legend**: ✅✅✅ = ideal fit, ✅✅ = good fit, ✅ = works, — = not recommended
 
-For runs with fixed dates on any of these platforms, book [Calendar mode](../3-get-capacity/calendar-mode/) capacity first.
+For runs with fixed dates, book [Calendar mode](../3-get-capacity/calendar-mode/) capacity first. Compute Engine, Cluster Toolkit, XPK, Cluster Director and Vertex AI can run on the reservation it creates.
 
 ### Decision Criteria Comparison
 
@@ -118,14 +118,14 @@ For runs with fixed dates on any of these platforms, book [Calendar mode](../3-g
 |---|---|---|---|---|---|---|
 | **Infra management** | Medium (MIGs) | High (Terraform) | Low (CLI) | Low (managed) | None (serverless) | None (managed) |
 | **K8s required** | ❌ | ✅ | ✅ (abstracted) | ❌ | ❌ | ❌ |
-| **Guaranteed start** | ❌ | ❌ | ❌ | Calendar Mode only | ❌ | Via reservations |
+| **Guaranteed start** | Reservation or Calendar mode | Reservation or Calendar mode | Reservation or Calendar mode | Reservation or Calendar mode | Reservation or Calendar mode | Reservation |
 | **DWS discount** | Up to 53% | Up to 53% | Up to 53% | Up to 53% | DWS + mgmt fees | ❌ (on-demand) |
 | **Max run duration** | 7 days (flex) | 7 days (flex) | 7 days (flex) | 7 days (flex) | 7 days | 18h (auto-delete) |
 | **Job orchestration** | Manual | Kueue (automatic) | Kueue (automatic) | Slurm (automatic) | Vertex AI (automatic) | Scheduled runs |
 | **IaC support** | ❌ | ✅ Terraform | ❌ | ❌ | ❌ | ✅ Terraform |
 | **Reservation fallback** | ❌ | ✅ Kueue pattern | ❌ | Separate partitions | ❌ | Specific reservation |
 | **Interactive notebooks** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
-| **Accelerators** | All GPUs/TPUs | All GPUs/TPUs | All GPUs/TPUs | All GPUs/TPUs | L4–H200 | V100, T4, A100, L4 |
+| **Accelerators** | All GPUs/TPUs | All GPUs/TPUs | All GPUs/TPUs | All GPUs/TPUs | GPUs from P4 to GB200; TPU v2, v3, v5e, v6e and TPU7x | V100, T4, A100, L4 |
 
 ---
 
