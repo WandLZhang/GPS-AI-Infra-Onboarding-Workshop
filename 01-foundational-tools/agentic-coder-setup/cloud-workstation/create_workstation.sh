@@ -19,28 +19,33 @@
 #   ./create_workstation.sh PROJECT_ID [USER_EMAIL] --dry-run
 #
 # USER_EMAIL is the person who uses the workstation. It defaults to the account gcloud runs as.
-# Run it in Cloud Shell, or anywhere gcloud runs, as an owner of the project. This is the admin
-# half. Claude Code goes on afterwards from inside the workstation (see ../README.md).
+# Run it in Cloud Shell, or anywhere gcloud runs, as an owner of the project.
+#
+# Before you run it, turn on Claude Opus 5.5 for the project in Model Garden. gcloud can't, and a
+# new enablement takes a while to answer, so it settles while this runs:
+#   https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=PROJECT_ID
 #
 #   1. Turns on the APIs a workstation and Claude Code on Vertex AI need.
 #   2. Resets the org policies a new Argolis project inherits that stop a workstation, and allows
 #      Anthropic's partner model features on Vertex AI, which Claude Code's web search needs.
-#   3. Creates the default network, a cluster, a workstation config with the Vertex AI settings in
+#   3. Asks Claude Opus 5.5 for a reply. If it doesn't answer, prints the Model Garden link and
+#      keeps going: the cluster takes minutes, which is time to turn it on.
+#   4. Creates the default network, a cluster, a workstation config with the Vertex AI settings in
 #      the workstation's environment, and the workstation.
-#   4. Gives USER_EMAIL access, and makes the Developer Knowledge API key that setup.sh picks up.
-#   5. On the workstation, runs box_setup.sh: installs agy and Claude Code, runs Claude Code's
-#      setup.sh and the smoke test. Once the two agents are in, a failed step doesn't stop the run.
-#      It goes into ~/setup-gaps.md, and the last lines print a prompt that has either agent fix it.
+#   5. Gives USER_EMAIL access, and makes the Developer Knowledge API key that setup.sh picks up.
+#   6. On the workstation, runs box_setup.sh: installs agy and Claude Code, checks Opus 5.5 again,
+#      and runs Claude Code's setup.sh and the smoke test. Once the two agents are in, a failed step
+#      doesn't stop the run. It goes into ~/setup-gaps.md, and the last lines print a prompt that
+#      has either agent fix it.
 #
 # Run --dry-run first on any project you didn't create for this. It lists each policy it would
 # reset and marks the ones someone set by hand, which a reset would erase.
 #
-# One step stays in the console: turn on Claude Opus 5.5 for the project in Model Garden.
-#
-# Settings, as environment variables (also WORKSHOP_BRANCH, main, for box_setup.sh, and
-# GOOGLE_DEV_KNOWLEDGE_API_KEY, passed to setup.sh when you have your own key):
+# Settings, as environment variables:
 #   REGION (us-east4), MACHINE (e2-standard-8), DISK_GB (200), CLUSTER (workstations),
-#   NAME (from USER_EMAIL), IDLE_TIMEOUT (7200: seconds without use before the workstation stops).
+#   NAME (from USER_EMAIL), IDLE_TIMEOUT (7200: seconds without use before the workstation stops),
+#   WORKSHOP_BRANCH (the branch this copy is on, else main: where the workstation gets setup.sh),
+#   GOOGLE_DEV_KNOWLEDGE_API_KEY (passed to setup.sh when you have your own key).
 #
 # Safe to run again: each step checks what exists first.
 set -uo pipefail
@@ -80,6 +85,8 @@ SA_NAME="$(printf 'ws-%s' "$NAME" | cut -c1-30)"
 SA="$SA_NAME@$PROJECT.iam.gserviceaccount.com"
 MODEL="claude-opus-5-5[1m]"
 
+OPUS_URL="https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=$PROJECT"
+
 ts() { date "+%H:%M:%S"; }
 say() { echo "$(ts) $*"; }
 # Run a gcloud command quietly. On failure, print its ERROR lines and return non-zero.
@@ -88,6 +95,30 @@ run() {
   out="$("$@" 2>&1)" && return 0
   echo "$out" | grep -E "ERROR|error" | sed "s/^/    /" >&2
   return 1
+}
+# Ask Claude Opus 5.5 on Vertex AI for an 8-token reply, as the account gcloud runs as. Prints the
+# HTTP status, then the error message when there is one.
+opus_check() {
+  local body code
+  body="$(mktemp)"
+  code="$(curl -s -o "$body" -w '%{http_code}' -X POST \
+    -H "Authorization: Bearer $(gcloud auth print-access-token 2>/dev/null)" \
+    -H "Content-Type: application/json" \
+    "https://aiplatform.googleapis.com/v1/projects/$PROJECT/locations/global/publishers/anthropic/models/claude-opus-5-5:rawPredict" \
+    -d '{"anthropic_version":"vertex-2023-10-16","messages":[{"role":"user","content":"hi"}],"max_tokens":8}')"
+  printf '%s ' "$code"
+  [ "$code" = 200 ] || python3 -c '
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except ValueError:
+    d = {}
+if isinstance(d, list):
+    d = d[0] if d else {}
+message = (d.get("error") or {}).get("message") or "no error message"
+print(message.splitlines()[0][:200])
+' "$body"
+  rm -f "$body"
 }
 
 # Every constraint a new Argolis project inherits that has had to be reset to build one of these
@@ -134,7 +165,11 @@ datastream.disablePublicConnectivity
 "
 
 SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
-WORKSHOP_BRANCH="${WORKSHOP_BRANCH:-main}"
+# The workstation runs setup.sh from the branch this copy came from, so the two always match.
+# "Open in Cloud Shell" checks out the branch named in its link.
+HERE_BRANCH="$(git -C "$SELF_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null)"
+case "$HERE_BRANCH" in ""|HEAD) HERE_BRANCH=main ;; esac
+WORKSHOP_BRANCH="${WORKSHOP_BRANCH:-$HERE_BRANCH}"
 RUNNER="$(gcloud config get-value account 2>/dev/null)"
 T0=$(date +%s)
 say "project $PROJECT, workstation $WORKSTATION for $EMAIL, region $REGION"
@@ -227,6 +262,22 @@ gcloud org-policies set-policy "$POLICY" --project="$PROJECT" >/dev/null 2>&1 \
   && say "  allowed partner model features for publishers/anthropic" \
   || say "  ** couldn't allow partner model features; Claude Code's web search will fail **"
 rm -f "$POLICY"
+
+say "== Claude Opus 5.5 on Vertex AI =="
+# Only a person in the console can turn the model on. Ask now, so there's time to do it while the
+# cluster builds. The workstation asks again before it needs Claude, and records a gap if it must.
+# Right after the Vertex AI API goes on, calls can fail with SERVICE_DISABLED for a minute.
+for attempt in 1 2 3 4 5 6; do
+  OPUS="$(opus_check)"
+  case "$OPUS" in *SERVICE_DISABLED*|*"has not been used"*) sleep 10 ;; *) break ;; esac
+done
+if [ "${OPUS%% *}" = 200 ]; then
+  say "  answers"
+else
+  say "  ** not answering yet (HTTP $OPUS) **"
+  say "  Turn it on now. This run keeps going and checks again on the workstation:"
+  say "    $OPUS_URL"
+fi
 
 T_BOOT=$(date +%s)
 say "== network =="
@@ -367,6 +418,7 @@ T_WS=$(date +%s)
 
 say "== on the workstation: agents, Claude Code setup, smoke test =="
 GAPS="unknown"
+BOX_OPUS=""
 if [ -f "$SELF_DIR/box_setup.sh" ]; then
   B64="$(base64 -w0 "$SELF_DIR/box_setup.sh")"
   KEYVAR=""
@@ -377,6 +429,7 @@ if [ -f "$SELF_DIR/box_setup.sh" ]; then
     </dev/null 2>&1 | grep --line-buffered -vE "^(Warning: Permanently added|Picking local unused port|Listening on port)" | tee "$OUT"
   GAPS="$(sed -n 's/^GAPS=//p' "$OUT")"
   [ -n "$GAPS" ] || GAPS="unknown: the SSH step didn't finish"
+  BOX_OPUS="$(sed -n 's/^OPUS=//p' "$OUT")"
   rm -f "$OUT"
 else
   say "  ** box_setup.sh isn't next to this script, so nothing ran on the box **"
@@ -390,13 +443,20 @@ config and workstation $((T_WS - T_CLUSTER))s (start $((T_WS - T_WS0))s), on the
 
 Workstation: https://$HOST/?folder=/home/user
 Gaps: $GAPS (listed in ~/setup-gaps.md on the workstation)
+EOF
+if [ -n "$BOX_OPUS" ] && [ "$BOX_OPUS" != ok ]; then
+  cat <<EOF
+
+Claude Opus 5.5 didn't answer on the workstation ($BOX_OPUS), so Claude Code can't work yet. Turn it on:
+  $OPUS_URL
+Until then, paste the prompt below into agy.
+EOF
+fi
+cat <<EOF
 
 Open the workstation, open a terminal, start agy or claude, and paste:
 
   Read ~/setup-gaps.md, fix each gap, then run claude-smoke-test until it passes 3 of 3.
-
-If Claude can't reach Vertex AI (404), turn on Claude Opus 5.5 for $PROJECT in Model Garden first:
-  https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project=$PROJECT
 
 The workstation stops itself after $IDLE_TIMEOUT seconds without use. To stop it sooner:
   gcloud workstations stop $WORKSTATION --config=$CONFIG --cluster=$CLUSTER --region=$REGION --project=$PROJECT

@@ -488,7 +488,7 @@ if not r.get("is_error"):
 status = r.get("api_error_status")
 hints = {
     404: "Turn on Claude Opus 5.5 for this project in Model Garden: "
-         "https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5",
+         f"https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-opus-5-5?project={project}",
     403: f"Your account needs the Vertex AI User role (roles/aiplatform.user) on {project}, "
          "and the project needs the Vertex AI API: gcloud services enable aiplatform.googleapis.com",
     401: "Log in again: gcloud auth application-default login",
